@@ -12,7 +12,8 @@
     "types:db": "npx supabase gen types typescript --project-id \"$SUPABASE_PROJECT_REF\" --schema public,evaluation > src/contract/database.types.ts",
     "links": "node --env-file=.env.local scripts/role-links.mjs",
     "agents:push": "node --env-file=.env.local scripts/agents-push.mjs",
-    "spike:s1": "node --env-file=.env.local --conditions=react-server --import tsx scripts/spikes/s1-replay.mts"
+    "spike:s1": "node --env-file=.env.local --conditions=react-server --import tsx scripts/spikes/s1-replay.mts",
+    "spike:s2:text": "node --env-file=.env.local scripts/spikes/s2-text-session.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",
