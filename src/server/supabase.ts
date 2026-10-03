@@ -1,13 +1,16 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/contract/database.types";
 import { readEnv } from "./env";
 
+export type TiroClient = SupabaseClient<Database>;
+
 export type SupabaseHandle =
-  | { ok: true; client: SupabaseClient }
+  | { ok: true; client: TiroClient }
   // `problem` names variables, never their values.
   | { ok: false; problem: string };
 
-let cached: { key: string; client: SupabaseClient } | undefined;
+let cached: { key: string; client: TiroClient } | undefined;
 
 /**
  * The only Supabase client in the app. It uses the secret key, so it must
@@ -29,7 +32,7 @@ export function getSupabase(): SupabaseHandle {
   const key = `${url}\n${secretKey}`;
   if (cached?.key !== key) {
     try {
-      const client = createClient(url, secretKey, {
+      const client = createClient<Database>(url, secretKey, {
         auth: { persistSession: false, autoRefreshToken: false },
       });
       cached = { key, client };
