@@ -2,7 +2,7 @@
 
 **Result: pass.** No fallback is needed for the floor itself. One fallback is needed for testing: ElevenLabs' simulated conversations cannot carry context updates, so the agent is checked through a text session instead.
 
-One point is still to confirm with Amr: that the run used the laptop's speakers and not headphones. The self-hearing result only counts with speakers.
+Amr's run used the laptop's speakers, not headphones, so the self-hearing result counts.
 
 Run on 2026-10-04 by Amr in Chrome 154 on macOS, with the test page at `/spikes/floor`, plus automated runs by Claude.
 
@@ -95,7 +95,6 @@ Measured on the Creator plan, from ElevenLabs' own record of each session:
 
 ## Not covered
 
-- **Confirmation that speakers were used** in Amr's run.
 - More than one run with a person, and a follow-up question in voice.
 - A session longer than three minutes. The design expects up to an hour connected.
 - Opening the floor only after the design's silence and stillness times. The page opens it when the button is pressed.

@@ -6,6 +6,8 @@
 - Recommended fallback: show the reader the previous frame beside the current one, read live with Sonnet 5.5, and have Opus 5.5 re-read every settled frame for the Work Map. With the previous frame, Opus read 5 of 5 decisions and Sonnet 4 of 5, with no invented decisions.
 - No model read a frame in under 2 seconds. The fastest was 2.3 seconds.
 
+**Decision (Amr, 2026-10-04): Opus 5.5 alone.** Opus reads every settled frame live, with the previous frame beside it, and there is no second pass. The live reader's default model has been changed to match.
+
 Two limits to keep in mind while reading: the recording holds only five decisions, and the labels were drafted by Claude and are **not yet checked by Amr**.
 
 Run on 2026-10-03 and 2026-10-04 against a recording Amr made in Crystal with the recorder at `/spikes/record`: 6 minutes 7 seconds, 56 settled frames.
@@ -100,7 +102,9 @@ Together that is about $0.39 a minute of watching at this pace, or about $4 for 
 
 A simpler alternative is Opus alone, live, with no second pass: $0.26 a minute and 5 of 5 here, but 4.5 seconds a frame instead of 2.7.
 
-Nothing in the model defaults has been changed. Both choices are settings (`VISION_FAST_MODEL`, `VISION_STRONG_MODEL`), and they wait for Amr's decision.
+Amr chose this simpler alternative. The live reader now defaults to Opus 5.5 at low effort, the setting measured here; `VISION_FAST_MODEL` still overrides it.
+
+One thing follows from having no second pass: the contract marks an event `verified` when the strong model has re-read it at the debrief. With one reader that mark needs a new meaning, which is raised with Amr at the start of Phase 2.
 
 ## Speed
 
@@ -131,7 +135,8 @@ Two untested ways to make a read faster: send smaller pictures (three go with ea
 
 - **Amr's check of the labels.** Claude drafted them from the frames and the video before looking at any model output. Until Amr confirms the five decisions, the scores are provisional.
 - **A larger sample.** One recording, five decisions, and each arrangement run once (the design as written, twice). Haiku's two runs differed, so the others would too. Five of five is one result, not a rate.
-- **Reject, rewrite, merge and escalate**, which design section 18 names as the task. None was in the recording. Typed text and dialogs were not tested either.
+- **Reject and rewrite.** Neither was in the recording. Typed text and dialogs were not tested either.
+- **The task itself.** Design section 18 names approve, rewrite, merge, reject and escalate. Amr confirmed on 2026-10-04 that Crystal has reject, rewrite and reprioritisation, and has no merge or escalate. The design's wording is to be brought in line.
 - The previous frame at the default effort for Sonnet and Opus (only low effort was run), and the two changes to the reader's input separately.
 - Using the checker's list of missed decisions. Today the pipeline ignores it.
 - JPEG frames. The recording used lossless pictures; the product will upload JPEG.
