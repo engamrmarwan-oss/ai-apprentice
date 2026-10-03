@@ -1,16 +1,31 @@
 // Spike S4: reads captured frames off the main thread, so sampling keeps its
 // pace while Tiro's own tab is hidden and its timers are throttled.
-import { diffGrids, toGrid, type Grid } from "@/sensor/diff";
+import { diffGrids, toGrid, unionRegions, type Grid, type Region } from "@/sensor/diff";
 import { createSettleDetector, type SettleDetector } from "@/sensor/settle";
 import type { SettledFrame } from "./summary";
 
 export type WorkerCommand =
-  | { type: "start"; readable: ReadableStream<VideoFrame>; sampleMs: number; settleMs: number }
+  | {
+      type: "start";
+      readable: ReadableStream<VideoFrame>;
+      sampleMs: number;
+      settleMs: number;
+      /** How settled frames are encoded. JPEG is the default; PNG keeps every pixel. */
+      image?: "jpeg" | "png";
+    }
   | { type: "stop" };
 
 export type WorkerReport =
   | { type: "status"; ticks: number; frames: number; settled: number; changing: boolean }
-  | { type: "settled"; frame: SettledFrame; image: Blob }
+  | {
+      type: "settled";
+      frame: SettledFrame;
+      image: Blob;
+      /** Everything that changed since the previous settled frame. */
+      region: Region | null;
+      /** The pixel format the browser delivered, such as I420 or BGRA. */
+      format: string | null;
+    }
   | { type: "done"; ticks: number[]; frameArrivals: number[]; settled: SettledFrame[] };
 
 const worker = self as unknown as {
@@ -32,6 +47,8 @@ let latest: VideoFrame | null = null;
 let latestSeq = 0;
 let sampledSeq = 0;
 let previous: Grid | null = null;
+let burstRegion: Region | null = null;
+let imageType: "jpeg" | "png" = "jpeg";
 let small: OffscreenCanvas | null = null;
 let reader: ReadableStreamDefaultReader<VideoFrame> | undefined;
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -58,12 +75,15 @@ function toSmallGrid(frame: VideoFrame): Grid {
 }
 
 /** Encodes a settled frame at full resolution, as the real sensor would before upload. */
-async function encode(frame: VideoFrame, t: number) {
+async function encode(frame: VideoFrame, t: number, region: Region | null) {
   const started = performance.now();
+  const format = frame.format;
   const canvas = new OffscreenCanvas(frame.displayWidth, frame.displayHeight);
   // Drawn before the first await, so the frame cannot be closed under us.
   canvas.getContext("2d")!.drawImage(frame, 0, 0);
-  const image = await canvas.convertToBlob({ type: "image/jpeg", quality: 0.85 });
+  const image = await canvas.convertToBlob(
+    imageType === "png" ? { type: "image/png" } : { type: "image/jpeg", quality: 0.85 },
+  );
   const record: SettledFrame = {
     t,
     width: canvas.width,
@@ -72,7 +92,7 @@ async function encode(frame: VideoFrame, t: number) {
     encodeMs: Math.round(performance.now() - started),
   };
   settled.push(record);
-  worker.postMessage({ type: "settled", frame: record, image });
+  worker.postMessage({ type: "settled", frame: record, image, region, format });
 }
 
 function tick(detector: SettleDetector) {
@@ -84,11 +104,16 @@ function tick(detector: SettleDetector) {
   if (latest && latestSeq !== sampledSeq) {
     sampledSeq = latestSeq;
     const grid = toSmallGrid(latest);
-    changed = previous ? diffGrids(previous, grid).changed : false;
+    const diff = previous ? diffGrids(previous, grid) : null;
+    changed = diff?.changed ?? false;
+    burstRegion = unionRegions(burstRegion, diff?.region ?? null);
     previous = grid;
   }
 
-  if (detector.sample(t, changed) && latest) void encode(latest, t);
+  if (detector.sample(t, changed) && latest) {
+    void encode(latest, t, burstRegion);
+    burstRegion = null;
+  }
   worker.postMessage({
     type: "status",
     ticks: ticks.length,
@@ -112,6 +137,7 @@ worker.onmessage = (event) => {
     void stop();
     return;
   }
+  imageType = command.image ?? "jpeg";
   const detector = createSettleDetector(command.settleMs);
   void readFrames(command.readable);
   timer = setInterval(() => tick(detector), command.sampleMs);

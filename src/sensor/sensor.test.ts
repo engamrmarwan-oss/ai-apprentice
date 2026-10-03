@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { diffGrids, toGrid, type Grid } from "./diff";
+import { diffGrids, toGrid, unionRegions, type Grid } from "./diff";
 import { createSettleDetector } from "./settle";
 
 function grid(width: number, height: number, fill = 0): Grid {
@@ -53,6 +53,25 @@ describe("diffGrids", () => {
       fraction: 1,
       region: { x: 0, y: 0, width: 1, height: 1 },
     });
+  });
+});
+
+describe("unionRegions", () => {
+  const a = { x: 0.1, y: 0.2, width: 0.2, height: 0.1 };
+  const b = { x: 0.5, y: 0.1, width: 0.25, height: 0.5 };
+
+  it("returns the other region when one is missing", () => {
+    expect(unionRegions(null, a)).toEqual(a);
+    expect(unionRegions(a, null)).toEqual(a);
+    expect(unionRegions(null, null)).toBeNull();
+  });
+
+  it("covers both regions", () => {
+    const union = unionRegions(a, b)!;
+    expect(union.x).toBeCloseTo(0.1);
+    expect(union.y).toBeCloseTo(0.1);
+    expect(union.width).toBeCloseTo(0.65);
+    expect(union.height).toBeCloseTo(0.5);
   });
 });
 
