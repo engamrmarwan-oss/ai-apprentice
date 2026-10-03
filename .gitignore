@@ -32,6 +32,13 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# solution design: the source of truth, kept local because it changes often
+/docs/TIRO_SOLUTION_DESIGN.md
+
+# recordings and other large local fixtures
+/fixtures/local/
 
 # vercel
 .vercel
