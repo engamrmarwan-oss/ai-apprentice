@@ -39,13 +39,18 @@ export const readingSchema = z.object({
 export type ReadEvent = z.infer<typeof readEventSchema>;
 export type Reading = z.infer<typeof readingSchema>;
 /** Carried from one frame to the next, so each read is a comparison, not a guess. */
-export type ScreenState = Pick<Reading, "screen" | "item" | "fields">;
+export type ScreenState = Pick<Reading, "screen" | "item" | "fields"> & {
+  /** What was reported at that frame, so a lasting effect (a busy button) is not reported twice. */
+  events?: ReadEvent[];
+};
 
 export type FrameImages = {
   /** The whole frame, scaled down, for layout. */
   full: ImageInput;
   /** The part that changed, at full resolution, for small text. Null when most of the frame changed. */
   changed: ImageInput | null;
+  /** The previous settled frame, scaled down, so the read compares two pictures and not a picture with a description. */
+  before?: ImageInput | null;
 };
 
 const EVENT_GUIDE = `Event types, and the keys each one uses (set every other key to null):
@@ -60,7 +65,8 @@ const EVENT_GUIDE = `Event types, and the keys each one uses (set every other ke
 const READ_SYSTEM = `You watch a person work in a business application, one screenshot at a time, and report what they did.
 
 You are given:
-- PREVIOUS: what the screen showed at the last screenshot, as JSON. It is null for the first screenshot.
+- PREVIOUS: what the screen showed at the last screenshot, as JSON. It is null for the first screenshot. Its "events", when present, are what was already reported at that screenshot.
+- Sometimes the previous screenshot itself, scaled down.
 - The current screenshot, scaled down, for the overall layout.
 - Sometimes a second image: the part of the screen that changed, at full resolution. Read small text from that one.
 
@@ -74,6 +80,8 @@ ${EVENT_GUIDE}
 
 Rules:
 - Report only what you can see. Never guess a name or a value. If you cannot read it, leave the event out.
+- When the previous screenshot is given, an event is something that differs between the two screenshots. What looks the same in both did not happen.
+- Do not report again an event listed in PREVIOUS unless the person did it again.
 - Copy names and values exactly as they appear on screen.
 - confidence is between 0 and 1: how sure you are that the event happened as you describe it.
 - The first screenshot has no events.`;
@@ -113,6 +121,15 @@ export type ModelCall<T> = { output: T; usage: Usage; model: string; servedBy: s
 
 type CallOptions = { model?: string; effort?: Effort; timeoutMs?: number };
 
+/** What the reader is shown, in order: the last state, the previous frame if there is one, then the current frame. */
+export function readContent(previous: ScreenState | null, frame: FrameImages): Content[] {
+  const content: Content[] = [text(`PREVIOUS:\n${JSON.stringify(previous)}`)];
+  if (frame.before) content.push(text("Previous screenshot:"), image(frame.before));
+  content.push(text("Current screenshot:"), image(frame.full));
+  if (frame.changed) content.push(text("The part that changed, at full resolution:"), image(frame.changed));
+  return content;
+}
+
 /** The live read: the fast model compares one settled frame with the previous screen state. */
 export function readFrame(
   previous: ScreenState | null,
@@ -120,12 +137,7 @@ export function readFrame(
   options: CallOptions = {},
 ): Promise<SoftResult<ModelCall<Reading>>> {
   const model = options.model ?? modelFor("vision_fast");
-  const content: Content[] = [
-    text(`PREVIOUS:\n${JSON.stringify(previous)}`),
-    text("Current screenshot:"),
-    image(frame.full),
-  ];
-  if (frame.changed) content.push(text("The part that changed, at full resolution:"), image(frame.changed));
+  const content = readContent(previous, frame);
 
   return failSoft(
     "vision",
