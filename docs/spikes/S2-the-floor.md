@@ -38,7 +38,7 @@ An earlier run of 28 seconds was stopped after the three sentences. It is kept w
 
 - **The agent closes the floor at the first pause, and can cut an answer short.** In the third floor Amr said "If it's concerning security, I need to ask someone." The agent heard "If it's concerning security." and gave the floor back; the rest was said to a muted agent. Scribe kept the whole sentence.
 - **Scribe, not the agent, holds the full answer.** In the second floor the two also differ slightly at the start of the answer. The stored answer must come from Scribe.
-- **The agent never asked a follow-up**: not in these three floors, and not in the six automated floors below. Its instructions allow one only when the reason, limit or exception is unclear.
+- **The agent never asked a follow-up**: not in these three floors, and not in the six automated floors below. Its instructions allow one only when the reason, limit or exception is unclear. It did ask follow-ups in spike S3, where the answer was deliberately vague.
 - **The agent waited through a long think.** In the second floor 8.6 seconds passed between the end of the question and the start of the answer. The agent stayed quiet.
 - **The agent used the screen updates.** Asked to put "Why did you decide that just now?", it said "Why did you decide that this one looks fine to you?", taking the words from an update.
 
@@ -85,12 +85,13 @@ Measured on the Creator plan, from ElevenLabs' own record of each session:
 ## What this means for the build
 
 1. **The floor works as designed**: mute by default, context updates for silent context, a user message as the trigger, the `yield_floor` tool to close.
-2. **Answers are stored from Scribe**, linked to the question by time. What the agent heard is not the record.
-3. **The agent should wait longer before deciding the expert has finished.** ElevenLabs has a setting for this (`turn_eagerness`, with a `patient` value). Untested; to try in Phase 2.
-4. **Whether the agent is too reluctant to follow up** is a question for the prompt in Phase 2, once real questions and answers exist.
-5. **ElevenLabs keeps the context updates.** Their text is stored in its record of the conversation. Whatever Tiro sends as an update (screen events, what the expert said) therefore also sits with ElevenLabs. This matters for the off-the-record claim (section 4.6).
-6. **The rule that drops Scribe output while Tiro speaks also drops the expert**, if the expert talks over Tiro. In the recorded-voice run three sentences were dropped this way. In Amr's run nothing was.
-7. **Agent regression tests run as text sessions**, not as ElevenLabs simulations.
+2. **The Conductor must be able to close the floor itself.** With clear answers the agent gave the floor back every time. In spike S3, with a deliberately vague answer, it spoke an acknowledgement and did not give the floor back in 5 of 8 floors.
+3. **Answers are stored from Scribe**, linked to the question by time. What the agent heard is not the record.
+4. **The agent should wait longer before deciding the expert has finished.** ElevenLabs has a setting for this (`turn_eagerness`, with a `patient` value). Untested; to try in Phase 2.
+5. **Whether the agent is too reluctant to follow up** is a question for the prompt in Phase 2, once real questions and answers exist.
+6. **ElevenLabs keeps the context updates.** Their text is stored in its record of the conversation. Whatever Tiro sends as an update (screen events, what the expert said) therefore also sits with ElevenLabs. This matters for the off-the-record claim (section 4.6).
+7. **The rule that drops Scribe output while Tiro speaks also drops the expert**, if the expert talks over Tiro. In the recorded-voice run three sentences were dropped this way. In Amr's run nothing was.
+8. **Agent regression tests run as text sessions**, not as ElevenLabs simulations.
 
 ## Not covered
 

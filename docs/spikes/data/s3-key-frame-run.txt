@@ -1,0 +1,20 @@
+  0.3 connected conv_0101m41z83vcfz5b4s04zwgtfnb5
+  1.9 trigger_sent no picture
+  2.8 agent_said I'm ready to listen, but I haven't seen you work yet, so I don't have anything to ask about. Could you start by showing me what you're doing?
+  5.3 agent_said I understand. So when you're reviewing an item like that, you follow specific rules for that type of item. I'll be watching for those rules as we go.
+ 19.9 uploaded 186 KB in 2453 ms
+ 19.9 trigger_sent with a picture, about the status
+ 20.8 agent_said I can see the requirement REQ-zero-zero-three has a status of Approved. Why is the status set to Approved?
+ 23.4 agent_said Got it. So the status being set to Approved for REQ-zero-zero-three follows the rules for requirements. I'll keep watching for what those rules are.
+ 38.0 uploaded 134 KB in 2548 ms
+ 38.0 trigger_sent with a picture, about the priority
+ 38.9 agent_said I see REQ-zero-zero-four now. Why is the priority set to Critical?
+ 41.6 agent_said I understand. So for REQ-zero-zero-four, the priority is set to Critical because that's what the rules say for this type of item. I'm starting to see a pattern here with how the rules guide these decisions.
+ 53.6 closed 1005 
+
+conversation: conv_0101m41z83vcfz5b4s04zwgtfnb5
+time to the question: 953 ms with no picture; 972 ms, 882 ms with one
+pass · Every picture uploads · 2453 ms, 2548 ms
+pass · The agent asks after a trigger with a picture · 2 of 2
+pass · The question names what only the picture shows · all named; all named
+FAIL · The floor comes back after each · 0 of 2
