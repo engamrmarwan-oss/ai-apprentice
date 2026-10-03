@@ -1,0 +1,44 @@
+{
+  "tools": [
+    "confirm_work_map",
+    "correct_step",
+    "correct_rule",
+    "yield_floor",
+    "go_off_record",
+    "replay_moment"
+  ],
+  "agents": {
+    "interviewer": {
+      "config": "interviewer.json",
+      "prompt": "prompts/interviewer.md",
+      "variables": [
+        "tool_name",
+        "task",
+        "expert_role",
+        "baseline"
+      ],
+      "tools": [
+        "confirm_work_map",
+        "correct_step",
+        "correct_rule",
+        "yield_floor",
+        "go_off_record"
+      ]
+    },
+    "tutor": {
+      "config": "tutor.json",
+      "prompt": "prompts/tutor.md",
+      "variables": [
+        "tool_name",
+        "task",
+        "expert_role",
+        "work_map"
+      ],
+      "tools": [
+        "replay_moment",
+        "yield_floor",
+        "go_off_record"
+      ]
+    }
+  }
+}

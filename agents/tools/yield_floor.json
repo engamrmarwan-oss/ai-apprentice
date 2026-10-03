@@ -1,0 +1,9 @@
+{
+  "tool_config": {
+    "type": "client",
+    "name": "yield_floor",
+    "description": "Give the floor back so the person can return to their work. Call it as soon as your question, and at most one follow-up, has been answered, or when the person shows they want to carry on working.",
+    "expects_response": true,
+    "response_timeout_secs": 20
+  }
+}

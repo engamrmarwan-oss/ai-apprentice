@@ -1,0 +1,23 @@
+{
+  "tool_config": {
+    "type": "client",
+    "name": "correct_step",
+    "description": "Record the expert's correction to one step of the process you explained back. Call it once per corrected step, then read the corrected step back to the expert.",
+    "expects_response": true,
+    "response_timeout_secs": 20,
+    "parameters": {
+      "type": "object",
+      "required": ["step_number", "correction"],
+      "properties": {
+        "step_number": {
+          "type": "integer",
+          "description": "The number of the step being corrected, as numbered in the process you were given."
+        },
+        "correction": {
+          "type": "string",
+          "description": "What should change, in the expert's own words."
+        }
+      }
+    }
+  }
+}

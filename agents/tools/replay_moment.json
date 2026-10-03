@@ -1,0 +1,19 @@
+{
+  "tool_config": {
+    "type": "client",
+    "name": "replay_moment",
+    "description": "Show the learner the moment on the expert's screen that a rule or step comes from. Call it when you explain why a rule exists, or when seeing what the expert did would help more than describing it.",
+    "expects_response": true,
+    "response_timeout_secs": 20,
+    "parameters": {
+      "type": "object",
+      "required": ["rule_id"],
+      "properties": {
+        "rule_id": {
+          "type": "string",
+          "description": "The id of the rule whose screen moment should be shown, exactly as it was given to you."
+        }
+      }
+    }
+  }
+}

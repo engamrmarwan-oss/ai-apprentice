@@ -1,0 +1,14 @@
+{
+  "tools": {
+    "confirm_work_map": "tool_2001m41px63pfz1t1jekxc6m1cwz",
+    "correct_step": "tool_3501m41px6x5fbwr3hpey7dfcbh8",
+    "correct_rule": "tool_1101m41px7pnfwjtafn00sr4sj9r",
+    "yield_floor": "tool_5201m41px8g6fm3abdsgf7bgbavq",
+    "go_off_record": "tool_9901m41px992f78vdqq7b9kmbqpk",
+    "replay_moment": "tool_3101m41pxa4nfvbt3y75m61p3zf7"
+  },
+  "agents": {
+    "interviewer": "agent_9101m41pxaxkf8c91e60jawxz9g5",
+    "tutor": "agent_0701m41pxe3ee3ft5gtr9c4rsmbf"
+  }
+}

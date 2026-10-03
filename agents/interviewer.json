@@ -1,0 +1,54 @@
+{
+  "name": "Tiro interviewer",
+  "tags": [
+    "tiro"
+  ],
+  "conversation_config": {
+    "turn": {
+      "turn_timeout": -1,
+      "silence_end_call_timeout": -1
+    },
+    "conversation": {
+      "max_duration_seconds": 3600,
+      "client_events": [
+        "conversation_initiation_metadata",
+        "ping",
+        "audio",
+        "interruption",
+        "user_transcript",
+        "agent_response",
+        "agent_response_correction",
+        "client_tool_call"
+      ]
+    },
+    "agent": {
+      "first_message": "",
+      "language": "en",
+      "prompt": {
+        "llm": "claude-haiku-4-5",
+        "built_in_tools": {
+          "skip_turn": {
+            "type": "system",
+            "name": "skip_turn",
+            "description": "",
+            "params": {
+              "system_tool_type": "skip_turn"
+            }
+          }
+        }
+      }
+    }
+  },
+  "platform_settings": {
+    "auth": {
+      "enable_auth": true
+    },
+    "overrides": {
+      "conversation_config_override": {
+        "agent": {
+          "language": true
+        }
+      }
+    }
+  }
+}

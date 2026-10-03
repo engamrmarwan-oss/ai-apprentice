@@ -1,0 +1,19 @@
+{
+  "tool_config": {
+    "type": "client",
+    "name": "go_off_record",
+    "description": "Remove a stretch of the session from the record. Call it when the person asks for something to be off the record, or to forget or delete what was just said or shown.",
+    "expects_response": true,
+    "response_timeout_secs": 20,
+    "parameters": {
+      "type": "object",
+      "required": ["seconds_back"],
+      "properties": {
+        "seconds_back": {
+          "type": "integer",
+          "description": "How far back to remove, in seconds, counted from now. Use the person's own estimate; if they only say 'that last bit', use 60."
+        }
+      }
+    }
+  }
+}

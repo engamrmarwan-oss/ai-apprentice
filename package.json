@@ -10,7 +10,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "types:db": "npx supabase gen types typescript --project-id \"$SUPABASE_PROJECT_REF\" --schema public,evaluation > src/contract/database.types.ts",
-    "links": "node --env-file=.env.local scripts/role-links.mjs"
+    "links": "node --env-file=.env.local scripts/role-links.mjs",
+    "agents:push": "node --env-file=.env.local scripts/agents-push.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

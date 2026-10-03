@@ -1,0 +1,9 @@
+{
+  "tool_config": {
+    "type": "client",
+    "name": "confirm_work_map",
+    "description": "Record that the expert confirmed the whole process you explained back. Call it only after the expert has clearly said the explanation is correct. Do not call it if they corrected anything in that same answer or sounded unsure.",
+    "expects_response": true,
+    "response_timeout_secs": 20
+  }
+}

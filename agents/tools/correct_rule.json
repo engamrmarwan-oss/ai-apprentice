@@ -1,0 +1,23 @@
+{
+  "tool_config": {
+    "type": "client",
+    "name": "correct_rule",
+    "description": "Record the expert's correction to one rule you explained back: a limit, an exception, or a point where they stop and ask. Call it once per corrected rule, then read the corrected rule back to the expert.",
+    "expects_response": true,
+    "response_timeout_secs": 20,
+    "parameters": {
+      "type": "object",
+      "required": ["rule_number", "correction"],
+      "properties": {
+        "rule_number": {
+          "type": "integer",
+          "description": "The number of the rule being corrected, as numbered in the process you were given."
+        },
+        "correction": {
+          "type": "string",
+          "description": "What should change, in the expert's own words."
+        }
+      }
+    }
+  }
+}
