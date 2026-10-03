@@ -11,9 +11,11 @@
     "test": "vitest run",
     "types:db": "npx supabase gen types typescript --project-id \"$SUPABASE_PROJECT_REF\" --schema public,evaluation > src/contract/database.types.ts",
     "links": "node --env-file=.env.local scripts/role-links.mjs",
-    "agents:push": "node --env-file=.env.local scripts/agents-push.mjs"
+    "agents:push": "node --env-file=.env.local scripts/agents-push.mjs",
+    "spike:s1": "node --env-file=.env.local --conditions=react-server --import tsx scripts/spikes/s1-replay.mts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@supabase/supabase-js": "^2.117.2",
     "next": "16.3.8",
     "react": "19.2.8",
@@ -28,7 +30,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^4.1.11"
   },
