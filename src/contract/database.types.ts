@@ -131,6 +131,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      auth_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          token_hash: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          token_hash: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token_hash?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auth_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       baseline_statements: {
         Row: {
           created_at: string
@@ -366,6 +398,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
       questions: {
         Row: {
@@ -679,6 +732,7 @@ export type Database = {
           phase: string
           role_link_id: string | null
           started_at: string | null
+          user_id: string | null
           workflow_id: string
         }
         Insert: {
@@ -690,6 +744,7 @@ export type Database = {
           phase?: string
           role_link_id?: string | null
           started_at?: string | null
+          user_id?: string | null
           workflow_id: string
         }
         Update: {
@@ -701,6 +756,7 @@ export type Database = {
           phase?: string
           role_link_id?: string | null
           started_at?: string | null
+          user_id?: string | null
           workflow_id?: string
         }
         Relationships: [
@@ -712,6 +768,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "sessions_workflow_id_fkey"
             columns: ["workflow_id"]
             isOneToOne: false
@@ -719,6 +782,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      signup_codes: {
+        Row: {
+          code_hash: string
+          created_at: string
+          id: string
+          label: string | null
+          revoked_at: string | null
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          id?: string
+          label?: string | null
+          revoked_at?: string | null
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          id?: string
+          label?: string | null
+          revoked_at?: string | null
+        }
+        Relationships: []
       }
       steps: {
         Row: {
@@ -1057,6 +1144,84 @@ export type Database = {
           },
           {
             foreignKeyName: "work_maps_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_invitations: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          invited_by: string | null
+          role: string
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          invited_by?: string | null
+          role?: string
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string | null
+          role?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_invitations_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_members: {
+        Row: {
+          created_at: string
+          role: string
+          user_id: string
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          role: string
+          user_id: string
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          role?: string
+          user_id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_members_workflow_id_fkey"
             columns: ["workflow_id"]
             isOneToOne: false
             referencedRelation: "workflows"
