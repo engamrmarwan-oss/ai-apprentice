@@ -51,7 +51,9 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 | `src/app/api/` | Route handlers | Claude Code |
 | `src/server/` | Server-only modules: environment, database client, fail-soft | Claude Code |
 | `src/contract/` | The contract as Zod schemas; import from here, change only via `CONTRACT.md` | Shared |
-| `src/app/` (except `api/`) | Pages and layouts | Codex |
+| `src/sensor/` | Screen sensor: frame diff, settle detection, capture | Claude Code |
+| `src/app/spikes/` | Throwaway test pages for the Phase 1 spikes. Not product screens | Claude Code |
+| `src/app/` (except `api/` and `spikes/`) | Pages and layouts | Codex |
 | `supabase/migrations/` | Database schema. Apply with `npx supabase db push`, then `npm run types:db` | Claude Code |
 | `agents/` | ElevenLabs agent configurations, prompts and client tools. Push with `npm run agents:push` | Claude Code |
 | `scripts/`, `.github/` | Gate, CI, role links (`npm run links`), agent push | Claude Code |
