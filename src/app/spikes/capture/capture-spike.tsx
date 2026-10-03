@@ -48,6 +48,11 @@ export function CaptureSpike() {
     }
   }
 
+  function startCapture() {
+    setResult(null);
+    void attempt(() => harness().start());
+  }
+
   function download() {
     if (!result) return;
     const body = JSON.stringify({ spike: "S4", version: 1, ...result }, null, 1);
@@ -73,8 +78,8 @@ export function CaptureSpike() {
 
       <ol className="list-decimal space-y-1 pl-5">
         <li>Open the tool in another tab of this window. Any page works; sandbox data only.</li>
-        <li>Press <b>Open companion window</b>. A small window appears and stays on top.</li>
-        <li>Press <b>Start capture</b> and choose the tool&apos;s tab. Chrome switches to it.</li>
+        <li>Press <b>1. Open companion window</b>. A small window appears and stays on top.</li>
+        <li>Press <b>2. Start capture</b> and choose the tool&apos;s tab. Chrome switches to it.</li>
         <li>
           Work in the tool for seven minutes without coming back here. Click, type, scroll, and
           pause for a few seconds now and then. Five minutes is the pass mark; the extra two show
@@ -91,17 +96,14 @@ export function CaptureSpike() {
           disabled={view.companionOpen}
           onClick={() => attempt(() => harness().openCompanion())}
         >
-          Open companion window
+          1. Open companion window
         </button>
         <button
           className={button}
-          disabled={view.running}
-          onClick={() => {
-            setResult(null);
-            void attempt(() => harness().start());
-          }}
+          disabled={view.running || !view.companionOpen}
+          onClick={startCapture}
         >
-          Start capture
+          2. Start capture
         </button>
         <button
           className={button}
@@ -114,6 +116,16 @@ export function CaptureSpike() {
           Download result
         </button>
       </div>
+
+      {!view.companionOpen && !view.running && (
+        <p className="opacity-70">
+          Start capture unlocks once the companion window is open. If the companion will not open,{" "}
+          <button className="underline" onClick={startCapture}>
+            start without it
+          </button>{" "}
+          and tell Claude Code what happened.
+        </p>
+      )}
 
       {error && <p className="rounded border border-red-500 p-3 text-red-600">{error}</p>}
 
