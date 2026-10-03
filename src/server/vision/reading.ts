@@ -147,7 +147,8 @@ export function readFrame(
         system: READ_SYSTEM,
         content,
         schema: readingSchema,
-        effort: options.effort,
+        // The setting spike S1 passed with. A higher one read no better and no faster.
+        effort: options.effort ?? "low",
         maxTokens: 4096,
         signal,
       });
