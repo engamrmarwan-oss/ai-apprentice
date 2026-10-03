@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "elevenlabs": {
+      "source": {
+        "source": "github",
+        "repo": "elevenlabs/plugin"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "elevenlabs@elevenlabs": true
+  }
+}
