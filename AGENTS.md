@@ -21,10 +21,12 @@ Do not edit the other builder's files. If you need a change there, ask Amr.
 
 Screens read and write data only by calling route handlers under `/api`. They never talk to the database directly.
 
+There are no accounts. A visitor enters through a role link (`/api/enter/<token>`), and `GET /api/me` tells a screen which role is viewing. Route handlers guard themselves with `requireRole` (`src/server/require-role.ts`).
+
 ## Rules
 
 1. **Secrets stay on the server.** Never put a secret behind the `NEXT_PUBLIC_` prefix and never commit one. Names go in `.env.example`; values go in `.env.local` and in Vercel. Print names only, never values.
-2. **All database access goes through route handlers.** Row-level security is on with no client policies. The only Supabase client is `src/server/supabase.ts`, and modules in `src/server/` import `server-only`.
+2. **All database access goes through route handlers.** Row-level security is on with no client policies. The only Supabase client is `src/server/supabase.ts`, and modules in `src/server/` import `server-only`. The answer key lives in the `evaluation` schema; only `src/app/api/evaluation/` may reach it, through `src/server/evaluation-db.ts`.
 3. **Nothing specific to any workflow or tool in code or in a fixed prompt.** Tools, baselines, questions, steps and rules are data. Prompts are templates with variables.
 4. **Every external call fails soft.** Wrap it in `failSoft` (`src/server/fail-soft.ts`). A timeout or error never breaks a session.
 5. **Never modify the watched tool.** Crystal is a separate product. Tiro sees it only through screen share, the user's own scan, or a read-only crawl.
@@ -50,7 +52,9 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 | `src/server/` | Server-only modules: environment, database client, fail-soft | Claude Code |
 | `src/contract/` | The contract as Zod schemas; import from here, change only via `CONTRACT.md` | Shared |
 | `src/app/` (except `api/`) | Pages and layouts | Codex |
-| `scripts/`, `.github/` | Gate and CI | Claude Code |
+| `supabase/migrations/` | Database schema. Apply with `npx supabase db push`, then `npm run types:db` | Claude Code |
+| `agents/` | ElevenLabs agent configurations, prompts and client tools. Push with `npm run agents:push` | Claude Code |
+| `scripts/`, `.github/` | Gate, CI, role links (`npm run links`), agent push | Claude Code |
 | `docs/spikes/` | Written spike results | Claude Code |
 
 <!-- BEGIN:nextjs-agent-rules -->
