@@ -1,0 +1,107 @@
+{
+ "spike": "S2",
+ "startedAt": "2026-10-03T22:33:00.919Z",
+ "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+ "conversationId": "conv_7201m41ycexsemptndwqj48crmsh",
+ "variables": {
+  "tool_name": "a web application",
+  "task": "a routine review of items in a list",
+  "expert_role": "an experienced reviewer",
+  "baseline": "Nothing is assumed yet."
+ },
+ "entries": [
+  {
+   "t": 4315,
+   "kind": "status",
+   "status": "agent connected"
+  },
+  {
+   "t": 8463,
+   "kind": "scribe_committed",
+   "text": "I'm reading the next item in the list.",
+   "startedAt": 6965
+  },
+  {
+   "t": 15813,
+   "kind": "scribe_committed",
+   "text": "This one looks fine to me, so I will carry on. What do you think about this one?",
+   "startedAt": 9821
+  },
+  {
+   "t": 28217,
+   "kind": "status",
+   "status": "agent disconnected (user)"
+  },
+  {
+   "t": 28349,
+   "kind": "status",
+   "status": "scribe closed"
+  }
+ ],
+ "summary": {
+  "durationMs": 28349,
+  "contextUpdates": {
+   "sent": 0,
+   "answered": 0
+  },
+  "closedFloor": {
+   "agentSaid": 0,
+   "agentHeard": 0,
+   "scribeCommitted": 2
+  },
+  "triggers": {
+   "sent": 0,
+   "asked": 0,
+   "msToSpeech": [],
+   "turns": [],
+   "closedByAgent": 0
+  },
+  "selfHearing": {
+   "duringAgentSpeech": 0,
+   "kept": 2,
+   "leaked": []
+  },
+  "checks": [
+   {
+    "label": "Silent on screen updates",
+    "pass": false,
+    "detail": "0 replies to 0 updates (needs at least 5 updates)"
+   },
+   {
+    "label": "Hears nothing and says nothing while the floor is closed",
+    "pass": true,
+    "detail": "heard 0 things, said 0"
+   },
+   {
+    "label": "Scribe hears the expert while the agent cannot",
+    "pass": false,
+    "detail": "2 sentences transcribed with the floor closed (needs 3)"
+   },
+   {
+    "label": "Asks when triggered",
+    "pass": false,
+    "detail": "0 of 0 triggers were followed by a question (needs at least 3)"
+   },
+   {
+    "label": "Starts speaking within 3 seconds of the trigger",
+    "pass": false,
+    "detail": "no speech measured"
+   },
+   {
+    "label": "One question and at most one follow-up",
+    "pass": false,
+    "detail": "turns per open floor: none"
+   },
+   {
+    "label": "Gives the floor back by itself",
+    "pass": false,
+    "detail": "0 of 0 floors were closed by the agent"
+   },
+   {
+    "label": "Tiro does not transcribe its own voice",
+    "pass": true,
+    "detail": "0 transcripts arrived during the agent's speech and were dropped; 0 of the 2 kept ones repeat the agent"
+   }
+  ]
+ }
+}
