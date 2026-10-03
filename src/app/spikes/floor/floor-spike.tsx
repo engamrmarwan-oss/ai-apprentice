@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { nextStep } from "./guide";
 import { createFloorHarness, EMPTY_VIEW, type FloorHarness, type FloorVariables, type FloorView } from "./harness";
 import { summarize, type Entry } from "./summary";
 
@@ -102,6 +103,7 @@ export function FloorSpike() {
   const summary = summarize(view.entries);
   const updatesSent = summary.contextUpdates.sent;
   const asked = summary.triggers.sent;
+  const step = nextStep(view.state, view.floorOpen, view.entries, SENTENCES);
   const button = "rounded border px-3 py-2 text-sm disabled:opacity-40";
 
   return (
@@ -114,35 +116,17 @@ export function FloorSpike() {
         </p>
       </header>
 
-      <ol className="list-decimal space-y-2 pl-5">
-        <li>
-          Open your <b>expert link</b> once in this browser, then come back to this page. Use the laptop&apos;s
-          <b> speakers, not headphones</b>.
-        </li>
-        <li>
-          Press <b>Start</b> and allow the microphone. Wait for &quot;agent connected&quot; in the log.
-        </li>
-        <li>
-          Read these aloud, one at a time, pausing two seconds after each. Tiro must stay silent, and each sentence
-          should appear in the log as &quot;Scribe&quot;:
-          <ul className="mt-1 list-disc pl-5 opacity-80">
-            {SENTENCES.map((sentence) => (
-              <li key={sentence}>{sentence}</li>
-            ))}
-          </ul>
-        </li>
-        <li>
-          Press <b>Send a screen update</b> five times, a few seconds apart. Tiro must stay silent.
-        </li>
-        <li>
-          Press <b>Ask a question</b>. Tiro asks; answer aloud in a sentence or two. It may ask one follow-up; answer
-          that too. The floor should close by itself. Do this three times.
-        </li>
-        <li>After the last floor closes, say one more sentence. Tiro must stay silent.</li>
-        <li>
-          Press <b>Stop</b>, then <b>Download results</b>.
-        </li>
-      </ol>
+      <p>
+        Before you start: open your <b>expert link</b> once in this browser, and use the laptop&apos;s
+        <b> speakers, not headphones</b>. The run takes about three minutes. Follow the box below, one step at a time.
+      </p>
+
+      <section className="rounded border-2 border-blue-600 p-4" aria-live="polite">
+        <p className="text-xs uppercase tracking-wide opacity-60">Do this now</p>
+        <p className="mt-1 text-base font-semibold">{step.title}</p>
+        {step.say && <p className="mt-2 text-lg">&ldquo;{step.say}&rdquo;</p>}
+        {step.detail && <p className="mt-2 opacity-70">{step.detail}</p>}
+      </section>
 
       <details>
         <summary className="cursor-pointer opacity-70">Session values given to the agent</summary>
@@ -187,7 +171,7 @@ export function FloorSpike() {
           Close the floor
         </button>
         <button className={button} disabled={!running} onClick={() => attempt(() => harness().stop())}>
-          Stop
+          {running && !step.done ? "Stop early" : "Stop"}
         </button>
         <button className={button} disabled={view.state !== "stopped"} onClick={download}>
           Download results
