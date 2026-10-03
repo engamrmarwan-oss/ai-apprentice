@@ -1,0 +1,324 @@
+{
+ "spike": "S2",
+ "startedAt": "2026-10-03T22:16:55.559Z",
+ "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+ "conversationId": "conv_0501m41xezsafpyb3cpcaged4frz",
+ "variables": {
+  "tool_name": "a web application",
+  "task": "a routine review of items in a list",
+  "expert_role": "an experienced reviewer",
+  "baseline": "Nothing is assumed yet."
+ },
+ "entries": [
+  {
+   "t": 2099,
+   "kind": "status",
+   "status": "agent connected"
+  },
+  {
+   "t": 4835,
+   "kind": "scribe_committed",
+   "text": "I'm in the list.",
+   "startedAt": 4583
+  },
+  {
+   "t": 11740,
+   "kind": "scribe_committed",
+   "text": "This one looks fine to me, so I will carry on.",
+   "startedAt": 8504
+  },
+  {
+   "t": 14576,
+   "kind": "context_sent",
+   "text": "Screen: the expert opened an item."
+  },
+  {
+   "t": 17093,
+   "kind": "context_sent",
+   "text": "Screen: the expert changed a field on the open item."
+  },
+  {
+   "t": 18659,
+   "kind": "scribe_committed",
+   "text": "Because it is over the limit we agreed with the customer.",
+   "startedAt": 15153
+  },
+  {
+   "t": 19609,
+   "kind": "context_sent",
+   "text": "Screen: the expert scrolled down the list."
+  },
+  {
+   "t": 22144,
+   "kind": "context_sent",
+   "text": "The expert said: this one looks fine to me."
+  },
+  {
+   "t": 24659,
+   "kind": "context_sent",
+   "text": "Screen: the expert saved the open item."
+  },
+  {
+   "t": 25563,
+   "kind": "scribe_committed",
+   "text": "I am reading the next item in the list.",
+   "startedAt": 22875
+  },
+  {
+   "t": 27176,
+   "kind": "floor",
+   "open": true,
+   "reason": "trigger"
+  },
+  {
+   "t": 27176,
+   "kind": "trigger_sent",
+   "text": "ASK: Why did you decide that just now?"
+  },
+  {
+   "t": 28316,
+   "kind": "agent_speaking",
+   "speaking": true
+  },
+  {
+   "t": 28507,
+   "kind": "agent_speaking",
+   "speaking": false
+  },
+  {
+   "t": 28508,
+   "kind": "agent_said",
+   "text": "..."
+  },
+  {
+   "t": 31370,
+   "kind": "agent_heard",
+   "text": "This one looks fine to me, so I will carry on."
+  },
+  {
+   "t": 31371,
+   "kind": "tool_call",
+   "name": "yield_floor"
+  },
+  {
+   "t": 31371,
+   "kind": "floor",
+   "open": false,
+   "reason": "yield_floor"
+  },
+  {
+   "t": 32220,
+   "kind": "scribe_committed",
+   "text": "This one looks fine to me, so I will carry on.",
+   "startedAt": 28725
+  },
+  {
+   "t": 35743,
+   "kind": "floor",
+   "open": true,
+   "reason": "trigger"
+  },
+  {
+   "t": 35743,
+   "kind": "trigger_sent",
+   "text": "ASK: What would have made you decide differently?"
+  },
+  {
+   "t": 38421,
+   "kind": "agent_heard",
+   "text": "The limit we agreed with the customer."
+  },
+  {
+   "t": 38422,
+   "kind": "agent_speaking",
+   "speaking": true
+  },
+  {
+   "t": 38423,
+   "kind": "agent_said",
+   "text": "What would have made you decide differently?"
+  },
+  {
+   "t": 39386,
+   "kind": "scribe_committed",
+   "text": "Because it is over the limit we agreed with the customer.",
+   "startedAt": 36404
+  },
+  {
+   "t": 40670,
+   "kind": "agent_speaking",
+   "speaking": false
+  },
+  {
+   "t": 45360,
+   "kind": "agent_heard",
+   "text": "I am reading the next item in the list."
+  },
+  {
+   "t": 45361,
+   "kind": "tool_call",
+   "name": "yield_floor"
+  },
+  {
+   "t": 45361,
+   "kind": "floor",
+   "open": false,
+   "reason": "yield_floor"
+  },
+  {
+   "t": 46315,
+   "kind": "scribe_committed",
+   "text": "I am reading the next item in the list.",
+   "startedAt": 44050
+  },
+  {
+   "t": 49860,
+   "kind": "floor",
+   "open": true,
+   "reason": "trigger"
+  },
+  {
+   "t": 49860,
+   "kind": "trigger_sent",
+   "text": "ASK: When would you stop and ask someone before doing that?"
+  },
+  {
+   "t": 52068,
+   "kind": "agent_heard",
+   "text": "So I will carry on."
+  },
+  {
+   "t": 52069,
+   "kind": "agent_speaking",
+   "speaking": true
+  },
+  {
+   "t": 52071,
+   "kind": "agent_said",
+   "text": "When would you stop and ask someone before doing that?"
+  },
+  {
+   "t": 52957,
+   "kind": "scribe_committed",
+   "text": "This one looks fine to me, so I will carry on.",
+   "startedAt": 49889
+  },
+  {
+   "t": 55109,
+   "kind": "agent_speaking",
+   "speaking": false
+  },
+  {
+   "t": 59015,
+   "kind": "agent_heard",
+   "text": "Because it is over the limit we agreed with the customer."
+  },
+  {
+   "t": 59017,
+   "kind": "tool_call",
+   "name": "yield_floor"
+  },
+  {
+   "t": 59017,
+   "kind": "floor",
+   "open": false,
+   "reason": "yield_floor"
+  },
+  {
+   "t": 60122,
+   "kind": "scribe_committed",
+   "text": "Because it is over the limit we agreed with the customer.",
+   "startedAt": 56565
+  },
+  {
+   "t": 66812,
+   "kind": "scribe_committed",
+   "text": "I am reading the next item in the list.",
+   "startedAt": 64314
+  },
+  {
+   "t": 69479,
+   "kind": "status",
+   "status": "agent disconnected (user)"
+  },
+  {
+   "t": 69605,
+   "kind": "status",
+   "status": "scribe closed"
+  }
+ ],
+ "summary": {
+  "durationMs": 69605,
+  "contextUpdates": {
+   "sent": 5,
+   "answered": 0
+  },
+  "closedFloor": {
+   "agentSaid": 0,
+   "agentHeard": 0,
+   "scribeCommitted": 7
+  },
+  "triggers": {
+   "sent": 3,
+   "asked": 2,
+   "msToSpeech": [
+    1140,
+    2679,
+    2209
+   ],
+   "turns": [
+    0,
+    1,
+    1
+   ],
+   "closedByAgent": 3
+  },
+  "selfHearing": {
+   "duringAgentSpeech": 3,
+   "kept": 7,
+   "leaked": []
+  },
+  "checks": [
+   {
+    "label": "Silent on screen updates",
+    "pass": true,
+    "detail": "0 replies to 5 updates (needs at least 5 updates)"
+   },
+   {
+    "label": "Hears nothing and says nothing while the floor is closed",
+    "pass": true,
+    "detail": "heard 0 things, said 0"
+   },
+   {
+    "label": "Scribe hears the expert while the agent cannot",
+    "pass": true,
+    "detail": "7 sentences transcribed with the floor closed (needs 3)"
+   },
+   {
+    "label": "Asks when triggered",
+    "pass": false,
+    "detail": "2 of 3 triggers were followed by a question (needs at least 3)"
+   },
+   {
+    "label": "Starts speaking within 3 seconds of the trigger",
+    "pass": true,
+    "detail": "median 2209 ms"
+   },
+   {
+    "label": "One question and at most one follow-up",
+    "pass": true,
+    "detail": "turns per open floor: 0, 1, 1"
+   },
+   {
+    "label": "Gives the floor back by itself",
+    "pass": true,
+    "detail": "3 of 3 floors were closed by the agent"
+   },
+   {
+    "label": "Tiro does not transcribe its own voice",
+    "pass": true,
+    "detail": "3 transcripts arrived during the agent's speech and were dropped; 0 of the 7 kept ones repeat the agent"
+   }
+  ]
+ }
+}
