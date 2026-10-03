@@ -12,11 +12,7 @@ export type SupabaseHandle =
 
 let cached: { key: string; client: TiroClient } | undefined;
 
-/**
- * The only Supabase client in the app. It uses the secret key, so it must
- * never reach the browser: all database access goes through route handlers.
- */
-export function getSupabase(): SupabaseHandle {
+function settings(): { ok: true; url: string; secretKey: string } | { ok: false; problem: string } {
   const url = readEnv("SUPABASE_URL");
   // The Vercel integration names the key differently depending on project age.
   const secretKey =
@@ -28,17 +24,41 @@ export function getSupabase(): SupabaseHandle {
   if (!url || !secretKey) {
     return { ok: false, problem: `Not set: ${missing.join(", ")}` };
   }
+  return { ok: true, url, secretKey };
+}
 
-  const key = `${url}\n${secretKey}`;
+const options = { auth: { persistSession: false, autoRefreshToken: false } };
+
+/**
+ * The only Supabase client in the app. It uses the secret key, so it must
+ * never reach the browser: all database access goes through route handlers.
+ */
+export function getSupabase(): SupabaseHandle {
+  const found = settings();
+  if (!found.ok) return found;
+
+  const key = `${found.url}\n${found.secretKey}`;
   if (cached?.key !== key) {
     try {
-      const client = createClient<Database>(url, secretKey, {
-        auth: { persistSession: false, autoRefreshToken: false },
-      });
-      cached = { key, client };
+      cached = { key, client: createClient<Database>(found.url, found.secretKey, options) };
     } catch {
       return { ok: false, problem: "SUPABASE_URL is not a valid address" };
     }
   }
   return { ok: true, client: cached.client };
+}
+
+/**
+ * A client of its own for checking one password. Signing in on a client
+ * makes its later requests that person's, so the shared client must never be
+ * used for it: it would stop acting with the server's key.
+ */
+export function newPasswordClient(): SupabaseHandle {
+  const found = settings();
+  if (!found.ok) return found;
+  try {
+    return { ok: true, client: createClient<Database>(found.url, found.secretKey, options) };
+  } catch {
+    return { ok: false, problem: "SUPABASE_URL is not a valid address" };
+  }
 }

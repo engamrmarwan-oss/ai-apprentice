@@ -1,14 +1,16 @@
 import type { NextRequest } from "next/server";
-import { requireRole } from "@/server/require-role";
+import { ok, unavailable } from "@/server/http";
+import { requireUser } from "@/server/require-user";
+import { listWorkflows } from "@/server/workflows";
 
 export const dynamic = "force-dynamic";
 
-/** Who is viewing: the role their link grants, and the workflow it is limited to, if any. */
+/** Who is signed in, and the workflows they are on with the role they hold on each. */
 export async function GET(request: NextRequest) {
-  const check = await requireRole(request);
+  const check = await requireUser(request);
   if (!check.ok) return check.response;
-  return Response.json(
-    { ok: true, role: check.role, workflow_id: check.workflowId },
-    { headers: { "Cache-Control": "no-store" } },
-  );
+
+  const list = await listWorkflows(check.user.id);
+  if (!list.ok) return unavailable();
+  return ok({ user: check.user, workflows: list.workflows });
 }

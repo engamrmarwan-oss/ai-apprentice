@@ -117,7 +117,7 @@ export function FloorSpike() {
       </header>
 
       <p>
-        Before you start: open your <b>expert link</b> once in this browser, and use the laptop&apos;s
+        Before you start: sign in to Tiro in this browser, and use the laptop&apos;s
         <b> speakers, not headphones</b>. The run takes about three minutes. Follow the box below, one step at a time.
       </p>
 
