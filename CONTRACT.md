@@ -1,14 +1,14 @@
 # Tiro contract
 
-**Status: DRAFT. Not frozen.** It becomes frozen when Amr approves it. After that it changes only with his agreement, and `src/contract/` changes in the same commit.
+**Status: FROZEN on 2026-10-03, approved by Amr.** It changes only with his agreement, and `src/contract/` changes in the same commit.
 
 This is the shape of the three records both builders code against: events, questions and rules. The executable form is the Zod schemas in `src/contract/`; `src/contract/contract.test.ts` checks them. If this file and the schemas disagree, that is a bug.
 
-## Open points
+## Decisions
 
-The design leaves these open. The draft uses the default shown. Each needs Amr's yes or a correction before the freeze.
+The design left these open. Amr approved the answer shown, and the contract is built on it.
 
-| # | Open point | Default used here |
+| # | Question | Decision |
 |---|---|---|
 | 1 | A rule the expert only described (an unseen case) has no screen moment of its own | It links to the nearest related event, with `screen_moment.link` set to `related` |
 | 2 | Which row carries the status `corrected` | One row per version, joined by `lineage_id`. The new version becomes `corrected` once re-confirmed; the old one becomes `retired` |
