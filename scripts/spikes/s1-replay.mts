@@ -1,12 +1,16 @@
 // Spike S1: replays a recorded session through the vision reader and scores
 // the result against the hand labels.
 //
-//   npm run spike:s1 -- <folder> [--limit N] [--no-verify] [--verify-all]
+//   npm run spike:s1 -- <folder> [--limit N] [--no-verify] [--verify-all] [--pair] [--carry]
 //                       [--fast <model>] [--fast-effort <level>]
 //                       [--strong <model>] [--strong-effort <level>]
+//   npm run spike:s1 -- <folder> --rescore
 //
 // <folder> is an unzipped recording from /spikes/record: frames/, manifest.json
 // and a filled-in labels.csv. Results are written to <folder>/results.json.
+// --pair also shows the reader the previous frame; --carry tells it what it
+// reported last time. --rescore reads no frames: it scores the readings already in results.json
+// against labels.csv, for when the labels are written or corrected after a run.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
@@ -71,9 +75,14 @@ const verify = !args.includes("--no-verify");
 // By default only frames with a reported decision are verified, as in the product.
 // --verify-all checks every frame that reported anything: the "strong model everywhere" comparison.
 const verifyAll = args.includes("--verify-all");
+// Two ways of giving the reader more to compare with, tried separately.
+const pair = args.includes("--pair");
+const carry = args.includes("--carry");
+const resultsFile = path.join(folder, "results.json");
+const stored = args.includes("--rescore") ? JSON.parse(readFileSync(resultsFile, "utf8")) : null;
 
 const manifest: Manifest = JSON.parse(readFileSync(path.join(folder, "manifest.json"), "utf8"));
-const frames = manifest.frames.slice(0, limit);
+const frames = stored ? [] : manifest.frames.slice(0, limit);
 
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
 const png = (buffer: Buffer): ImageInput => ({ data: buffer.toString("base64"), mediaType: "image/png" });
@@ -107,11 +116,12 @@ const describe = (event: ReadEvent) =>
   (event.to ? ` → ${event.to}` : "");
 const seconds = (ms: number) => `${(ms / 1000).toFixed(1)}s`;
 
-const results: FrameResult[] = [];
+const results: FrameResult[] = stored?.frames ?? [];
 let state: ScreenState | null = null;
 let previousFull: ImageInput | null = null;
 
-console.log(`Reading ${frames.length} frames with ${fastModel}; verifying with ${verify ? strongModel : "nothing"}.\n`);
+if (stored) console.log(`Scoring the ${results.length} frames already read in ${resultsFile}.`);
+else console.log(`Reading ${frames.length} frames with ${fastModel}; verifying with ${verify ? strongModel : "nothing"}.\n`);
 
 for (const [index, frame] of frames.entries()) {
   const number = index + 1;
@@ -131,7 +141,10 @@ for (const [index, frame] of frames.entries()) {
   };
 
   const started = performance.now();
-  const read = await readFrame(state, images, { model: fastModel, effort: fastEffort });
+  const read = await readFrame(state, pair ? { ...images, before: previousFull } : images, {
+    model: fastModel,
+    effort: fastEffort,
+  });
   result.readMs = Math.round(performance.now() - started);
 
   if (!read.ok) {
@@ -139,11 +152,16 @@ for (const [index, frame] of frames.entries()) {
     console.log(`${String(number).padStart(4, "0")} ${frame.time}  read failed: ${read.error.message}`);
   } else {
     const reading = read.value.output;
-    state = { screen: reading.screen, item: reading.item, fields: reading.fields };
     result.readUsage = read.value.usage;
     result.screen = reading.screen;
     // The first frame has nothing to be compared with.
     result.events = index === 0 ? [] : reading.events;
+    state = {
+      screen: reading.screen,
+      item: reading.item,
+      fields: reading.fields,
+      ...(carry ? { events: result.events } : {}),
+    };
 
     let note = "";
     const worthVerifying = verifyAll ? result.events.length > 0 : result.events.some(isDecision);
@@ -200,10 +218,11 @@ const readUsage = sum(results.map((result) => result.readUsage));
 const verifyUsage = sum(results.map((result) => result.verifyUsage));
 const minutes = (frames.at(-1)?.t_ms ?? manifest.durationMs) / 60_000 || 1;
 
-const totals = {
+// A rescore keeps the totals of the run that did the reading.
+const totals = stored?.totals ?? {
   frames: results.length,
   failedReads: results.filter((result) => result.error).length,
-  read: { model: fastModel, medianMs: percentile(readTimes, 50), p95Ms: percentile(readTimes, 95), ...readUsage, costUsd: cost(fastModel, readUsage) },
+  read: { model: fastModel, effort: fastEffort ?? null, pair, carry, medianMs: percentile(readTimes, 50), p95Ms: percentile(readTimes, 95), ...readUsage, costUsd: cost(fastModel, readUsage) },
   verify: { model: strongModel, framesVerified: verifyTimes.length, medianMs: percentile(verifyTimes, 50), ...verifyUsage, costUsd: cost(strongModel, verifyUsage) },
   sessionMinutes: Number(minutes.toFixed(2)),
 };
@@ -234,16 +253,16 @@ if (existsSync(labelFile)) {
 }
 
 writeFileSync(
-  path.join(folder, "results.json"),
-  JSON.stringify({ spike: "S1", ranAt: new Date().toISOString(), totals, scores, frames: results }, null, 1),
+  resultsFile,
+  JSON.stringify({ spike: "S1", ranAt: stored?.ranAt ?? new Date().toISOString(), totals, scores, frames: results }, null, 1),
 );
 
 const money = (value: number | null) => (value === null ? "unknown price" : `$${value.toFixed(3)}`);
 const percent = (value: number | null) => (value === null ? "n/a" : `${Math.round(value * 100)}%`);
 
 console.log(`\nFrames: ${totals.frames} (${totals.failedReads} failed) over ${totals.sessionMinutes} minutes`);
-console.log(`Fast read (${fastModel}): median ${totals.read.medianMs} ms, 95th ${totals.read.p95Ms} ms, ${money(totals.read.costUsd)}`);
-console.log(`Verification (${strongModel}): ${totals.verify.framesVerified} frames, median ${totals.verify.medianMs ?? "n/a"} ms, ${money(totals.verify.costUsd)}`);
+console.log(`Fast read (${totals.read.model}): median ${totals.read.medianMs} ms, 95th ${totals.read.p95Ms} ms, ${money(totals.read.costUsd)}`);
+console.log(`Verification (${totals.verify.model}): ${totals.verify.framesVerified} frames, median ${totals.verify.medianMs ?? "n/a"} ms, ${money(totals.verify.costUsd)}`);
 
 if (!scores) {
   console.log("\nNo labels found in labels.csv for these frames, so nothing was scored.");
@@ -253,12 +272,14 @@ if (!scores) {
     console.log(`${name}: ${s.decisions.found} of ${s.decisions.labelled} labelled decisions read correctly (${percent(s.decisions.recall)}); ${s.decisions.reported - s.decisions.correct} reported decisions with no matching label`);
   console.log(`\nLabelled events: ${scores.labels}`);
   line("As read by the fast model ", scores.asRead);
-  line("After verification        ", scores.afterVerification);
-  for (const miss of scores.afterVerification.missed.filter(isDecision)) {
+  // With nothing verified, "after verification" would only say that no decision was checked.
+  const final = totals.verify.framesVerified > 0 ? scores.afterVerification : scores.asRead;
+  if (final === scores.afterVerification) line("After verification        ", final);
+  for (const miss of final.missed.filter(isDecision)) {
     console.log(`  missed   frame ${miss.frame}: ${miss.type} ${miss.item ?? ""} ${miss.field ?? ""} ${miss.action ?? ""} → ${miss.to ?? ""}`);
   }
-  for (const extra of scores.afterVerification.unsupported.filter(isDecision)) {
+  for (const extra of final.unsupported.filter(isDecision)) {
     console.log(`  no label frame ${extra.frame}: ${extra.type} ${extra.item ?? ""} ${extra.field ?? ""} ${extra.action ?? ""} → ${extra.to ?? ""}`);
   }
 }
-console.log(`\nDetails written to ${path.join(folder, "results.json")}`);
+console.log(`\nDetails written to ${resultsFile}`);
