@@ -49,7 +49,7 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 | Path | Content | Owner |
 |---|---|---|
 | `src/app/api/` | Route handlers | Claude Code |
-| `src/server/` | Server-only modules: environment, database client, fail-soft, model router (`models.ts`), frame reading (`vision/`) | Claude Code |
+| `src/server/` | Server-only modules: environment, database client, fail-soft, model router (`models.ts`), frame reading (`vision/`), ElevenLabs session addresses and tokens (`elevenlabs.ts`) | Claude Code |
 | `src/spikes/`, `scripts/spikes/` | Spike tooling that is not a page: scoring and replay | Claude Code |
 | `src/contract/` | The contract as Zod schemas; import from here, change only via `CONTRACT.md` | Shared |
 | `src/sensor/` | Screen sensor: frame diff, settle detection, capture | Claude Code |
