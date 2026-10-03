@@ -1,0 +1,2759 @@
+{
+ "spike": "S1",
+ "ranAt": "2026-10-03T21:52:56.927Z",
+ "totals": {
+  "frames": 56,
+  "failedReads": 0,
+  "read": {
+   "model": "claude-haiku-4-5",
+   "medianMs": 2759,
+   "p95Ms": 4171,
+   "inputTokens": 205520,
+   "outputTokens": 5941,
+   "costUsd": 0.235225
+  },
+  "verify": {
+   "model": "claude-opus-5-5",
+   "framesVerified": 39,
+   "medianMs": 3919,
+   "inputTokens": 228610,
+   "outputTokens": 5206,
+   "costUsd": 1.01856
+  },
+  "sessionMinutes": 6.11
+ },
+ "scores": {
+  "labels": 23,
+  "problems": [],
+  "asRead": {
+   "byType": {
+    "navigate": {
+     "labelled": 13,
+     "found": 4,
+     "reported": 31,
+     "correct": 4
+    },
+    "open_item": {
+     "labelled": 4,
+     "found": 4,
+     "reported": 4,
+     "correct": 4
+    },
+    "field_change": {
+     "labelled": 1,
+     "found": 0,
+     "reported": 5,
+     "correct": 0
+    },
+    "status_change": {
+     "labelled": 2,
+     "found": 2,
+     "reported": 3,
+     "correct": 2
+    },
+    "text_edit": {
+     "labelled": 0,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    },
+    "dialog": {
+     "labelled": 0,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    },
+    "commit": {
+     "labelled": 3,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    }
+   },
+   "decisions": {
+    "labelled": 5,
+    "found": 2,
+    "reported": 3,
+    "correct": 2,
+    "recall": 0.4,
+    "precision": 0.6666666666666666
+   },
+   "missed": [
+    {
+     "frame": 7,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Details",
+     "action": null
+    },
+    {
+     "frame": 8,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Details",
+     "to": "Formal Spec",
+     "action": null
+    },
+    {
+     "frame": 8,
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Regenerate"
+    },
+    {
+     "frame": 10,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Elements",
+     "action": null
+    },
+    {
+     "frame": 14,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Elements",
+     "to": "Tests",
+     "action": null
+    },
+    {
+     "frame": 15,
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Generate"
+    },
+    {
+     "frame": 22,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Gherkin",
+     "to": "Playwright",
+     "action": null
+    },
+    {
+     "frame": 33,
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "Priority",
+     "from": "High",
+     "to": "Critical",
+     "action": null
+    },
+    {
+     "frame": 39,
+     "type": "navigate",
+     "item": "REQ-004",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Elements",
+     "action": null
+    },
+    {
+     "frame": 41,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Process Map",
+     "to": "Completeness · RCC",
+     "action": null
+    },
+    {
+     "frame": 45,
+     "type": "navigate",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": "RCC Gate",
+     "action": null
+    },
+    {
+     "frame": 48,
+     "type": "commit",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Run gap analysis (project-wide)"
+    },
+    {
+     "frame": 52,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Completeness · RCC",
+     "action": null
+    }
+   ],
+   "unsupported": [
+    {
+     "frame": 2,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal Spec tab",
+     "action": null
+    },
+    {
+     "frame": 3,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal Spec",
+     "action": null
+    },
+    {
+     "frame": 4,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal Spec",
+     "action": null
+    },
+    {
+     "frame": 5,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal Spec",
+     "action": null
+    },
+    {
+     "frame": 6,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details tab",
+     "to": "Formal Spec tab",
+     "action": null
+    },
+    {
+     "frame": 9,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "TITLE",
+     "from": "The AI Apprentice shall teach the mapped workflow to the next generation.",
+     "to": "Teaching Mapped Workflow to Next Generation",
+     "action": null
+    },
+    {
+     "frame": 12,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 13,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 15,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 16,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 18,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 19,
+     "type": "field_change",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 20,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Tests",
+     "action": null
+    },
+    {
+     "frame": 21,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "RCC Gate",
+     "action": null
+    },
+    {
+     "frame": 22,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 23,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 24,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details",
+     "to": "RCC Gate",
+     "action": null
+    },
+    {
+     "frame": 26,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Requirements - RCC Gate",
+     "action": null
+    },
+    {
+     "frame": 27,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Requirements - RCC Gate tab",
+     "action": null
+    },
+    {
+     "frame": 30,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Tests",
+     "action": null
+    },
+    {
+     "frame": 31,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "REQ-003",
+     "to": "REQ-004",
+     "action": null
+    },
+    {
+     "frame": 33,
+     "type": "status_change",
+     "item": "REQ-004",
+     "field": "PRIORITY",
+     "from": "High",
+     "to": "Critical",
+     "action": null
+    },
+    {
+     "frame": 35,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 36,
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "TITLE",
+     "from": "The AI Apprentice shall use an ElevenLabs voice agent that watches the expert's screen and asks why at the right moments.",
+     "to": "AI Apprentice Voice Agent Interaction",
+     "action": null
+    },
+    {
+     "frame": 38,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal Spec",
+     "action": null
+    },
+    {
+     "frame": 41,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Process Map",
+     "to": "Completeness - RCC",
+     "action": null
+    },
+    {
+     "frame": 45,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "REQ-001",
+     "to": "REQ-004",
+     "action": null
+    },
+    {
+     "frame": 46,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirements workspace - Formal view",
+     "action": null
+    },
+    {
+     "frame": 47,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 48,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirement Details",
+     "action": null
+    },
+    {
+     "frame": 50,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirement Details",
+     "to": "Requirement Details",
+     "action": null
+    },
+    {
+     "frame": 51,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 52,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirement Details",
+     "to": "Completeness matrix",
+     "action": null
+    }
+   ]
+  },
+  "afterVerification": {
+   "byType": {
+    "navigate": {
+     "labelled": 13,
+     "found": 4,
+     "reported": 6,
+     "correct": 4
+    },
+    "open_item": {
+     "labelled": 4,
+     "found": 4,
+     "reported": 4,
+     "correct": 4
+    },
+    "field_change": {
+     "labelled": 1,
+     "found": 1,
+     "reported": 2,
+     "correct": 1
+    },
+    "status_change": {
+     "labelled": 2,
+     "found": 2,
+     "reported": 2,
+     "correct": 2
+    },
+    "text_edit": {
+     "labelled": 0,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    },
+    "dialog": {
+     "labelled": 0,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    },
+    "commit": {
+     "labelled": 3,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    }
+   },
+   "decisions": {
+    "labelled": 5,
+    "found": 2,
+    "reported": 2,
+    "correct": 2,
+    "recall": 0.4,
+    "precision": 1
+   },
+   "missed": [
+    {
+     "frame": 7,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Details",
+     "action": null
+    },
+    {
+     "frame": 8,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Details",
+     "to": "Formal Spec",
+     "action": null
+    },
+    {
+     "frame": 8,
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Regenerate"
+    },
+    {
+     "frame": 10,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Elements",
+     "action": null
+    },
+    {
+     "frame": 14,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Elements",
+     "to": "Tests",
+     "action": null
+    },
+    {
+     "frame": 15,
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Generate"
+    },
+    {
+     "frame": 22,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Gherkin",
+     "to": "Playwright",
+     "action": null
+    },
+    {
+     "frame": 36,
+     "type": "navigate",
+     "item": "REQ-004",
+     "field": null,
+     "from": "Details",
+     "to": "Formal Spec",
+     "action": null
+    },
+    {
+     "frame": 39,
+     "type": "navigate",
+     "item": "REQ-004",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Elements",
+     "action": null
+    },
+    {
+     "frame": 41,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Process Map",
+     "to": "Completeness · RCC",
+     "action": null
+    },
+    {
+     "frame": 45,
+     "type": "navigate",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": "RCC Gate",
+     "action": null
+    },
+    {
+     "frame": 48,
+     "type": "commit",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Run gap analysis (project-wide)"
+    }
+   ],
+   "unsupported": [
+    {
+     "frame": 9,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "TITLE",
+     "from": "Acceptance Criteria for Teaching the Mapped Workflow",
+     "to": "Teaching Mapped Workflow to Next Generation",
+     "action": null
+    },
+    {
+     "frame": 41,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Process Map",
+     "to": "Completeness - RCC",
+     "action": null
+    },
+    {
+     "frame": 45,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "REQ-004",
+     "action": null
+    }
+   ]
+  }
+ },
+ "frames": [
+  {
+   "frame": 1,
+   "time": "0:02",
+   "readMs": 2702,
+   "readUsage": {
+    "inputTokens": 3077,
+    "outputTokens": 92
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 2,
+   "time": "0:07",
+   "readMs": 3491,
+   "readUsage": {
+    "inputTokens": 4307,
+    "outputTokens": 108
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal Spec tab",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": 4549,
+   "verifyUsage": {
+    "inputTokens": 7017,
+    "outputTokens": 83
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Formal Spec tab was already active in BEFORE; the only change is a scroll down within the same content, not a navigation."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 3,
+   "time": "0:09",
+   "readMs": 2411,
+   "readUsage": {
+    "inputTokens": 4307,
+    "outputTokens": 111
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal Spec",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 4060,
+   "verifyUsage": {
+    "inputTokens": 7015,
+    "outputTokens": 83
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Formal Spec tab was already active in BEFORE; the only change is a slight scroll of the content, not a navigation."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 4,
+   "time": "0:11",
+   "readMs": 3232,
+   "readUsage": {
+    "inputTokens": 4311,
+    "outputTokens": 107
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal Spec",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3919,
+   "verifyUsage": {
+    "inputTokens": 7015,
+    "outputTokens": 91
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Formal Spec tab was already active in BEFORE; AFTER only shows the same tab scrolled up to the top, so no navigation took place."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 5,
+   "time": "0:19",
+   "readMs": 3343,
+   "readUsage": {
+    "inputTokens": 4307,
+    "outputTokens": 107
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal Spec",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 4700,
+   "verifyUsage": {
+    "inputTokens": 7015,
+    "outputTokens": 87
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Formal Spec tab was already active in BEFORE; the only change is that the content scrolled down, with no navigation to a new screen."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 6,
+   "time": "0:21",
+   "readMs": 3502,
+   "readUsage": {
+    "inputTokens": 4345,
+    "outputTokens": 109
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details tab",
+     "to": "Formal Spec tab",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": 4503,
+   "verifyUsage": {
+    "inputTokens": 6741,
+    "outputTokens": 90
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Formal Spec tab was already active in BEFORE; the only change is the content scrolling down to reveal Constraints, not a tab switch."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 7,
+   "time": "0:24",
+   "readMs": 2881,
+   "readUsage": {
+    "inputTokens": 2764,
+    "outputTokens": 77
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 8,
+   "time": "0:41",
+   "readMs": 2208,
+   "readUsage": {
+    "inputTokens": 4345,
+    "outputTokens": 77
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 9,
+   "time": "0:42",
+   "readMs": 5329,
+   "readUsage": {
+    "inputTokens": 4349,
+    "outputTokens": 318
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "TITLE",
+     "from": "The AI Apprentice shall teach the mapped workflow to the next generation.",
+     "to": "Teaching Mapped Workflow to Next Generation",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 6155,
+   "verifyUsage": {
+    "inputTokens": 6669,
+    "outputTokens": 338
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "corrected",
+      "event": {
+       "type": "field_change",
+       "item": "REQ-003",
+       "field": "TITLE",
+       "from": "Acceptance Criteria for Teaching the Mapped Workflow",
+       "to": "Teaching Mapped Workflow to Next Generation",
+       "action": null,
+       "confidence": 0.9
+      },
+      "reason": "The spec TITLE did change to the reported value, but in BEFORE it read \"Acceptance Criteria for Teaching the Mapped Workflow\", not the requirement statement."
+     }
+    ],
+    "missed": []
+   },
+   "verified": [
+    {
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "TITLE",
+     "from": "Acceptance Criteria for Teaching the Mapped Workflow",
+     "to": "Teaching Mapped Workflow to Next Generation",
+     "action": null,
+     "confidence": 0.9
+    }
+   ]
+  },
+  {
+   "frame": 10,
+   "time": "1:01",
+   "readMs": 3647,
+   "readUsage": {
+    "inputTokens": 4528,
+    "outputTokens": 260
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 11,
+   "time": "1:09",
+   "readMs": 3255,
+   "readUsage": {
+    "inputTokens": 4494,
+    "outputTokens": 77
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 12,
+   "time": "1:14",
+   "readMs": 2666,
+   "readUsage": {
+    "inputTokens": 4341,
+    "outputTokens": 111
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3719,
+   "verifyUsage": {
+    "inputTokens": 6400,
+    "outputTokens": 85
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The View toggle is already set to Formal in BEFORE and unchanged in AFTER; only the clock and cursor position differ."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 13,
+   "time": "1:20",
+   "readMs": 3896,
+   "readUsage": {
+    "inputTokens": 4311,
+    "outputTokens": 109
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3894,
+   "verifyUsage": {
+    "inputTokens": 7068,
+    "outputTokens": 81
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Formal view was already selected in BEFORE; the only change is a scroll of the Elements list, not a navigation."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 14,
+   "time": "1:27",
+   "readMs": 1832,
+   "readUsage": {
+    "inputTokens": 4311,
+    "outputTokens": 77
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 15,
+   "time": "1:32",
+   "readMs": 2087,
+   "readUsage": {
+    "inputTokens": 4159,
+    "outputTokens": 109
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3861,
+   "verifyUsage": {
+    "inputTokens": 5985,
+    "outputTokens": 141
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Formal view was already selected in BEFORE, so there was no switch from Plain to Formal; the only visible change is the Generate button turning into Generating...."
+     }
+    ],
+    "missed": [
+     {
+      "type": "commit",
+      "item": "REQ-003",
+      "field": null,
+      "from": null,
+      "to": null,
+      "action": "Generate",
+      "confidence": 0.85
+     }
+    ]
+   },
+   "verified": []
+  },
+  {
+   "frame": 16,
+   "time": "1:33",
+   "readMs": 2849,
+   "readUsage": {
+    "inputTokens": 3681,
+    "outputTokens": 109
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3388,
+   "verifyUsage": {
+    "inputTokens": 5507,
+    "outputTokens": 80
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "Formal view was already selected in BEFORE; only the clock and cursor position changed, so no navigation occurred."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 17,
+   "time": "1:35",
+   "readMs": 1891,
+   "readUsage": {
+    "inputTokens": 3717,
+    "outputTokens": 77
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 18,
+   "time": "1:37",
+   "readMs": 2506,
+   "readUsage": {
+    "inputTokens": 3144,
+    "outputTokens": 109
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3265,
+   "verifyUsage": {
+    "inputTokens": 4967,
+    "outputTokens": 85
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "Formal view was already selected in BEFORE; the only change is the clock ticking from 23:33:20 to 23:33:21."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 19,
+   "time": "1:40",
+   "readMs": 2375,
+   "readUsage": {
+    "inputTokens": 4311,
+    "outputTokens": 111
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 4168,
+   "verifyUsage": {
+    "inputTokens": 7012,
+    "outputTokens": 92
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The View toggle was already set to Formal in BEFORE and is unchanged in AFTER; the only visible change is the generated test scenarios appearing."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 20,
+   "time": "1:44",
+   "readMs": 3309,
+   "readUsage": {
+    "inputTokens": 4311,
+    "outputTokens": 108
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Tests",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3635,
+   "verifyUsage": {
+    "inputTokens": 7012,
+    "outputTokens": 78
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Tests tab was already active in BEFORE; the only change is the page scrolling down, not a navigation."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 21,
+   "time": "1:45",
+   "readMs": 2780,
+   "readUsage": {
+    "inputTokens": 3144,
+    "outputTokens": 110
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "RCC Gate",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": 3788,
+   "verifyUsage": {
+    "inputTokens": 4970,
+    "outputTokens": 96
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Tests tab is still active in AFTER; only the clock changed from 23:33:29 to 23:33:30, so there was no navigation to RCC Gate."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 22,
+   "time": "1:54",
+   "readMs": 3399,
+   "readUsage": {
+    "inputTokens": 4321,
+    "outputTokens": 111
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 4329,
+   "verifyUsage": {
+    "inputTokens": 7072,
+    "outputTokens": 103
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The View toggle shows Formal selected in both BEFORE and AFTER; the visible change is the Tests sub-tab switching from Gherkin to Playwright, not a View field change."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 23,
+   "time": "1:58",
+   "readMs": 3600,
+   "readUsage": {
+    "inputTokens": 4335,
+    "outputTokens": 109
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 4016,
+   "verifyUsage": {
+    "inputTokens": 7142,
+    "outputTokens": 89
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Formal view was already selected in BEFORE and the screen is unchanged apart from the clock and the cursor position, so no navigation happened."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 24,
+   "time": "2:00",
+   "readMs": 2185,
+   "readUsage": {
+    "inputTokens": 3474,
+    "outputTokens": 110
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details",
+     "to": "RCC Gate",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 4180,
+   "verifyUsage": {
+    "inputTokens": 5302,
+    "outputTokens": 106
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "Both screens show the Tests tab with the Playwright sub-tab active; only the clock changed (23:33:43 to 23:33:44), and the person did not move from Details to RCC Gate."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 25,
+   "time": "2:07",
+   "readMs": 1674,
+   "readUsage": {
+    "inputTokens": 2768,
+    "outputTokens": 77
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 26,
+   "time": "2:09",
+   "readMs": 3146,
+   "readUsage": {
+    "inputTokens": 2768,
+    "outputTokens": 112
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Requirements - RCC Gate",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": 3757,
+   "verifyUsage": {
+    "inputTokens": 4600,
+    "outputTokens": 99
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The AFTER screen still shows the Tests tab with the Playwright view, so there was no move to RCC Gate; the only change is the cursor hovering over Approve specification."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 27,
+   "time": "2:11",
+   "readMs": 2525,
+   "readUsage": {
+    "inputTokens": 2768,
+    "outputTokens": 151
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "status_change",
+     "item": "REQ-003",
+     "field": "STATUS",
+     "from": "Draft",
+     "to": "Approved",
+     "action": null,
+     "confidence": 0.95
+    },
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Requirements - RCC Gate tab",
+     "action": null,
+     "confidence": 0.7
+    }
+   ],
+   "verifyMs": 4445,
+   "verifyUsage": {
+    "inputTokens": 4675,
+    "outputTokens": 195
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "confirmed",
+      "event": null,
+      "reason": "STATUS for REQ-003 changed from Draft to Approved after the click on Approve specification."
+     },
+     {
+      "index": 1,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Tests tab with the Playwright sub-tab is still active in AFTER, so there was no navigation to the RCC Gate tab."
+     }
+    ],
+    "missed": [
+     {
+      "type": "commit",
+      "item": "REQ-003",
+      "field": null,
+      "from": null,
+      "to": null,
+      "action": "Approve specification",
+      "confidence": 0.85
+     }
+    ]
+   },
+   "verified": [
+    {
+     "type": "status_change",
+     "item": "REQ-003",
+     "field": "STATUS",
+     "from": "Draft",
+     "to": "Approved",
+     "action": null,
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "frame": 28,
+   "time": "2:13",
+   "readMs": 2862,
+   "readUsage": {
+    "inputTokens": 4350,
+    "outputTokens": 78
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 29,
+   "time": "2:17",
+   "readMs": 2236,
+   "readUsage": {
+    "inputTokens": 2769,
+    "outputTokens": 116
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "status_change",
+     "item": "REQ-003",
+     "field": "STATUS",
+     "from": "Approved",
+     "to": "In progress",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 5031,
+   "verifyUsage": {
+    "inputTokens": 4600,
+    "outputTokens": 233
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "confirmed",
+      "event": null,
+      "reason": "The STATUS badge for REQ-003 changes from Approved in BEFORE to In progress in AFTER."
+     }
+    ],
+    "missed": [
+     {
+      "type": "commit",
+      "item": "REQ-003",
+      "field": null,
+      "from": null,
+      "to": null,
+      "action": "Start implementation",
+      "confidence": 0.8
+     }
+    ]
+   },
+   "verified": [
+    {
+     "type": "status_change",
+     "item": "REQ-003",
+     "field": "STATUS",
+     "from": "Approved",
+     "to": "In progress",
+     "action": null,
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "frame": 30,
+   "time": "2:19",
+   "readMs": 3760,
+   "readUsage": {
+    "inputTokens": 4312,
+    "outputTokens": 109
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Tests",
+     "action": null,
+     "confidence": 0.9
+    }
+   ],
+   "verifyMs": 4484,
+   "verifyUsage": {
+    "inputTokens": 7016,
+    "outputTokens": 99
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Tests tab was already active in BEFORE; the only change is the panel scrolled up to reveal the Test Scenarios header and Regenerate button, not a navigation."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 31,
+   "time": "2:41",
+   "readMs": 3666,
+   "readUsage": {
+    "inputTokens": 2769,
+    "outputTokens": 164
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "REQ-003",
+     "to": "REQ-004",
+     "action": null,
+     "confidence": 0.95
+    },
+    {
+     "type": "open_item",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 5975,
+   "verifyUsage": {
+    "inputTokens": 4662,
+    "outputTokens": 335
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The person stayed on the Requirements screen; switching from REQ-003 to REQ-004 is opening a different record, which the open_item event already captures, not a move to another screen."
+     },
+     {
+      "index": 1,
+      "verdict": "confirmed",
+      "event": null,
+      "reason": "The AFTER breadcrumb and Details pane show REQ-004 open in place of REQ-003."
+     }
+    ],
+    "missed": []
+   },
+   "verified": [
+    {
+     "type": "open_item",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "frame": 32,
+   "time": "2:43",
+   "readMs": 2232,
+   "readUsage": {
+    "inputTokens": 3158,
+    "outputTokens": 91
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 33,
+   "time": "2:51",
+   "readMs": 3130,
+   "readUsage": {
+    "inputTokens": 2782,
+    "outputTokens": 128
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "status_change",
+     "item": "REQ-004",
+     "field": "PRIORITY",
+     "from": "High",
+     "to": "Critical",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3830,
+   "verifyUsage": {
+    "inputTokens": 4600,
+    "outputTokens": 192
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "corrected",
+      "event": {
+       "type": "field_change",
+       "item": "REQ-004",
+       "field": "PRIORITY",
+       "from": "High",
+       "to": "Critical",
+       "action": null,
+       "confidence": 0.9
+      },
+      "reason": "Priority on REQ-004 visibly changed from High to Critical, but priority is an ordinary field rather than a status or decision, so this is a field_change."
+     }
+    ],
+    "missed": []
+   },
+   "verified": [
+    {
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "PRIORITY",
+     "from": "High",
+     "to": "Critical",
+     "action": null,
+     "confidence": 0.9
+    }
+   ]
+  },
+  {
+   "frame": 34,
+   "time": "3:01",
+   "readMs": 2467,
+   "readUsage": {
+    "inputTokens": 4346,
+    "outputTokens": 91
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 35,
+   "time": "3:02",
+   "readMs": 2617,
+   "readUsage": {
+    "inputTokens": 4251,
+    "outputTokens": 123
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3551,
+   "verifyUsage": {
+    "inputTokens": 6060,
+    "outputTokens": 104
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Formal view was already selected in BEFORE, and AFTER only shows the cursor hovering over the Formal Spec tab while the Details tab is still active, so no navigation is visible."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 36,
+   "time": "3:05",
+   "readMs": 2788,
+   "readUsage": {
+    "inputTokens": 4359,
+    "outputTokens": 142
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "TITLE",
+     "from": "The AI Apprentice shall use an ElevenLabs voice agent that watches the expert's screen and asks why at the right moments.",
+     "to": "AI Apprentice Voice Agent Interaction",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3671,
+   "verifyUsage": {
+    "inputTokens": 7077,
+    "outputTokens": 89
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "No field was edited; the person switched from the Details tab to the Formal Spec tab, which shows an existing title rather than a changed requirement text."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 37,
+   "time": "3:09",
+   "readMs": 3490,
+   "readUsage": {
+    "inputTokens": 4311,
+    "outputTokens": 104
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal Spec",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3321,
+   "verifyUsage": {
+    "inputTokens": 6399,
+    "outputTokens": 86
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Formal Spec tab was already active in BEFORE; the only changes are the clock and cursor position, so no navigation occurred."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 38,
+   "time": "3:22",
+   "readMs": 2348,
+   "readUsage": {
+    "inputTokens": 4304,
+    "outputTokens": 104
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal Spec",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 4230,
+   "verifyUsage": {
+    "inputTokens": 7015,
+    "outputTokens": 87
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Formal Spec tab was already active in BEFORE; the only change is scrolling within the same spec, not navigation to a new screen."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 39,
+   "time": "3:29",
+   "readMs": 1957,
+   "readUsage": {
+    "inputTokens": 4304,
+    "outputTokens": 70
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 40,
+   "time": "3:48",
+   "readMs": 2254,
+   "readUsage": {
+    "inputTokens": 2761,
+    "outputTokens": 53
+   },
+   "error": null,
+   "screen": "Process Map",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Process Map",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3699,
+   "verifyUsage": {
+    "inputTokens": 4593,
+    "outputTokens": 69
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "confirmed",
+      "event": null,
+      "reason": "The breadcrumb and sidebar change from Requirements to Process Map."
+     }
+    ],
+    "missed": []
+   },
+   "verified": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Process Map",
+     "action": null,
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "frame": 41,
+   "time": "3:56",
+   "readMs": 1669,
+   "readUsage": {
+    "inputTokens": 2713,
+    "outputTokens": 62
+   },
+   "error": null,
+   "screen": "Completeness - RCC",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Process Map",
+     "to": "Completeness - RCC",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3399,
+   "verifyUsage": {
+    "inputTokens": 4597,
+    "outputTokens": 84
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "confirmed",
+      "event": null,
+      "reason": "The breadcrumb and the sidebar both change from Process Map to Completeness · RCC, which is the reported navigation."
+     }
+    ],
+    "missed": []
+   },
+   "verified": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Process Map",
+     "to": "Completeness - RCC",
+     "action": null,
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "frame": 42,
+   "time": "3:57",
+   "readMs": 1459,
+   "readUsage": {
+    "inputTokens": 2717,
+    "outputTokens": 25
+   },
+   "error": null,
+   "screen": "Completeness · RCC",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 43,
+   "time": "4:03",
+   "readMs": 5564,
+   "readUsage": {
+    "inputTokens": 2717,
+    "outputTokens": 189
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Completeness · RCC",
+     "to": "Requirements workspace",
+     "action": null,
+     "confidence": 0.9
+    },
+    {
+     "type": "open_item",
+     "item": "REQ-001",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3510,
+   "verifyUsage": {
+    "inputTokens": 4667,
+    "outputTokens": 137
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "confirmed",
+      "event": null,
+      "reason": "The screen changed from the Completeness · RCC page to the Requirements workspace, as both the breadcrumb and the heading show."
+     },
+     {
+      "index": 1,
+      "verdict": "confirmed",
+      "event": null,
+      "reason": "The REQ-001 row is selected, and its detail panel is open on the right."
+     }
+    ],
+    "missed": []
+   },
+   "verified": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Completeness · RCC",
+     "to": "Requirements workspace",
+     "action": null,
+     "confidence": 0.9
+    },
+    {
+     "type": "open_item",
+     "item": "REQ-001",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "frame": 44,
+   "time": "4:05",
+   "readMs": 2115,
+   "readUsage": {
+    "inputTokens": 2807,
+    "outputTokens": 126
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 45,
+   "time": "4:37",
+   "readMs": 2064,
+   "readUsage": {
+    "inputTokens": 2817,
+    "outputTokens": 127
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "REQ-001",
+     "to": "REQ-004",
+     "action": null,
+     "confidence": 0.95
+    },
+    {
+     "type": "open_item",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 5953,
+   "verifyUsage": {
+    "inputTokens": 4662,
+    "outputTokens": 353
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "corrected",
+      "event": {
+       "type": "navigate",
+       "item": null,
+       "field": null,
+       "from": "Requirements workspace",
+       "to": "REQ-004",
+       "action": null,
+       "confidence": 0.8
+      },
+      "reason": "The person moved from the Requirements workspace list (with the REQ-001 side panel open) to the full REQ-004 detail page, so the previous screen was the Requirements workspace, not a REQ-001 screen."
+     },
+     {
+      "index": 1,
+      "verdict": "confirmed",
+      "event": null,
+      "reason": "The AFTER screen shows the REQ-004 record opened in full detail view."
+     }
+    ],
+    "missed": []
+   },
+   "verified": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "REQ-004",
+     "action": null,
+     "confidence": 0.8
+    },
+    {
+     "type": "open_item",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "frame": 46,
+   "time": "4:43",
+   "readMs": 2198,
+   "readUsage": {
+    "inputTokens": 4288,
+    "outputTokens": 91
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirements workspace - Formal view",
+     "action": null,
+     "confidence": 0.9
+    }
+   ],
+   "verifyMs": 3397,
+   "verifyUsage": {
+    "inputTokens": 7028,
+    "outputTokens": 90
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "The Formal view was already selected in BEFORE; the only change is a slight scroll of the RCC Gate content, with no navigation to another screen."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 47,
+   "time": "4:46",
+   "readMs": 1865,
+   "readUsage": {
+    "inputTokens": 4309,
+    "outputTokens": 86
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3514,
+   "verifyUsage": {
+    "inputTokens": 6790,
+    "outputTokens": 85
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "Both screens show the same RCC Gate tab with the Formal view already selected, so no navigation from Details to Formal is visible."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 48,
+   "time": "5:02",
+   "readMs": 2761,
+   "readUsage": {
+    "inputTokens": 2745,
+    "outputTokens": 89
+   },
+   "error": null,
+   "screen": "Requirement Details",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirement Details",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 5483,
+   "verifyUsage": {
+    "inputTokens": 4598,
+    "outputTokens": 287
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "Both screens show the same REQ-004 page on the RCC Gate tab, so no navigation to a Requirement Details screen is visible."
+     }
+    ],
+    "missed": [
+     {
+      "type": "commit",
+      "item": "REQ-004",
+      "field": null,
+      "from": null,
+      "to": null,
+      "action": "Run gap analysis (project-wide)",
+      "confidence": 0.85
+     }
+    ]
+   },
+   "verified": []
+  },
+  {
+   "frame": 49,
+   "time": "5:08",
+   "readMs": 2759,
+   "readUsage": {
+    "inputTokens": 2746,
+    "outputTokens": 55
+   },
+   "error": null,
+   "screen": "Requirement Details",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 50,
+   "time": "5:10",
+   "readMs": 2055,
+   "readUsage": {
+    "inputTokens": 2746,
+    "outputTokens": 90
+   },
+   "error": null,
+   "screen": "Requirement Details",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirement Details",
+     "to": "Requirement Details",
+     "action": null,
+     "confidence": 0.3
+    }
+   ],
+   "verifyMs": 3238,
+   "verifyUsage": {
+    "inputTokens": 4597,
+    "outputTokens": 88
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "Both screens show the same REQ-004 RCC Gate view; only the sidebar scrolled slightly, so no navigation occurred."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 51,
+   "time": "5:10",
+   "readMs": 3021,
+   "readUsage": {
+    "inputTokens": 4327,
+    "outputTokens": 87
+   },
+   "error": null,
+   "screen": "Requirement Details",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3704,
+   "verifyUsage": {
+    "inputTokens": 6678,
+    "outputTokens": 92
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "rejected",
+      "event": null,
+      "reason": "Both screens show the same RCC Gate tab with the Formal view already selected; only the clock and the spinner icon changed, so no navigation occurred."
+     }
+    ],
+    "missed": []
+   },
+   "verified": []
+  },
+  {
+   "frame": 52,
+   "time": "5:31",
+   "readMs": 3988,
+   "readUsage": {
+    "inputTokens": 2746,
+    "outputTokens": 59
+   },
+   "error": null,
+   "screen": "Completeness matrix",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirement Details",
+     "to": "Completeness matrix",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 6251,
+   "verifyUsage": {
+    "inputTokens": 4598,
+    "outputTokens": 421
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "corrected",
+      "event": {
+       "type": "navigate",
+       "item": null,
+       "field": null,
+       "from": "Requirements",
+       "to": "Completeness · RCC",
+       "action": null,
+       "confidence": 0.85
+      },
+      "reason": "The person did move to the Completeness · RCC screen, but the previous screen is labelled 'Requirements' (REQ-004, RCC Gate tab), not 'Requirement Details'."
+     }
+    ],
+    "missed": []
+   },
+   "verified": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Completeness · RCC",
+     "action": null,
+     "confidence": 0.85
+    }
+   ]
+  },
+  {
+   "frame": 53,
+   "time": "5:50",
+   "readMs": 2815,
+   "readUsage": {
+    "inputTokens": 2715,
+    "outputTokens": 56
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Completeness matrix",
+     "to": "Requirements workspace",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 6319,
+   "verifyUsage": {
+    "inputTokens": 4599,
+    "outputTokens": 91
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "confirmed",
+      "event": null,
+      "reason": "The screen changed from the Completeness matrix page to the Requirements workspace page, and the breadcrumb and sidebar selection changed to match."
+     }
+    ],
+    "missed": []
+   },
+   "verified": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Completeness matrix",
+     "to": "Requirements workspace",
+     "action": null,
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "frame": 54,
+   "time": "5:56",
+   "readMs": 3291,
+   "readUsage": {
+    "inputTokens": 2713,
+    "outputTokens": 115
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "open_item",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 4431,
+   "verifyUsage": {
+    "inputTokens": 4590,
+    "outputTokens": 82
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "confirmed",
+      "event": null,
+      "reason": "The cursor is on REQ-004 in BEFORE, and AFTER shows the REQ-004 detail view."
+     }
+    ],
+    "missed": []
+   },
+   "verified": [
+    {
+     "type": "open_item",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "frame": 55,
+   "time": "6:03",
+   "readMs": 4171,
+   "readUsage": {
+    "inputTokens": 4312,
+    "outputTokens": 84
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 56,
+   "time": "6:06",
+   "readMs": 2158,
+   "readUsage": {
+    "inputTokens": 4328,
+    "outputTokens": 84
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  }
+ ]
+}

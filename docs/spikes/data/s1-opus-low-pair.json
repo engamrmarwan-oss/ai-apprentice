@@ -1,0 +1,1490 @@
+{
+ "spike": "S1",
+ "ranAt": "2026-10-03T22:02:27.454Z",
+ "totals": {
+  "frames": 56,
+  "failedReads": 0,
+  "read": {
+   "model": "claude-opus-5-5",
+   "effort": "low",
+   "pair": true,
+   "carry": true,
+   "medianMs": 4455,
+   "p95Ms": 5580,
+   "inputTokens": 340277,
+   "outputTokens": 12413,
+   "costUsd": 1.609368
+  },
+  "verify": {
+   "model": "claude-opus-5-5",
+   "framesVerified": 0,
+   "medianMs": null,
+   "inputTokens": 0,
+   "outputTokens": 0,
+   "costUsd": 0
+  },
+  "sessionMinutes": 6.11
+ },
+ "scores": {
+  "labels": 23,
+  "problems": [],
+  "asRead": {
+   "byType": {
+    "navigate": {
+     "labelled": 13,
+     "found": 10,
+     "reported": 12,
+     "correct": 10
+    },
+    "open_item": {
+     "labelled": 4,
+     "found": 4,
+     "reported": 4,
+     "correct": 4
+    },
+    "field_change": {
+     "labelled": 1,
+     "found": 1,
+     "reported": 3,
+     "correct": 1
+    },
+    "status_change": {
+     "labelled": 2,
+     "found": 2,
+     "reported": 2,
+     "correct": 2
+    },
+    "text_edit": {
+     "labelled": 0,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    },
+    "dialog": {
+     "labelled": 0,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    },
+    "commit": {
+     "labelled": 3,
+     "found": 3,
+     "reported": 5,
+     "correct": 3
+    }
+   },
+   "decisions": {
+    "labelled": 5,
+    "found": 5,
+    "reported": 7,
+    "correct": 5,
+    "recall": 1,
+    "precision": 0.7142857142857143
+   },
+   "missed": [
+    {
+     "frame": 22,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Gherkin",
+     "to": "Playwright",
+     "action": null
+    },
+    {
+     "frame": 41,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Process Map",
+     "to": "Completeness · RCC",
+     "action": null
+    },
+    {
+     "frame": 52,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Completeness · RCC",
+     "action": null
+    }
+   ],
+   "unsupported": [
+    {
+     "frame": 19,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "Test Scenarios",
+     "from": "No scenarios yet. Click Generate to create them.",
+     "to": "Feature: AI Apprentice Teaching Mapped Workflow",
+     "action": null
+    },
+    {
+     "frame": 22,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "Test Format",
+     "from": "Gherkin",
+     "to": "Playwright",
+     "action": null
+    },
+    {
+     "frame": 27,
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Approve specification"
+    },
+    {
+     "frame": 29,
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Start implementation"
+    },
+    {
+     "frame": 41,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Process Map",
+     "to": "Completeness matrix",
+     "action": null
+    },
+    {
+     "frame": 52,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirement detail · RCC Gate",
+     "to": "Completeness matrix",
+     "action": null
+    }
+   ]
+  },
+  "afterVerification": {
+   "byType": {
+    "navigate": {
+     "labelled": 13,
+     "found": 10,
+     "reported": 12,
+     "correct": 10
+    },
+    "open_item": {
+     "labelled": 4,
+     "found": 4,
+     "reported": 4,
+     "correct": 4
+    },
+    "field_change": {
+     "labelled": 1,
+     "found": 1,
+     "reported": 3,
+     "correct": 1
+    },
+    "status_change": {
+     "labelled": 2,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    },
+    "text_edit": {
+     "labelled": 0,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    },
+    "dialog": {
+     "labelled": 0,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    },
+    "commit": {
+     "labelled": 3,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    }
+   },
+   "decisions": {
+    "labelled": 5,
+    "found": 0,
+    "reported": 0,
+    "correct": 0,
+    "recall": 0,
+    "precision": null
+   },
+   "missed": [
+    {
+     "frame": 8,
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Regenerate"
+    },
+    {
+     "frame": 15,
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Generate"
+    },
+    {
+     "frame": 22,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Gherkin",
+     "to": "Playwright",
+     "action": null
+    },
+    {
+     "frame": 27,
+     "type": "status_change",
+     "item": "REQ-003",
+     "field": "Status",
+     "from": "Draft",
+     "to": "Approved",
+     "action": null
+    },
+    {
+     "frame": 29,
+     "type": "status_change",
+     "item": "REQ-003",
+     "field": "Status",
+     "from": "Approved",
+     "to": "In progress",
+     "action": null
+    },
+    {
+     "frame": 41,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Process Map",
+     "to": "Completeness · RCC",
+     "action": null
+    },
+    {
+     "frame": 48,
+     "type": "commit",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Run gap analysis (project-wide)"
+    },
+    {
+     "frame": 52,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Completeness · RCC",
+     "action": null
+    }
+   ],
+   "unsupported": [
+    {
+     "frame": 19,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "Test Scenarios",
+     "from": "No scenarios yet. Click Generate to create them.",
+     "to": "Feature: AI Apprentice Teaching Mapped Workflow",
+     "action": null
+    },
+    {
+     "frame": 22,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "Test Format",
+     "from": "Gherkin",
+     "to": "Playwright",
+     "action": null
+    },
+    {
+     "frame": 41,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Process Map",
+     "to": "Completeness matrix",
+     "action": null
+    },
+    {
+     "frame": 52,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirement detail · RCC Gate",
+     "to": "Completeness matrix",
+     "action": null
+    }
+   ]
+  }
+ },
+ "frames": [
+  {
+   "frame": 1,
+   "time": "0:02",
+   "readMs": 4964,
+   "readUsage": {
+    "inputTokens": 3426,
+    "outputTokens": 211
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 2,
+   "time": "0:07",
+   "readMs": 5139,
+   "readUsage": {
+    "inputTokens": 7256,
+    "outputTokens": 211
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 3,
+   "time": "0:09",
+   "readMs": 4958,
+   "readUsage": {
+    "inputTokens": 7256,
+    "outputTokens": 211
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 4,
+   "time": "0:11",
+   "readMs": 5204,
+   "readUsage": {
+    "inputTokens": 7256,
+    "outputTokens": 211
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 5,
+   "time": "0:19",
+   "readMs": 4768,
+   "readUsage": {
+    "inputTokens": 7256,
+    "outputTokens": 211
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 6,
+   "time": "0:21",
+   "readMs": 4487,
+   "readUsage": {
+    "inputTokens": 6976,
+    "outputTokens": 211
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 7,
+   "time": "0:24",
+   "readMs": 4643,
+   "readUsage": {
+    "inputTokens": 4832,
+    "outputTokens": 226
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Details",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 8,
+   "time": "0:41",
+   "readMs": 4797,
+   "readUsage": {
+    "inputTokens": 7271,
+    "outputTokens": 312
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Details",
+     "to": "Formal Spec",
+     "action": null,
+     "confidence": 0.85
+    },
+    {
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Regenerate",
+     "confidence": 0.6
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 9,
+   "time": "0:42",
+   "readMs": 5069,
+   "readUsage": {
+    "inputTokens": 6965,
+    "outputTokens": 210
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 10,
+   "time": "1:01",
+   "readMs": 5173,
+   "readUsage": {
+    "inputTokens": 7199,
+    "outputTokens": 222
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Elements",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 11,
+   "time": "1:09",
+   "readMs": 4363,
+   "readUsage": {
+    "inputTokens": 7323,
+    "outputTokens": 187
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 12,
+   "time": "1:14",
+   "readMs": 4297,
+   "readUsage": {
+    "inputTokens": 6616,
+    "outputTokens": 187
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 13,
+   "time": "1:20",
+   "readMs": 4942,
+   "readUsage": {
+    "inputTokens": 7288,
+    "outputTokens": 204
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 14,
+   "time": "1:27",
+   "readMs": 4579,
+   "readUsage": {
+    "inputTokens": 7249,
+    "outputTokens": 192
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Elements",
+     "to": "Tests",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 15,
+   "time": "1:32",
+   "readMs": 4319,
+   "readUsage": {
+    "inputTokens": 6207,
+    "outputTokens": 193
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Generate",
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 16,
+   "time": "1:33",
+   "readMs": 3818,
+   "readUsage": {
+    "inputTokens": 5730,
+    "outputTokens": 146
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 17,
+   "time": "1:35",
+   "readMs": 3322,
+   "readUsage": {
+    "inputTokens": 5719,
+    "outputTokens": 146
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 18,
+   "time": "1:37",
+   "readMs": 3552,
+   "readUsage": {
+    "inputTokens": 5146,
+    "outputTokens": 146
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 19,
+   "time": "1:40",
+   "readMs": 4951,
+   "readUsage": {
+    "inputTokens": 7191,
+    "outputTokens": 263
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "Test Scenarios",
+     "from": "No scenarios yet. Click Generate to create them.",
+     "to": "Feature: AI Apprentice Teaching Mapped Workflow",
+     "action": null,
+     "confidence": 0.8
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 20,
+   "time": "1:44",
+   "readMs": 3843,
+   "readUsage": {
+    "inputTokens": 7308,
+    "outputTokens": 173
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 21,
+   "time": "1:45",
+   "readMs": 3656,
+   "readUsage": {
+    "inputTokens": 5173,
+    "outputTokens": 173
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 22,
+   "time": "1:54",
+   "readMs": 5038,
+   "readUsage": {
+    "inputTokens": 7274,
+    "outputTokens": 228
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "Test Format",
+     "from": "Gherkin",
+     "to": "Playwright",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 23,
+   "time": "1:58",
+   "readMs": 10616,
+   "readUsage": {
+    "inputTokens": 7403,
+    "outputTokens": 172
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 24,
+   "time": "2:00",
+   "readMs": 4618,
+   "readUsage": {
+    "inputTokens": 5502,
+    "outputTokens": 172
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 25,
+   "time": "2:07",
+   "readMs": 3816,
+   "readUsage": {
+    "inputTokens": 4793,
+    "outputTokens": 172
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 26,
+   "time": "2:09",
+   "readMs": 4090,
+   "readUsage": {
+    "inputTokens": 4793,
+    "outputTokens": 172
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 27,
+   "time": "2:11",
+   "readMs": 5163,
+   "readUsage": {
+    "inputTokens": 4793,
+    "outputTokens": 272
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Approve specification",
+     "confidence": 0.9
+    },
+    {
+     "type": "status_change",
+     "item": "REQ-003",
+     "field": "Status",
+     "from": "Draft",
+     "to": "Approved",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 28,
+   "time": "2:13",
+   "readMs": 3791,
+   "readUsage": {
+    "inputTokens": 6533,
+    "outputTokens": 172
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 29,
+   "time": "2:17",
+   "readMs": 4429,
+   "readUsage": {
+    "inputTokens": 4793,
+    "outputTokens": 272
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Start implementation",
+     "confidence": 0.85
+    },
+    {
+     "type": "status_change",
+     "item": "REQ-003",
+     "field": "Status",
+     "from": "Approved",
+     "to": "In progress",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 30,
+   "time": "2:19",
+   "readMs": 4561,
+   "readUsage": {
+    "inputTokens": 7317,
+    "outputTokens": 172
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 31,
+   "time": "2:41",
+   "readMs": 4383,
+   "readUsage": {
+    "inputTokens": 4793,
+    "outputTokens": 267
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "open_item",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.9
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 32,
+   "time": "2:43",
+   "readMs": 3840,
+   "readUsage": {
+    "inputTokens": 5267,
+    "outputTokens": 221
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 33,
+   "time": "2:51",
+   "readMs": 4747,
+   "readUsage": {
+    "inputTokens": 4842,
+    "outputTokens": 273
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "Priority",
+     "from": "High",
+     "to": "Critical",
+     "action": null,
+     "confidence": 0.93
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 34,
+   "time": "3:01",
+   "readMs": 4138,
+   "readUsage": {
+    "inputTokens": 7150,
+    "outputTokens": 223
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 35,
+   "time": "3:02",
+   "readMs": 4057,
+   "readUsage": {
+    "inputTokens": 6316,
+    "outputTokens": 223
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 36,
+   "time": "3:05",
+   "readMs": 4525,
+   "readUsage": {
+    "inputTokens": 7268,
+    "outputTokens": 261
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details",
+     "to": "Formal Spec",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 37,
+   "time": "3:09",
+   "readMs": 3889,
+   "readUsage": {
+    "inputTokens": 6690,
+    "outputTokens": 213
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 38,
+   "time": "3:22",
+   "readMs": 4316,
+   "readUsage": {
+    "inputTokens": 7258,
+    "outputTokens": 213
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 39,
+   "time": "3:29",
+   "readMs": 4455,
+   "readUsage": {
+    "inputTokens": 7258,
+    "outputTokens": 263
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": "REQ-004",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Elements",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 40,
+   "time": "3:48",
+   "readMs": 3226,
+   "readUsage": {
+    "inputTokens": 4884,
+    "outputTokens": 151
+   },
+   "error": null,
+   "screen": "Process Map",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Process Map",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 41,
+   "time": "3:56",
+   "readMs": 3054,
+   "readUsage": {
+    "inputTokens": 4772,
+    "outputTokens": 185
+   },
+   "error": null,
+   "screen": "Completeness matrix",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Process Map",
+     "to": "Completeness matrix",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 42,
+   "time": "3:57",
+   "readMs": 3762,
+   "readUsage": {
+    "inputTokens": 4806,
+    "outputTokens": 134
+   },
+   "error": null,
+   "screen": "Completeness matrix",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 43,
+   "time": "4:03",
+   "readMs": 4661,
+   "readUsage": {
+    "inputTokens": 4755,
+    "outputTokens": 351
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Completeness matrix",
+     "to": "Requirements workspace",
+     "action": null,
+     "confidence": 0.9
+    },
+    {
+     "type": "open_item",
+     "item": "REQ-001",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 44,
+   "time": "4:05",
+   "readMs": 4995,
+   "readUsage": {
+    "inputTokens": 4972,
+    "outputTokens": 251
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 45,
+   "time": "4:37",
+   "readMs": 5211,
+   "readUsage": {
+    "inputTokens": 4872,
+    "outputTokens": 375
+   },
+   "error": null,
+   "screen": "Requirement detail · RCC Gate",
+   "events": [
+    {
+     "type": "open_item",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.85
+    },
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirement detail · RCC Gate",
+     "action": null,
+     "confidence": 0.8
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 46,
+   "time": "4:43",
+   "readMs": 5316,
+   "readUsage": {
+    "inputTokens": 7420,
+    "outputTokens": 269
+   },
+   "error": null,
+   "screen": "Requirement detail · RCC Gate",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 47,
+   "time": "4:46",
+   "readMs": 4628,
+   "readUsage": {
+    "inputTokens": 7090,
+    "outputTokens": 269
+   },
+   "error": null,
+   "screen": "Requirement detail · RCC Gate",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 48,
+   "time": "5:02",
+   "readMs": 4421,
+   "readUsage": {
+    "inputTokens": 4890,
+    "outputTokens": 301
+   },
+   "error": null,
+   "screen": "Requirement detail · RCC Gate",
+   "events": [
+    {
+     "type": "commit",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Run gap analysis (project-wide)",
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 49,
+   "time": "5:08",
+   "readMs": 4366,
+   "readUsage": {
+    "inputTokens": 4922,
+    "outputTokens": 244
+   },
+   "error": null,
+   "screen": "Requirement detail · RCC Gate",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 50,
+   "time": "5:10",
+   "readMs": 4046,
+   "readUsage": {
+    "inputTokens": 4865,
+    "outputTokens": 244
+   },
+   "error": null,
+   "screen": "Requirement detail · RCC Gate",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 51,
+   "time": "5:10",
+   "readMs": 4435,
+   "readUsage": {
+    "inputTokens": 6953,
+    "outputTokens": 244
+   },
+   "error": null,
+   "screen": "Requirement detail · RCC Gate",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 52,
+   "time": "5:31",
+   "readMs": 4156,
+   "readUsage": {
+    "inputTokens": 4865,
+    "outputTokens": 242
+   },
+   "error": null,
+   "screen": "Completeness matrix",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirement detail · RCC Gate",
+     "to": "Completeness matrix",
+     "action": null,
+     "confidence": 0.9
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 53,
+   "time": "5:50",
+   "readMs": 4482,
+   "readUsage": {
+    "inputTokens": 4863,
+    "outputTokens": 261
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Completeness matrix",
+     "to": "Requirements workspace",
+     "action": null,
+     "confidence": 0.9
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 54,
+   "time": "5:56",
+   "readMs": 5894,
+   "readUsage": {
+    "inputTokens": 4882,
+    "outputTokens": 263
+   },
+   "error": null,
+   "screen": "Requirement REQ-004 — RCC Gate",
+   "events": [
+    {
+     "type": "open_item",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.9
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 55,
+   "time": "6:03",
+   "readMs": 5580,
+   "readUsage": {
+    "inputTokens": 7308,
+    "outputTokens": 211
+   },
+   "error": null,
+   "screen": "Requirement REQ-004 — RCC Gate",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 56,
+   "time": "6:06",
+   "readMs": 3833,
+   "readUsage": {
+    "inputTokens": 6472,
+    "outputTokens": 211
+   },
+   "error": null,
+   "screen": "Requirement REQ-004 — RCC Gate",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  }
+ ]
+}

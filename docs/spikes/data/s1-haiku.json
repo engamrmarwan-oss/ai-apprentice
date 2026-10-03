@@ -1,0 +1,2164 @@
+{
+ "spike": "S1",
+ "ranAt": "2026-10-03T21:50:33.489Z",
+ "totals": {
+  "frames": 56,
+  "failedReads": 0,
+  "read": {
+   "model": "claude-haiku-4-5",
+   "medianMs": 2972,
+   "p95Ms": 5258,
+   "inputTokens": 207567,
+   "outputTokens": 7800,
+   "costUsd": 0.246567
+  },
+  "verify": {
+   "model": "claude-opus-5-5",
+   "framesVerified": 1,
+   "medianMs": 3673,
+   "inputTokens": 4600,
+   "outputTokens": 191,
+   "costUsd": 0.02222
+  },
+  "sessionMinutes": 6.11
+ },
+ "scores": {
+  "labels": 23,
+  "problems": [],
+  "asRead": {
+   "byType": {
+    "navigate": {
+     "labelled": 13,
+     "found": 5,
+     "reported": 18,
+     "correct": 5
+    },
+    "open_item": {
+     "labelled": 4,
+     "found": 3,
+     "reported": 3,
+     "correct": 3
+    },
+    "field_change": {
+     "labelled": 1,
+     "found": 1,
+     "reported": 15,
+     "correct": 1
+    },
+    "status_change": {
+     "labelled": 2,
+     "found": 1,
+     "reported": 1,
+     "correct": 1
+    },
+    "text_edit": {
+     "labelled": 0,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    },
+    "dialog": {
+     "labelled": 0,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    },
+    "commit": {
+     "labelled": 3,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    }
+   },
+   "decisions": {
+    "labelled": 5,
+    "found": 1,
+    "reported": 1,
+    "correct": 1,
+    "recall": 0.2,
+    "precision": 1
+   },
+   "missed": [
+    {
+     "frame": 7,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Details",
+     "action": null
+    },
+    {
+     "frame": 8,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Details",
+     "to": "Formal Spec",
+     "action": null
+    },
+    {
+     "frame": 8,
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Regenerate"
+    },
+    {
+     "frame": 10,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Elements",
+     "action": null
+    },
+    {
+     "frame": 14,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Elements",
+     "to": "Tests",
+     "action": null
+    },
+    {
+     "frame": 15,
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Generate"
+    },
+    {
+     "frame": 22,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Gherkin",
+     "to": "Playwright",
+     "action": null
+    },
+    {
+     "frame": 29,
+     "type": "status_change",
+     "item": "REQ-003",
+     "field": "Status",
+     "from": "Approved",
+     "to": "In progress",
+     "action": null
+    },
+    {
+     "frame": 39,
+     "type": "navigate",
+     "item": "REQ-004",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Elements",
+     "action": null
+    },
+    {
+     "frame": 43,
+     "type": "open_item",
+     "item": "REQ-001",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null
+    },
+    {
+     "frame": 45,
+     "type": "navigate",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": "RCC Gate",
+     "action": null
+    },
+    {
+     "frame": 48,
+     "type": "commit",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Run gap analysis (project-wide)"
+    },
+    {
+     "frame": 52,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Completeness · RCC",
+     "action": null
+    }
+   ],
+   "unsupported": [
+    {
+     "frame": 4,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "TITLE",
+     "from": "The AI Apprentice shall teach the mapped workflow to the next generation.",
+     "to": "Acceptance Criteria for Teaching the Mapped Workflow",
+     "action": null
+    },
+    {
+     "frame": 6,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details tab",
+     "to": "Formal Spec tab",
+     "action": null
+    },
+    {
+     "frame": 8,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "TITLE",
+     "from": "The AI Apprentice shall teach the mapped workflow to the next generation.",
+     "to": "Acceptance Criteria for Teaching the Mapped Workflow",
+     "action": null
+    },
+    {
+     "frame": 11,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 14,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 15,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 16,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 17,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 18,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 21,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "RCC Gate",
+     "action": null
+    },
+    {
+     "frame": 22,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 23,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 24,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "RCC Gate",
+     "action": null
+    },
+    {
+     "frame": 26,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Requirements - RCC Gate",
+     "action": null
+    },
+    {
+     "frame": 29,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "STATUS",
+     "from": "Approved",
+     "to": "In progress",
+     "action": null
+    },
+    {
+     "frame": 31,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "REQ-003",
+     "to": "REQ-004",
+     "action": null
+    },
+    {
+     "frame": 35,
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 38,
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 45,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "REQ-001",
+     "to": "REQ-004",
+     "action": null
+    },
+    {
+     "frame": 46,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 47,
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 48,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirements workspace",
+     "action": null
+    },
+    {
+     "frame": 49,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirements workspace - Details view",
+     "action": null
+    },
+    {
+     "frame": 50,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirements workspace",
+     "action": null
+    },
+    {
+     "frame": 51,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details tab",
+     "to": "Formal Spec tab",
+     "action": null
+    },
+    {
+     "frame": 52,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Completeness - RCC",
+     "action": null
+    },
+    {
+     "frame": 55,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    }
+   ]
+  },
+  "afterVerification": {
+   "byType": {
+    "navigate": {
+     "labelled": 13,
+     "found": 5,
+     "reported": 18,
+     "correct": 5
+    },
+    "open_item": {
+     "labelled": 4,
+     "found": 3,
+     "reported": 3,
+     "correct": 3
+    },
+    "field_change": {
+     "labelled": 1,
+     "found": 1,
+     "reported": 15,
+     "correct": 1
+    },
+    "status_change": {
+     "labelled": 2,
+     "found": 1,
+     "reported": 1,
+     "correct": 1
+    },
+    "text_edit": {
+     "labelled": 0,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    },
+    "dialog": {
+     "labelled": 0,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    },
+    "commit": {
+     "labelled": 3,
+     "found": 0,
+     "reported": 0,
+     "correct": 0
+    }
+   },
+   "decisions": {
+    "labelled": 5,
+    "found": 1,
+    "reported": 1,
+    "correct": 1,
+    "recall": 0.2,
+    "precision": 1
+   },
+   "missed": [
+    {
+     "frame": 7,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Details",
+     "action": null
+    },
+    {
+     "frame": 8,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Details",
+     "to": "Formal Spec",
+     "action": null
+    },
+    {
+     "frame": 8,
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Regenerate"
+    },
+    {
+     "frame": 10,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Elements",
+     "action": null
+    },
+    {
+     "frame": 14,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Elements",
+     "to": "Tests",
+     "action": null
+    },
+    {
+     "frame": 15,
+     "type": "commit",
+     "item": "REQ-003",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Generate"
+    },
+    {
+     "frame": 22,
+     "type": "navigate",
+     "item": "REQ-003",
+     "field": null,
+     "from": "Gherkin",
+     "to": "Playwright",
+     "action": null
+    },
+    {
+     "frame": 29,
+     "type": "status_change",
+     "item": "REQ-003",
+     "field": "Status",
+     "from": "Approved",
+     "to": "In progress",
+     "action": null
+    },
+    {
+     "frame": 39,
+     "type": "navigate",
+     "item": "REQ-004",
+     "field": null,
+     "from": "Formal Spec",
+     "to": "Elements",
+     "action": null
+    },
+    {
+     "frame": 43,
+     "type": "open_item",
+     "item": "REQ-001",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null
+    },
+    {
+     "frame": 45,
+     "type": "navigate",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": "RCC Gate",
+     "action": null
+    },
+    {
+     "frame": 48,
+     "type": "commit",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": "Run gap analysis (project-wide)"
+    },
+    {
+     "frame": 52,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Completeness · RCC",
+     "action": null
+    }
+   ],
+   "unsupported": [
+    {
+     "frame": 4,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "TITLE",
+     "from": "The AI Apprentice shall teach the mapped workflow to the next generation.",
+     "to": "Acceptance Criteria for Teaching the Mapped Workflow",
+     "action": null
+    },
+    {
+     "frame": 6,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details tab",
+     "to": "Formal Spec tab",
+     "action": null
+    },
+    {
+     "frame": 8,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "TITLE",
+     "from": "The AI Apprentice shall teach the mapped workflow to the next generation.",
+     "to": "Acceptance Criteria for Teaching the Mapped Workflow",
+     "action": null
+    },
+    {
+     "frame": 11,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 14,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 15,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 16,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 17,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 18,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 21,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "RCC Gate",
+     "action": null
+    },
+    {
+     "frame": 22,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 23,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 24,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "RCC Gate",
+     "action": null
+    },
+    {
+     "frame": 26,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Requirements - RCC Gate",
+     "action": null
+    },
+    {
+     "frame": 29,
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "STATUS",
+     "from": "Approved",
+     "to": "In progress",
+     "action": null
+    },
+    {
+     "frame": 31,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "REQ-003",
+     "to": "REQ-004",
+     "action": null
+    },
+    {
+     "frame": 35,
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 38,
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 45,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "REQ-001",
+     "to": "REQ-004",
+     "action": null
+    },
+    {
+     "frame": 46,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 47,
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    },
+    {
+     "frame": 48,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirements workspace",
+     "action": null
+    },
+    {
+     "frame": 49,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirements workspace - Details view",
+     "action": null
+    },
+    {
+     "frame": 50,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirements workspace",
+     "action": null
+    },
+    {
+     "frame": 51,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details tab",
+     "to": "Formal Spec tab",
+     "action": null
+    },
+    {
+     "frame": 52,
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Completeness - RCC",
+     "action": null
+    },
+    {
+     "frame": 55,
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null
+    }
+   ]
+  }
+ },
+ "frames": [
+  {
+   "frame": 1,
+   "time": "0:02",
+   "readMs": 4155,
+   "readUsage": {
+    "inputTokens": 3077,
+    "outputTokens": 219
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 2,
+   "time": "0:07",
+   "readMs": 4063,
+   "readUsage": {
+    "inputTokens": 4451,
+    "outputTokens": 186
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 3,
+   "time": "0:09",
+   "readMs": 3047,
+   "readUsage": {
+    "inputTokens": 4419,
+    "outputTokens": 185
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 4,
+   "time": "0:11",
+   "readMs": 5591,
+   "readUsage": {
+    "inputTokens": 4419,
+    "outputTokens": 278
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "TITLE",
+     "from": "The AI Apprentice shall teach the mapped workflow to the next generation.",
+     "to": "Acceptance Criteria for Teaching the Mapped Workflow",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 5,
+   "time": "0:19",
+   "readMs": 4591,
+   "readUsage": {
+    "inputTokens": 4451,
+    "outputTokens": 217
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 6,
+   "time": "0:21",
+   "readMs": 5220,
+   "readUsage": {
+    "inputTokens": 4489,
+    "outputTokens": 221
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details tab",
+     "to": "Formal Spec tab",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 7,
+   "time": "0:24",
+   "readMs": 2132,
+   "readUsage": {
+    "inputTokens": 2876,
+    "outputTokens": 128
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 8,
+   "time": "0:41",
+   "readMs": 6257,
+   "readUsage": {
+    "inputTokens": 4396,
+    "outputTokens": 378
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "TITLE",
+     "from": "The AI Apprentice shall teach the mapped workflow to the next generation.",
+     "to": "Acceptance Criteria for Teaching the Mapped Workflow",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 9,
+   "time": "0:42",
+   "readMs": 5258,
+   "readUsage": {
+    "inputTokens": 4589,
+    "outputTokens": 296
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 10,
+   "time": "1:01",
+   "readMs": 3027,
+   "readUsage": {
+    "inputTokens": 4562,
+    "outputTokens": 90
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 11,
+   "time": "1:09",
+   "readMs": 3912,
+   "readUsage": {
+    "inputTokens": 4324,
+    "outputTokens": 124
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 12,
+   "time": "1:14",
+   "readMs": 2737,
+   "readUsage": {
+    "inputTokens": 4354,
+    "outputTokens": 90
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 13,
+   "time": "1:20",
+   "readMs": 2054,
+   "readUsage": {
+    "inputTokens": 4324,
+    "outputTokens": 90
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 14,
+   "time": "1:27",
+   "readMs": 3571,
+   "readUsage": {
+    "inputTokens": 4324,
+    "outputTokens": 124
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 15,
+   "time": "1:32",
+   "readMs": 2533,
+   "readUsage": {
+    "inputTokens": 4172,
+    "outputTokens": 127
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 16,
+   "time": "1:33",
+   "readMs": 2218,
+   "readUsage": {
+    "inputTokens": 3694,
+    "outputTokens": 124
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 17,
+   "time": "1:35",
+   "readMs": 3225,
+   "readUsage": {
+    "inputTokens": 3730,
+    "outputTokens": 124
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 18,
+   "time": "1:37",
+   "readMs": 2372,
+   "readUsage": {
+    "inputTokens": 3157,
+    "outputTokens": 122
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 19,
+   "time": "1:40",
+   "readMs": 3256,
+   "readUsage": {
+    "inputTokens": 4324,
+    "outputTokens": 90
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 20,
+   "time": "1:44",
+   "readMs": 3959,
+   "readUsage": {
+    "inputTokens": 4324,
+    "outputTokens": 90
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 21,
+   "time": "1:45",
+   "readMs": 2243,
+   "readUsage": {
+    "inputTokens": 3157,
+    "outputTokens": 123
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "RCC Gate",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 22,
+   "time": "1:54",
+   "readMs": 2651,
+   "readUsage": {
+    "inputTokens": 4334,
+    "outputTokens": 124
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 23,
+   "time": "1:58",
+   "readMs": 2493,
+   "readUsage": {
+    "inputTokens": 4348,
+    "outputTokens": 124
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 24,
+   "time": "2:00",
+   "readMs": 2396,
+   "readUsage": {
+    "inputTokens": 3487,
+    "outputTokens": 123
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "RCC Gate",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 25,
+   "time": "2:07",
+   "readMs": 3075,
+   "readUsage": {
+    "inputTokens": 2781,
+    "outputTokens": 90
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 26,
+   "time": "2:09",
+   "readMs": 3486,
+   "readUsage": {
+    "inputTokens": 2781,
+    "outputTokens": 125
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Requirements - RCC Gate",
+     "action": null,
+     "confidence": 0.7
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 27,
+   "time": "2:11",
+   "readMs": 2272,
+   "readUsage": {
+    "inputTokens": 2781,
+    "outputTokens": 128
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "status_change",
+     "item": "REQ-003",
+     "field": "STATUS",
+     "from": "Draft",
+     "to": "Approved",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": 3673,
+   "verifyUsage": {
+    "inputTokens": 4600,
+    "outputTokens": 191
+   },
+   "verification": {
+    "verdicts": [
+     {
+      "index": 0,
+      "verdict": "confirmed",
+      "event": null,
+      "reason": "The REQ-003 STATUS field changes from Draft in BEFORE to Approved in AFTER."
+     }
+    ],
+    "missed": [
+     {
+      "type": "commit",
+      "item": "REQ-003",
+      "field": null,
+      "from": null,
+      "to": null,
+      "action": "Approve specification",
+      "confidence": 0.85
+     }
+    ]
+   },
+   "verified": [
+    {
+     "type": "status_change",
+     "item": "REQ-003",
+     "field": "STATUS",
+     "from": "Draft",
+     "to": "Approved",
+     "action": null,
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "frame": 28,
+   "time": "2:13",
+   "readMs": 2158,
+   "readUsage": {
+    "inputTokens": 4363,
+    "outputTokens": 91
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 29,
+   "time": "2:17",
+   "readMs": 2536,
+   "readUsage": {
+    "inputTokens": 2782,
+    "outputTokens": 129
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": "REQ-003",
+     "field": "STATUS",
+     "from": "Approved",
+     "to": "In progress",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 30,
+   "time": "2:19",
+   "readMs": 2041,
+   "readUsage": {
+    "inputTokens": 4325,
+    "outputTokens": 91
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 31,
+   "time": "2:41",
+   "readMs": 3996,
+   "readUsage": {
+    "inputTokens": 2782,
+    "outputTokens": 171
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "REQ-003",
+     "to": "REQ-004",
+     "action": null,
+     "confidence": 0.95
+    },
+    {
+     "type": "open_item",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 32,
+   "time": "2:43",
+   "readMs": 3465,
+   "readUsage": {
+    "inputTokens": 3165,
+    "outputTokens": 154
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 33,
+   "time": "2:51",
+   "readMs": 2753,
+   "readUsage": {
+    "inputTokens": 2845,
+    "outputTokens": 197
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "PRIORITY",
+     "from": "High",
+     "to": "Critical",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 34,
+   "time": "3:01",
+   "readMs": 2972,
+   "readUsage": {
+    "inputTokens": 4415,
+    "outputTokens": 160
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 35,
+   "time": "3:02",
+   "readMs": 2999,
+   "readUsage": {
+    "inputTokens": 4320,
+    "outputTokens": 197
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 36,
+   "time": "3:05",
+   "readMs": 5097,
+   "readUsage": {
+    "inputTokens": 4428,
+    "outputTokens": 188
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal Spec",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 37,
+   "time": "3:09",
+   "readMs": 2845,
+   "readUsage": {
+    "inputTokens": 4395,
+    "outputTokens": 154
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 38,
+   "time": "3:22",
+   "readMs": 3926,
+   "readUsage": {
+    "inputTokens": 4388,
+    "outputTokens": 135
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [
+    {
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 39,
+   "time": "3:29",
+   "readMs": 2408,
+   "readUsage": {
+    "inputTokens": 4332,
+    "outputTokens": 98
+   },
+   "error": null,
+   "screen": "Requirements",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 40,
+   "time": "3:48",
+   "readMs": 1720,
+   "readUsage": {
+    "inputTokens": 2789,
+    "outputTokens": 53
+   },
+   "error": null,
+   "screen": "Process Map",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements",
+     "to": "Process Map",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 41,
+   "time": "3:56",
+   "readMs": 1821,
+   "readUsage": {
+    "inputTokens": 2713,
+    "outputTokens": 62
+   },
+   "error": null,
+   "screen": "Completeness · RCC",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Process Map",
+     "to": "Completeness · RCC",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 42,
+   "time": "3:57",
+   "readMs": 1360,
+   "readUsage": {
+    "inputTokens": 2717,
+    "outputTokens": 25
+   },
+   "error": null,
+   "screen": "Completeness · RCC",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 43,
+   "time": "4:03",
+   "readMs": 3988,
+   "readUsage": {
+    "inputTokens": 2717,
+    "outputTokens": 175
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Completeness · RCC",
+     "to": "Requirements workspace",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 44,
+   "time": "4:05",
+   "readMs": 3585,
+   "readUsage": {
+    "inputTokens": 2829,
+    "outputTokens": 138
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 45,
+   "time": "4:37",
+   "readMs": 4684,
+   "readUsage": {
+    "inputTokens": 2829,
+    "outputTokens": 166
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "REQ-001",
+     "to": "REQ-004",
+     "action": null,
+     "confidence": 0.95
+    },
+    {
+     "type": "open_item",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 46,
+   "time": "4:43",
+   "readMs": 3740,
+   "readUsage": {
+    "inputTokens": 4327,
+    "outputTokens": 131
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": null,
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 47,
+   "time": "4:46",
+   "readMs": 2549,
+   "readUsage": {
+    "inputTokens": 4354,
+    "outputTokens": 136
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "field_change",
+     "item": "REQ-004",
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 48,
+   "time": "5:02",
+   "readMs": 2555,
+   "readUsage": {
+    "inputTokens": 2790,
+    "outputTokens": 132
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirements workspace",
+     "action": null,
+     "confidence": 0.3
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 49,
+   "time": "5:08",
+   "readMs": 3626,
+   "readUsage": {
+    "inputTokens": 2790,
+    "outputTokens": 135
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirements workspace - Details view",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 50,
+   "time": "5:10",
+   "readMs": 3508,
+   "readUsage": {
+    "inputTokens": 2790,
+    "outputTokens": 132
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Requirements workspace",
+     "action": null,
+     "confidence": 0.3
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 51,
+   "time": "5:10",
+   "readMs": 2879,
+   "readUsage": {
+    "inputTokens": 4371,
+    "outputTokens": 135
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Details tab",
+     "to": "Formal Spec tab",
+     "action": null,
+     "confidence": 0.85
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 52,
+   "time": "5:31",
+   "readMs": 1985,
+   "readUsage": {
+    "inputTokens": 2790,
+    "outputTokens": 62
+   },
+   "error": null,
+   "screen": "Completeness - RCC",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Requirements workspace",
+     "to": "Completeness - RCC",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 53,
+   "time": "5:50",
+   "readMs": 1770,
+   "readUsage": {
+    "inputTokens": 2717,
+    "outputTokens": 58
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "navigate",
+     "item": null,
+     "field": null,
+     "from": "Completeness - RCC",
+     "to": "Requirements workspace",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 54,
+   "time": "5:56",
+   "readMs": 3274,
+   "readUsage": {
+    "inputTokens": 2713,
+    "outputTokens": 127
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "open_item",
+     "item": "REQ-004",
+     "field": null,
+     "from": null,
+     "to": null,
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 55,
+   "time": "6:03",
+   "readMs": 2619,
+   "readUsage": {
+    "inputTokens": 4325,
+    "outputTokens": 131
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [
+    {
+     "type": "field_change",
+     "item": null,
+     "field": "View",
+     "from": "Plain",
+     "to": "Formal",
+     "action": null,
+     "confidence": 0.95
+    }
+   ],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  },
+  {
+   "frame": 56,
+   "time": "6:06",
+   "readMs": 2154,
+   "readUsage": {
+    "inputTokens": 4341,
+    "outputTokens": 97
+   },
+   "error": null,
+   "screen": "Requirements workspace",
+   "events": [],
+   "verifyMs": null,
+   "verifyUsage": null,
+   "verification": null,
+   "verified": null
+  }
+ ]
+}
