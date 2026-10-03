@@ -48,6 +48,7 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 |---|---|---|
 | `src/app/api/` | Route handlers | Claude Code |
 | `src/server/` | Server-only modules: environment, database client, fail-soft | Claude Code |
+| `src/contract/` | The contract as Zod schemas; import from here, change only via `CONTRACT.md` | Shared |
 | `src/app/` (except `api/`) | Pages and layouts | Codex |
 | `scripts/`, `.github/` | Gate and CI | Claude Code |
 | `docs/spikes/` | Written spike results | Claude Code |
