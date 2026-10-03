@@ -21,7 +21,9 @@ Do not edit the other builder's files. If you need a change there, ask Amr.
 
 Screens read and write data only by calling route handlers under `/api`. They never talk to the database directly.
 
-There are no accounts. A visitor enters through a role link (`/api/enter/<token>`), and `GET /api/me` tells a screen which role is viewing. Route handlers guard themselves with `requireRole` (`src/server/require-role.ts`).
+People sign in with an email and a password. An account has no role of its own: a role belongs to a workflow. Whoever creates a workflow is its expert, and the people the expert invites are its new hires. `GET /api/me` tells a screen who is signed in and which workflows they are on. Route handlers guard themselves with `requireUser` or `requireWorkflowRole` (`src/server/require-user.ts`).
+
+The routes a screen can call, with their request and response shapes, are in `docs/API.md`.
 
 ## Rules
 
@@ -49,7 +51,7 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 | Path | Content | Owner |
 |---|---|---|
 | `src/app/api/` | Route handlers | Claude Code |
-| `src/server/` | Server-only modules: environment, database client, fail-soft, model router (`models.ts`), frame reading (`vision/`), ElevenLabs session addresses and tokens (`elevenlabs.ts`) | Claude Code |
+| `src/server/` | Server-only modules: environment, database client, fail-soft, accounts and sign-in (`accounts.ts`, `require-user.ts`), workflows and their people (`workflows.ts`), model router (`models.ts`), frame reading (`vision/`), ElevenLabs session addresses and tokens (`elevenlabs.ts`) | Claude Code |
 | `src/spikes/`, `scripts/spikes/` | Spike tooling that is not a page: scoring and replay | Claude Code |
 | `src/contract/` | The contract as Zod schemas; import from here, change only via `CONTRACT.md` | Shared |
 | `src/sensor/` | Screen sensor: frame diff, settle detection, capture | Claude Code |
@@ -57,7 +59,7 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 | `src/app/` (except `api/` and `spikes/`) | Pages and layouts | Codex |
 | `supabase/migrations/` | Database schema. Apply with `npx supabase db push`, then `npm run types:db` | Claude Code |
 | `agents/` | ElevenLabs agent configurations, prompts and client tools. Push with `npm run agents:push` | Claude Code |
-| `scripts/`, `.github/` | Gate, CI, role links (`npm run links`), agent push | Claude Code |
+| `scripts/`, `.github/` | Gate, CI, sign-up codes (`npm run signup-code`), demo accounts (`npm run demo-accounts`), agent push | Claude Code |
 | `docs/spikes/` | Written spike results | Claude Code |
 
 <!-- BEGIN:nextjs-agent-rules -->
