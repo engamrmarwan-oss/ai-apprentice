@@ -1,5 +1,6 @@
 // The small, plain pieces of the capture engine, kept apart so they can be tested without a browser.
 import type { FloorKind, TurnPlan } from "@/conductor/floor";
+import type { TiroEvent } from "@/contract/event";
 import { unionRegions } from "@/sensor/diff";
 import type { SensorFrame } from "@/sensor/screen-sensor";
 
@@ -70,4 +71,15 @@ export function teachBackTrigger(map: MapToTeach): string {
 export function replacePending(waiting: SensorFrame | null, next: SensorFrame): SensorFrame {
   if (!waiting) return next;
   return { ...next, region: unionRegions(waiting.region, next.region) };
+}
+
+/**
+ * Whether a frame just read starts a new screen visit: Tiro sums up each
+ * visit once. The reader may keep one name for a screen while the expert
+ * moves between its tabs or opens another item on it, so a move it reported
+ * starts a visit too, not only a new name. `name` is the screen's name in
+ * lower case; `current` is the visit's, or null before the first.
+ */
+export function startsVisit(current: string | null, name: string, events: readonly Pick<TiroEvent, "type">[]): boolean {
+  return current !== name || events.some((event) => event.type === "navigate" || event.type === "open_item");
 }

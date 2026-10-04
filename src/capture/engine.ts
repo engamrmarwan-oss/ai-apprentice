@@ -13,7 +13,7 @@ import { createConductor, type Action, type Conductor, type FloorKind, type Floo
 import type { TiroEvent } from "@/contract/event";
 import type { Question } from "@/contract/question";
 import { startScreenSensor, type ScreenSensor, type SensorFrame } from "@/sensor/screen-sensor";
-import { hearsWakeWord, replacePending, spokenText, triggerFor } from "./parts";
+import { hearsWakeWord, replacePending, spokenText, startsVisit, triggerFor } from "./parts";
 
 /** One stretch of speech, as the capture screen shows it. `id` is set once it is stored. */
 export type Spoken = { key: number; id: string | null; speaker: "expert" | "new_hire" | "agent"; start_ms: number; end_ms: number; text: string };
@@ -546,11 +546,12 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
   }
 
   /** Keeps track of the screen the expert is on, from a frame just read. */
-  function onScreen(frame: SensorFrame, frameId: string, screen: FrameAnswer["screen"], decided: boolean) {
-    const name = screen?.name.trim().toLowerCase();
-    // A frame the reader could not name a screen for leaves the visit as it was.
+  function onScreen(frame: SensorFrame, frameId: string, screen: FrameAnswer["screen"], events: TiroEvent[]) {
+    // A frame the reader could not name a screen for keeps the visit's name.
+    const name = screen?.name.trim().toLowerCase() || visit?.name;
     if (!name) return;
-    if (visit && visit.name === name) {
+    const decided = events.some(isDecision);
+    if (visit && !startsVisit(visit.name, name, events)) {
       visit.frameId = frameId;
       visit.small = frame.small;
       visit.decided ||= decided;
@@ -558,7 +559,7 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
     }
     const left = visit;
     visit = { name, since: frame.t, frameId, small: frame.small, decided, planned: false };
-    trace(`on screen "${screen!.name}"`);
+    trace(`on screen "${screen?.name ?? name}"${screen?.item ? `, ${screen.item}` : ""}`);
     if (view.voice !== "on") return;
     run(conductor.screenEntered(frame.t));
     if (left && left.decided && !left.planned) planVisit(left, left.since, false);
@@ -594,7 +595,7 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
       events: [...view.events, ...result.events],
       questions: [...view.questions, ...result.questions],
     });
-    onScreen(frame, result.frame.id, result.screen, result.events.some(isDecision));
+    onScreen(frame, result.frame.id, result.screen, result.events);
   }
 
   /** Reads frames one at a time, each against the one before. While one is being read, only the newest waits. */
