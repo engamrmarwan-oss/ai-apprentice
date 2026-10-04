@@ -208,6 +208,119 @@ What the view holds (`CaptureView`):
 
 `describeEvent(event)` and `isDecision(event)` in `src/conductor/describe.ts` turn an event into one plain line and say whether it is a decision.
 
+## The debrief and the Work Map
+
+When the expert ends the task, the session is in its `debrief` phase. The debrief ends when the expert confirms the Work Map; the session is then `ended`.
+
+### `GET /api/workflows/{id}/sessions`
+
+Expert only. The expert's own sessions on the workflow, newest first: `{ "sessions": [{ "id", "phase", "language", "started_at", "ended_at", ... }] }`. The session to debrief is the newest one whose `phase` is `debrief`.
+
+### `GET /api/workflows/{id}/work-map`
+
+For anyone on the workflow. The expert gets the newest Work Map, draft or confirmed. A new hire gets the newest confirmed one. `work_map` is `null` when there is none yet.
+
+```json
+{
+  "ok": true,
+  "work_map": {
+    "id": "…", "workflow_id": "…", "session_id": "…", "version": 1,
+    "status": "draft", "created_at": "…", "confirmed_at": null,
+    "steps": [
+      {
+        "id": "…", "position": 1, "title": "Hold the order", "decision": "Held the order for review.",
+        "is_judgment": true,
+        "reason": { "utterance_id": "…", "text": "The expert's own words." },
+        "moment": { "event_id": "…", "frame_id": "…", "t_ms": 84700, "what": "Pressed \"Hold\" on Order 7.", "picture": "https://…" },
+        "rules": [1]
+      }
+    ],
+    "rules": [
+      {
+        "id": "…", "number": 1, "lineage_id": "…", "version": 1,
+        "kind": "limit", "statement": "The rule in one plain sentence.",
+        "quote": { "utterance_id": "…", "text": "The expert's own words." },
+        "moment": { "event_id": "…", "frame_id": "…", "t_ms": 84700, "what": "…", "picture": "https://…", "link": "direct" },
+        "action": { "type": "block" },
+        "status": "candidate", "provenance": "live_question", "documented": false, "check_type": "judged",
+        "steps": [1]
+      }
+    ]
+  }
+}
+```
+
+- `status` of the map is `draft` or `confirmed`.
+- A step's `reason` is `null` while the expert has not said why. A map with such a step cannot be confirmed.
+- `moment.picture` is the screen at that moment: a signed address that works for about two hours. Load the map again for a fresh one. It can be `null`.
+- A rule's `number` is its place in the list and stays the same when the rule is corrected. `steps` are the positions of the steps it belongs to; a step's `rules` are rule numbers.
+- `kind` is a key of the rule kinds table (`limit`, `exception`, `stop_and_ask`, `never`, `judgment`, or one a workflow adds). Show it as given.
+- `action.type` is `block`, `warn`, `ask`, or `escalate` (then with `role`).
+- A rule's `status` is `candidate`, `confirmed` or `corrected`. `provenance` is `observed` (said while working), `live_question` (an answer to Tiro during the task), `debrief` or `baseline_confirmed`. `moment.link` is `direct` (said at that moment) or `related` (the nearest moment to a rule the expert only described).
+- `documented` is true when the baseline already held the rule; otherwise it was newly captured.
+
+### `GET /api/work-maps/{id}`
+
+One Work Map by its id, in the same shape. A new hire can read it only once it is confirmed.
+
+### Routes the debrief engine calls
+
+| Route | What it does |
+|---|---|
+| `POST /api/sessions/{id}/debrief` | Prepares the debrief. Reads every decision a second time from its frame of record: agreement verifies the event, disagreement becomes a question. Returns `{ verified, doubted, ask, listed }`: `ask` are the questions Tiro asks aloud, in order; `listed` are the rest. Takes up to half a minute. |
+| `POST /api/sessions/{id}/voice` | As in capture. |
+| `POST /api/sessions/{id}/utterances` | As in capture. |
+| `PATCH /api/sessions/{id}/questions/{question_id}` | As in capture. `{ "status": "dropped" }` dismisses a question. |
+| `POST /api/sessions/{id}/work-map` | Builds the session's Work Map as a draft, replacing an earlier draft. Body `{ "final": false }`. Returns `{ work_map, gaps, left_out }`. `gaps` are questions the validator sent back: steps that still lack the expert's reason. `left_out` is what it refused, as `{ what, text, why }`. With `final: true` a step still without a reason is left out instead of asked about. `builder_unavailable` (503) when the map could not be put together. |
+| `PATCH /api/work-maps/{id}/steps/{position}` | Expert only. Corrects a step. `{ "correction": "what the expert said" }` rewrites it to say that; `{ "title", "decision" }` sets the text. Returns `{ step, work_map }`. |
+| `PATCH /api/work-maps/{id}/rules/{number}` | Expert only. Corrects a rule: `{ "correction" }` or `{ "statement" }`. The rule gets a new version and keeps its number. Returns `{ rule, work_map }`. Also works on a confirmed map. |
+| `POST /api/work-maps/{id}/confirm` | Expert only. Confirms the map and ends the session. `incomplete` (409) when a step lacks its screen moment or its reason; the message says which. |
+
+## The debrief engine
+
+`src/capture/debrief.ts` runs the debrief in the browser: the voice conversation, the building of the map, the teach-back, corrections and confirmation. Like the capture engine it has no React in it. The debrief bench at `/spikes/debrief` is a bare page built on it; read `src/app/spikes/debrief/debrief-bench.tsx` for a working example.
+
+```ts
+import { createDebriefEngine, EMPTY_DEBRIEF, type DebriefView } from "@/capture/debrief";
+
+const engine = createDebriefEngine(sessionId, (view) => setView(view));
+```
+
+`engine.start()` must be called from a click: this is when the browser asks for the microphone. Then everything runs by itself:
+
+1. `preparing`: the decisions are read a second time and the questions are put in order (up to half a minute).
+2. `asking`: Tiro asks the `ask` questions aloud, one at a time, and the expert answers. This is an ordinary conversation.
+3. `building`: when Tiro has asked its questions, the map is built (about ten seconds). If the validator sends questions back, the phase returns to `asking` once, for at most three more.
+4. `teach_back`: `workMap` is set. Tiro explains it back in under a minute. The expert corrects a step or a rule by saying so, and the map on screen changes; or edits its text on screen.
+5. `confirmed`: the expert said it is right, or pressed the button.
+
+| Call | What it does |
+|---|---|
+| `engine.start()` | Begins the debrief. From a click. |
+| `engine.build()` | "I have answered": builds the map now and goes on to the teach-back. Tiro does this by itself when it has asked its questions. |
+| `engine.confirm()` | Confirms the map. The same as the expert saying it is right. |
+| `engine.editStep(position, { title, decision })` | Sets a step's text from the screen. |
+| `engine.editRule(number, statement)` | Sets a rule's text from the screen. |
+| `engine.dismiss(questionId)` | The expert does not want this question asked. |
+| `engine.setMuted(true)` | Tiro does not hear the expert until unmuted. |
+| `engine.release()` | Ends the voice. Call it when the screen unmounts. |
+| `engine.view()` | The current view. |
+
+What the view holds (`DebriefView`):
+
+| Field | Meaning |
+|---|---|
+| `phase` | `idle`, `preparing`, `asking`, `building`, `teach_back`, `confirmed` |
+| `problem` | The last thing that went wrong, in plain words, or null |
+| `voice` | `off`, `connecting`, `on`, `lost`. Without voice the map can still be built and confirmed with the buttons |
+| `agentSpeaking`, `muted` | |
+| `verified`, `doubted` | How many screen events the second reading verified, and how many it doubted and turned into questions |
+| `ask` | The questions Tiro asks aloud, in order |
+| `listed` | The rest of what Tiro wondered about. Each can be dismissed |
+| `spoken` | The conversation so far, as in capture |
+| `workMap` | The Work Map, in the shape above, or null before it is built |
+| `leftOut` | What the validator refused to put in the map: `{ what, text, why }` |
+
 ## Other routes
 
 - `GET /api/health`: `{ "ok": true, "database": { "table", "rows" } }` or 503. Needs no sign-in.
