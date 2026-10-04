@@ -50,6 +50,8 @@ export type FrameResult = {
   events: TiroEvent[];
   /** What the screen shows now, as the reader named it. */
   screen: { name: string; item: string | null } | null;
+  /** The fields of the item on screen, as read. */
+  fields: { name: string; value: string }[];
   /** Roughly how many words appeared on this frame: the expert needs time to read them. */
   new_words: number;
   /** Questions code made from low-confidence readings. They wait for the debrief. */
@@ -69,7 +71,7 @@ async function toImage(blob: Blob): Promise<ImageInput> {
 export async function ingestFrame(context: SessionContext, input: FrameInput): Promise<({ ok: true } & FrameResult) | Unavailable> {
   const { session, workflow } = context;
   const frame = { id: randomUUID(), session_id: session.id, t_ms: input.t_ms };
-  const unread: { ok: true } & FrameResult = { ok: true, frame, read: false, events: [], screen: null, new_words: 0, questions: [] };
+  const unread: { ok: true } & FrameResult = { ok: true, frame, read: false, events: [], screen: null, fields: [], new_words: 0, questions: [] };
 
   const [stored, previous] = await Promise.all([
     storeFrame({ ...frame, width: input.width, height: input.height, changed_region: input.region as Json | null }, input.full),
@@ -94,13 +96,15 @@ export async function ingestFrame(context: SessionContext, input: FrameInput): P
   // Events that were not stored are not handed out: questions will point at them.
   if (!saved.ok) return unread;
 
-  const doubts = await queueQuestions(session.id, confirmQuestions(events, workflow.config.low_confidence));
+  // Doubt becomes a question for the expert's debrief. A tutor session has no debrief to ask it in.
+  const doubts = await queueQuestions(session.id, session.kind === "expert" ? confirmQuestions(events, workflow.config.low_confidence) : []);
   return {
     ok: true,
     frame,
     read: true,
     events,
     screen: { name: output.screen, item: output.item },
+    fields: output.fields,
     new_words: Number.isFinite(output.new_words) ? Math.max(0, Math.round(output.new_words)) : 0,
     questions: doubts.ok ? doubts.questions : [],
   };

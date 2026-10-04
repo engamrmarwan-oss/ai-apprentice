@@ -5,7 +5,7 @@ import { describeEvent } from "@/conductor/describe";
 import type { Json } from "@/contract/database.types";
 import { eventSchema, type TiroEvent } from "@/contract/event";
 import type { Question } from "@/contract/question";
-import type { JudgeSpec, RuleAction } from "@/contract/rule";
+import type { Condition, JudgeSpec, RuleAction } from "@/contract/rule";
 import { must, mustHave, withDatabase } from "../accounts";
 import { loadTimeline, queueQuestions, type SessionContext } from "../sessions";
 import type { TiroClient } from "../supabase";
@@ -47,6 +47,8 @@ export type WorkMapRule = {
   provenance: string;
   documented: boolean;
   check_type: string;
+  /** For a deterministic rule, the condition the generic engine works out. Null for a judged rule. */
+  condition: Condition | null;
   /** The positions of the steps it belongs to. */
   steps: number[];
 };
@@ -156,6 +158,7 @@ async function readMap(client: TiroClient, mapId: string): Promise<WorkMapView |
       provenance: rule.provenance,
       documented: rule.documented,
       check_type: rule.check_type,
+      condition: (rule.condition as Condition | null) ?? null,
       steps: linkRows.filter((link) => link.rule_id === rule.id).flatMap((link) => positionOf.get(link.step_id) ?? []).sort((a, b) => a - b),
     })),
   };

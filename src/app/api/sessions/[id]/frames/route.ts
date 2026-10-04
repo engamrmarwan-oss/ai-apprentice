@@ -3,7 +3,7 @@ import { z } from "zod";
 import { ingestFrame, regionSchema } from "@/server/capture";
 import { fail, ok, unavailable } from "@/server/http";
 import { pictureFrom } from "@/server/pictures";
-import { requireExpertSession } from "@/server/require-session";
+import { requireRecordingSession } from "@/server/require-session";
 
 export const dynamic = "force-dynamic";
 // Reading a frame takes about five seconds, and is given up to thirty.
@@ -26,7 +26,7 @@ const fieldsSchema = z.object({
  */
 export async function POST(request: NextRequest, context: RouteContext<"/api/sessions/[id]/frames">) {
   const { id } = await context.params;
-  const check = await requireExpertSession(request, id, ["capture"]);
+  const check = await requireRecordingSession(request, id, ["capture"]);
   if (!check.ok) return check.response;
 
   const form = await request.formData().catch(() => null);
@@ -73,6 +73,7 @@ export async function POST(request: NextRequest, context: RouteContext<"/api/ses
     read: result.read,
     events: result.events,
     screen: result.screen,
+    fields: result.fields,
     new_words: result.new_words,
     questions: result.questions,
   });

@@ -55,7 +55,7 @@ export const newSessionSchema = z.object({
 
 export const utteranceSchema = z
   .object({
-    speaker: z.enum(["expert", "agent"]),
+    speaker: z.enum(["expert", "new_hire", "agent"]),
     start_ms: z.int().nonnegative(),
     end_ms: z.int().nonnegative(),
     text: z.string().trim().min(1, "There is nothing to store.").max(8_000),
