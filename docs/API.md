@@ -297,7 +297,7 @@ const engine = createDebriefEngine(sessionId, (view) => setView(view));
 1. `preparing`: the decisions are read a second time and the questions are put in order (up to half a minute).
 2. `asking`: Tiro asks the `ask` questions aloud, one at a time, and the expert answers. This is an ordinary conversation.
 3. `building`: when Tiro has asked its questions, the map is built (about ten seconds). If the validator sends questions back, the phase returns to `asking` once, for at most three more.
-4. `teach_back`: `workMap` is set. Tiro explains it back in under a minute. The expert corrects a step or a rule by saying so, and the map on screen changes; or edits its text on screen.
+4. `teach_back`: `workMap` is set. When it has no steps and no rules, Tiro says that nothing from the session can be kept, with the reasons in `leftOut`, and asks for no confirmation: a map with no steps cannot be confirmed, and `engine.confirm()` says so in `problem` without asking the server. Otherwise Tiro explains it back in under a minute. The expert corrects a step or a rule by saying so, and the map on screen changes; or edits its text on screen.
 5. `confirmed`: the expert said it is right, or pressed the button.
 
 | Call | What it does |

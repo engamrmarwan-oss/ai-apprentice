@@ -10,7 +10,7 @@
 import { Conversation } from "@elevenlabs/client";
 import type { Question } from "@/contract/question";
 import type { Spoken } from "./engine";
-import { debriefTrigger, spokenText, teachBackTrigger, type MapToTeach } from "./parts";
+import { debriefTrigger, emptyMapTrigger, spokenText, teachBackTrigger, type LeftOutItem, type MapToTeach } from "./parts";
 
 /** What the screen showed at a moment: its name, the item open on it and that item's fields. */
 export type ScreenRead = { name: string; item: string | null; fields: { name: string; value: string }[] };
@@ -62,7 +62,7 @@ export type WorkMap = {
   rules: WorkMapRule[];
 };
 
-export type LeftOut = { what: "step" | "rule"; text: string; why: string };
+export type LeftOut = LeftOutItem;
 
 export type DebriefView = {
   /** `asking`: Tiro is asking its questions. `building`: the map is being put together. `teach_back`: Tiro explains it back and the expert corrects or confirms. */
@@ -202,12 +202,23 @@ export function createDebriefEngine(sessionId: string, onView: (view: DebriefVie
       return build();
     }
     update({ phase: "teach_back" });
+    // Nothing could be kept: there is nothing to explain back, and a map with no steps cannot be confirmed.
+    if (work_map.steps.length === 0 && work_map.rules.length === 0) {
+      voice?.sendUserMessage(emptyMapTrigger(left_out));
+      return;
+    }
     voice?.sendUserMessage(teachBackTrigger(forTeaching(work_map)));
   }
 
   async function confirmMap(): Promise<string> {
     const map = view.workMap;
     if (!map) return "There is no Work Map yet. Tell the expert you are still putting it together.";
+    // The server refuses a map with no steps. Say why rather than ask it.
+    if (map.steps.length === 0) {
+      const message = "A Work Map needs at least one step, and this one has none.";
+      update({ problem: message });
+      return `It was not confirmed. ${message} Tell the expert that plainly.`;
+    }
     const confirmed = await call<{ work_map: WorkMap }>(`/api/work-maps/${map.id}/confirm`, json("POST"));
     if (!confirmed.ok) {
       update({ problem: confirmed.message });

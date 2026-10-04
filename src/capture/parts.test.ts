@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SensorFrame } from "@/sensor/screen-sensor";
-import { debriefTrigger, hearsWakeWord, replacePending, spokenText, startsVisit, teachBackTrigger, triggerFor } from "./parts";
+import { debriefTrigger, emptyMapTrigger, hearsWakeWord, replacePending, spokenText, startsVisit, teachBackTrigger, triggerFor } from "./parts";
 
 const WORDS = ["tiro", "tyro", "tero"];
 
@@ -111,5 +111,18 @@ describe("startsVisit", () => {
   it("starts a visit when the expert moves to another tab or item that the reader gives the same name", () => {
     expect(startsVisit("requirements", "requirements", [{ type: "navigate" }])).toBe(true);
     expect(startsVisit("requirements", "requirements", [{ type: "open_item" }])).toBe(true);
+  });
+});
+
+describe("emptyMapTrigger", () => {
+  it("tells Tiro there is nothing to explain back or confirm, with the reasons", () => {
+    const trigger = emptyMapTrigger([{ what: "step", text: "Approved REQ-003", why: "No reason was given for it." }]);
+    expect(trigger).toMatch(/^WAIT:/);
+    expect(trigger).toContain('- step "Approved REQ-003": No reason was given for it.');
+    expect(trigger).toContain("Do not ask them to confirm anything.");
+  });
+
+  it("says nothing was recorded when nothing was left out either", () => {
+    expect(emptyMapTrigger([])).toContain("Nothing was recorded that could become a step or a rule.");
   });
 });

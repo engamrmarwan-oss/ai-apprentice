@@ -83,3 +83,20 @@ export function replacePending(waiting: SensorFrame | null, next: SensorFrame): 
 export function startsVisit(current: string | null, name: string, events: readonly Pick<TiroEvent, "type">[]): boolean {
   return current !== name || events.some((event) => event.type === "navigate" || event.type === "open_item");
 }
+
+/** What the validator refused to put in a Work Map, and why. */
+export type LeftOutItem = { what: "step" | "rule"; text: string; why: string };
+
+/**
+ * The message for a debrief whose Work Map came out empty. There is nothing
+ * to explain back or confirm: Tiro says so, with the reasons, instead of a
+ * teach-back the server would refuse to confirm.
+ */
+export function emptyMapTrigger(leftOut: readonly LeftOutItem[]): string {
+  const reasons = leftOut.slice(0, 3).map((item) => `- ${item.what} "${item.text}": ${item.why}`);
+  return [
+    "WAIT: Nothing from this session can be kept in the Work Map, so there is nothing to explain back or confirm.",
+    reasons.length > 0 ? `What was left out, and why:\n${reasons.join("\n")}` : "Nothing was recorded that could become a step or a rule.",
+    "Tell the expert so, with the main reason, and that they can record the task again. Do not ask them to confirm anything.",
+  ].join("\n");
+}
