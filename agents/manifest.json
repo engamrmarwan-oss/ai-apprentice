@@ -7,6 +7,22 @@
     "go_off_record",
     "replay_moment"
   ],
+  "mcp_servers": {
+    "tiro": {
+      "config": "mcp/tiro.json",
+      "secret": {
+        "name": "tiro_mcp_secret",
+        "env": "TIRO_MCP_SECRET"
+      },
+      "tools": [
+        "get_work_map",
+        "get_step",
+        "list_rules_for_step",
+        "get_rule",
+        "get_screen_moment"
+      ]
+    }
+  },
   "agents": {
     "interviewer": {
       "config": "interviewer.json",
@@ -34,12 +50,16 @@
         "tool_name",
         "task",
         "expert_role",
+        "work_map_id",
         "work_map"
       ],
       "tools": [
         "replay_moment",
         "yield_floor",
         "go_off_record"
+      ],
+      "mcp_servers": [
+        "tiro"
       ]
     }
   }

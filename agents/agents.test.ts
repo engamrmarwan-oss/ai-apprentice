@@ -8,7 +8,8 @@ const readJson = (path: string) => JSON.parse(read(path));
 
 type Manifest = {
   tools: string[];
-  agents: Record<string, { config: string; prompt: string; variables: string[]; tools: string[] }>;
+  mcp_servers: Record<string, { config: string; secret: { name: string; env: string }; tools: string[] }>;
+  agents: Record<string, { config: string; prompt: string; variables: string[]; tools: string[]; mcp_servers?: string[] }>;
 };
 
 const manifest: Manifest = readJson("manifest.json");
@@ -85,6 +86,34 @@ describe("prompts", () => {
   });
 });
 
+describe("Tiro's MCP server", () => {
+  const servers = Object.entries(manifest.mcp_servers);
+
+  it("is given to the tutor only", () => {
+    expect(manifest.agents.tutor.mcp_servers).toEqual(["tiro"]);
+    expect(manifest.agents.interviewer.mcp_servers).toBeUndefined();
+  });
+
+  it.each(servers)("%s is reached over https, runs its tools without asking, and keeps its secret out of the file", (_key, entry) => {
+    const { config } = readJson(entry.config);
+    expect(config.url).toMatch(/^https:\/\//);
+    expect(config.transport).toBe("STREAMABLE_HTTP");
+    // Every tool is read-only, so none waits for approval in the middle of a spoken turn.
+    expect(config.approval_policy).toBe("auto_approve_all");
+    expect(config.secret_token).toBeUndefined();
+    expect(config.request_headers).toBeUndefined();
+    expect(entry.secret.env).toBe("TIRO_MCP_SECRET");
+  });
+
+  it.each(agents.filter(([, entry]) => entry.mcp_servers?.length))("%s is told about every lookup it has, and which map to pass", (_key, entry) => {
+    const prompt = read(entry.prompt);
+    for (const server of entry.mcp_servers ?? []) {
+      for (const tool of manifest.mcp_servers[server].tools) expect(prompt).toContain(`\`${tool}\``);
+    }
+    expect(variablesIn(prompt)).toContain("work_map_id");
+  });
+});
+
 describe("generality", () => {
   // Tripwire, not proof: the words of the first demo workflow must not leak into fixed text.
   const SPECIFIC = /crystal|requirement|invoice/i;
@@ -92,6 +121,7 @@ describe("generality", () => {
     "manifest.json",
     ...agents.flatMap(([, entry]) => [entry.config, entry.prompt]),
     ...manifest.tools.map((name) => `tools/${name}.json`),
+    ...Object.values(manifest.mcp_servers).map((entry) => entry.config),
   ];
 
   it.each(files)("%s names no tool or workflow", (file) => {

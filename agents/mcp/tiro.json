@@ -1,0 +1,10 @@
+{
+  "config": {
+    "name": "Tiro Work Maps",
+    "description": "Read-only lookups in a confirmed Work Map: its steps, its rules and the expert's screen behind them.",
+    "url": "https://tiro-ai.vercel.app/api/mcp",
+    "transport": "STREAMABLE_HTTP",
+    "approval_policy": "auto_approve_all",
+    "response_timeout_secs": 15
+  }
+}

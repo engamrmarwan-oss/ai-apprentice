@@ -1,8 +1,12 @@
 // Pushes the agent configurations in agents/ to ElevenLabs with the ElevenLabs CLI.
 // The repository is the source of truth: run this after changing anything in agents/.
 //
-//   npm run agents:push              create or update the tools and both agents
+//   npm run agents:push              create or update the tools, Tiro's MCP server entry and both agents
 //   npm run agents:push -- --dry-run validate every request locally, send nothing
+//
+// An agent reaches Tiro's MCP server with the server's secret. The secret is
+// read from this machine's environment and stored as a workspace secret in
+// ElevenLabs; it is never written to the repository or printed.
 //
 // Ids are not secrets. They are written to agents/ids.json and committed.
 import { execFileSync } from "node:child_process";
@@ -24,6 +28,8 @@ const manifest = readJson("manifest.json");
 const ids = existsSync(IDS_FILE)
   ? JSON.parse(readFileSync(IDS_FILE, "utf8"))
   : { tools: {}, agents: {} };
+ids.secrets ??= {};
+ids.mcp_servers ??= {};
 
 /** Runs one CLI command with a JSON body on stdin and returns the parsed response. */
 function cli(command, body, params) {
@@ -58,6 +64,50 @@ function stop(what, response) {
   process.exit(1);
 }
 
+for (const [key, entry] of Object.entries(manifest.mcp_servers ?? {})) {
+  const value = process.env[entry.secret.env];
+  if (!value) {
+    console.error(`Not set: ${entry.secret.env}`);
+    process.exit(1);
+  }
+  const { config } = readJson(entry.config);
+  // An agent given a server that refuses it loses its lookups in the middle of a session: check before anything is changed.
+  if (!dryRun) {
+    const answer = await fetch(config.url, {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json, text/event-stream", authorization: `Bearer ${value}` },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+    }).catch(() => null);
+    if (answer?.status !== 200) {
+      console.error(`mcp server ${key}: ${config.url} does not accept ${entry.secret.env} (${answer?.status ?? "no answer"}). Set it where the app runs, deploy, and push again. Nothing was changed.`);
+      process.exit(1);
+    }
+  }
+
+  // The secret first: the server entry points at it by id. It is sent on stdin, so it shows in no command line.
+  const knownSecret = ids.secrets[entry.secret.name];
+  const secret = knownSecret
+    ? cli(["agents", "secrets", "update"], { type: "update", name: entry.secret.name, value }, { secret_id: knownSecret })
+    : cli(["agents", "secrets", "create"], { type: "new", name: entry.secret.name, value });
+  if (failed(secret)) {
+    // Not `stop`: a rejected request may be echoed back, and this one carries the secret.
+    console.error(`secret ${entry.secret.name} failed:\n${JSON.stringify(secret.error, null, 2).split(value).join("[secret]")}`);
+    process.exit(1);
+  }
+  if (!knownSecret && !dryRun) ids.secrets[entry.secret.name] = secret.secret_id;
+  console.log(`secret ${entry.secret.name}: ${dryRun ? "valid" : knownSecret ? "updated" : "created"}`);
+
+  const secret_token = { secret_id: ids.secrets[entry.secret.name] ?? `dry-run-${entry.secret.name}` };
+  const known = ids.mcp_servers[key];
+  // An entry's name, address and transport are fixed when it is made; the rest can change.
+  const response = known
+    ? cli(["agents", "mcp-servers", "update"], { approval_policy: config.approval_policy, response_timeout_secs: config.response_timeout_secs, secret_token }, { mcp_server_id: known })
+    : cli(["agents", "mcp-servers", "create"], { config: { ...config, secret_token } });
+  if (failed(response)) stop(`mcp server ${key}`, response);
+  if (!known && !dryRun) ids.mcp_servers[key] = response.id;
+  console.log(`mcp server ${key}: ${dryRun ? "valid" : known ? "updated" : "created"}`);
+}
+
 for (const name of manifest.tools) {
   const body = readJson(`tools/${name}.json`);
   const known = ids.tools[name];
@@ -74,6 +124,7 @@ for (const [key, entry] of Object.entries(manifest.agents)) {
   const prompt = body.conversation_config.agent.prompt;
   prompt.prompt = readFileSync(`${AGENTS_DIR}${entry.prompt}`, "utf8");
   prompt.tool_ids = entry.tools.map((tool) => ids.tools[tool] ?? `dry-run-${tool}`);
+  prompt.mcp_server_ids = (entry.mcp_servers ?? []).map((server) => ids.mcp_servers[server] ?? `dry-run-${server}`);
 
   const known = ids.agents[key];
   const response = known

@@ -12,7 +12,8 @@ export const dynamic = "force-dynamic";
  * address for the session's agent (the interviewer for an expert session,
  * the tutor for a tutor session), a single-use transcription token, and the
  * values that agent's prompt template takes. A tutor is handed the confirmed
- * Work Map it teaches, read fresh. Call it again to reconnect. The workspace
+ * Work Map it teaches, read fresh, and its id, so it can look the map up
+ * again through Tiro's MCP server. Call it again to reconnect. The workspace
  * key never leaves the server.
  */
 export async function POST(request: NextRequest, context: RouteContext<"/api/sessions/[id]/voice">) {
@@ -33,6 +34,7 @@ export async function POST(request: NextRequest, context: RouteContext<"/api/ses
         tool_name: check.workflow.tool.name,
         task: check.workflow.task,
         expert_role: check.workflow.role ?? "the expert",
+        work_map_id: taught.work_map.id,
         work_map: mapAsText(taught.work_map),
       },
     });
