@@ -296,7 +296,7 @@ export function createTutorEngine(sessionId: string, workMap: WorkMap, onView: (
       replayUntil = now() + REPLAY_MS;
       update({ replay: rule });
       trace(`replay: rule ${rule.number}`);
-      return "The expert's screen at that moment is now shown to the learner, with what the expert said.";
+      return "The expert's screen at that moment is now shown to the learner, with what the expert said. Add nothing about it aloud.";
     },
     go_off_record: () => "Nothing was removed: going off the record is not available yet. Tell the learner that plainly.",
   };
