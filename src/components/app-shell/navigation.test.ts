@@ -28,6 +28,7 @@ describe("getNavigation", () => {
       "Teach",
       "Learn",
     ]);
+    expect(labels).toContain("Setup");
     expect(labels).toContain("Capture");
     expect(labels).toContain("People");
     expect(labels).toContain("Agents");
@@ -53,6 +54,7 @@ describe("getNavigation", () => {
     ]);
     expect(labels).toContain("Tutor");
     expect(labels).toContain("Mastery");
+    expect(labels).not.toContain("Setup");
     expect(labels).not.toContain("Capture");
     expect(labels).not.toContain("People");
     expect(labels).not.toContain("Agents");

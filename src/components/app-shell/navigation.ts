@@ -46,6 +46,7 @@ export function getNavigation(workflow?: OpenWorkflow): NavigationGroup[] {
   const teachingNavigation: NavigationGroup = {
     label: "Teach",
     items: [
+      { href: `${root}/setup`, icon: "tools", label: "Setup" },
       { href: `${root}/capture`, icon: "record", label: "Capture" },
       { href: `${root}/debrief`, icon: "conversation", label: "Debrief" },
       { href: `${root}/people`, icon: "people", label: "People" },
