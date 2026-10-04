@@ -1,0 +1,6 @@
+# Confirmed false positives, one fingerprint each: commit:file:rule:line.
+# Anything not listed here, in these files or any other, still fails the scan.
+
+# The id ElevenLabs gave the stored TIRO_MCP_SECRET, written by scripts/agents-push.mjs.
+# An id, not the value: checked on 2026-10-04 against .env.local, it matches no secret.
+05f43219a72bd46b5567a5f6461bbc78ac9044f4:agents/ids.json:generic-api-key:15
