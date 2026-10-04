@@ -120,6 +120,24 @@ export async function createSession(
   return run.ok ? { ok: true, session: run.value as Session } : unavailable;
 }
 
+/** The sessions one person has run on a workflow, newest first. */
+export async function listSessions(workflowId: string, userId: string): Promise<{ ok: true; sessions: Session[] } | Unavailable> {
+  const read = await withDatabase(async (client, signal) =>
+    must(
+      await client
+        .from("sessions")
+        .select(SESSION_COLUMNS)
+        .eq("workflow_id", workflowId)
+        .eq("user_id", userId)
+        .eq("kind", "expert")
+        .order("created_at", { ascending: false })
+        .limit(50)
+        .abortSignal(signal),
+    ),
+  );
+  return read.ok ? { ok: true, sessions: (read.value ?? []) as Session[] } : unavailable;
+}
+
 /** Moves a session to capture and starts its clock. Starting twice changes nothing. */
 export async function startCapture(session: Session): Promise<{ ok: true; session: Session } | Unavailable> {
   if (session.phase !== "setup") return { ok: true, session };

@@ -14,7 +14,7 @@ const shown = (value: string | null | undefined): string | null => {
  * when the report lacks a part its type cannot do without. Code maps; the
  * model never writes a payload directly.
  */
-function toPayload(read: ReadEvent): TiroEvent["payload"] | null {
+export function toPayload(read: ReadEvent): TiroEvent["payload"] | null {
   const item = shown(read.item);
   const field = shown(read.field);
   const from = shown(read.from);
@@ -36,6 +36,26 @@ function toPayload(read: ReadEvent): TiroEvent["payload"] | null {
       return field || to ? { title: field, text: to ?? "" } : null;
     case "commit":
       return action ? { item, action } : null;
+  }
+}
+
+/** A stored event in the reader's flat shape, to show to the verifier. The reverse of `toPayload`. */
+export function toRead(event: TiroEvent): ReadEvent {
+  const blank = { type: event.type, item: null, field: null, from: null, to: null, action: null, confidence: event.confidence };
+  switch (event.type) {
+    case "navigate":
+      return { ...blank, from: event.payload.from_screen, to: event.payload.to_screen };
+    case "open_item":
+      return { ...blank, item: event.payload.item };
+    case "field_change":
+    case "status_change":
+      return { ...blank, item: event.payload.item, field: event.payload.field, from: event.payload.from, to: event.payload.to };
+    case "text_edit":
+      return { ...blank, item: event.payload.item, field: event.payload.field, from: event.payload.before, to: event.payload.after };
+    case "dialog":
+      return { ...blank, field: event.payload.title, to: event.payload.text };
+    case "commit":
+      return { ...blank, item: event.payload.item, action: event.payload.action };
   }
 }
 
