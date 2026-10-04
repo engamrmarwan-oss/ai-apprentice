@@ -25,6 +25,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",
     "@elevenlabs/client": "^1.26.0",
+    "@modelcontextprotocol/sdk": "^1.32.0",
     "@supabase/supabase-js": "^2.117.2",
     "next": "16.3.8",
     "react": "19.2.8",
