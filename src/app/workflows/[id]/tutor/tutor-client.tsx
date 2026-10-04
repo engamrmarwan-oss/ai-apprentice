@@ -13,7 +13,15 @@ import {
   type TutorCompanion,
 } from "@/components/tutor/companion";
 import { TutorSessionView } from "@/components/tutor/tutor-session-view";
-import { parseTutorRouteError, parseTutorSessionStart } from "./tutor-data";
+import {
+  ENGLISH,
+  parseLanguages,
+  parseTutorRouteError,
+  parseTutorSessionStart,
+  type TutorLanguage,
+} from "./tutor-data";
+
+const ENGLISH_ONLY: TutorLanguage[] = [{ code: ENGLISH, name: "English", ownName: "English" }];
 
 export function TutorClient({ workflowId }: { workflowId: string }) {
   return (
@@ -31,6 +39,31 @@ function TutorScreen({ workflowId }: { workflowId: string }) {
   const [isStarting, setIsStarting] = useState(false);
   const [companionOpen, setCompanionOpen] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [languages, setLanguages] = useState<TutorLanguage[] | null>(null);
+  const [languagesFailed, setLanguagesFailed] = useState(false);
+  const [language, setLanguage] = useState(ENGLISH);
+  const [languageError, setLanguageError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetch("/api/languages", {
+      cache: "no-store",
+      credentials: "same-origin",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        const payload: unknown = await response.json().catch(() => null);
+        const parsed = response.ok ? parseLanguages(payload) : null;
+        setLanguages(parsed?.length ? parsed : ENGLISH_ONLY);
+        setLanguagesFailed(!parsed?.length);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setLanguages(ENGLISH_ONLY);
+        setLanguagesFailed(true);
+      });
+    return () => controller.abort();
+  }, []);
 
   useEffect(
     () => () => {
@@ -42,11 +75,17 @@ function TutorScreen({ workflowId }: { workflowId: string }) {
 
   async function startSession() {
     setActionError(null);
+    setLanguageError(null);
     setIsStarting(true);
     try {
       const response = await fetch(
         `/api/workflows/${encodeURIComponent(workflowId)}/tutor-sessions`,
-        { credentials: "same-origin", method: "POST" },
+        {
+          body: JSON.stringify({ language }),
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+        },
       );
       const payload: unknown = await response.json().catch(() => null);
       const error = parseTutorRouteError(payload);
@@ -55,6 +94,10 @@ function TutorScreen({ workflowId }: { workflowId: string }) {
         return;
       }
       if (!response.ok) {
+        if (error?.code === "invalid_input" && error.languageField) {
+          setLanguageError(error.languageField);
+          return;
+        }
         setActionError(
           error?.message ??
             (error?.code === "no_map"
@@ -166,6 +209,42 @@ function TutorScreen({ workflowId }: { workflowId: string }) {
             <p className="mt-3 text-sm leading-6 text-stone-600">
               Tiro will use this workflow’s newest confirmed Work Map. You will connect voice and open the companion before sharing the tool tab.
             </p>
+            <div className="mt-6">
+              <label className="text-sm font-semibold text-stone-800" htmlFor="tutor-language">
+                Language of the lesson
+              </label>
+              <select
+                aria-describedby={`tutor-language-help${languageError ? " tutor-language-error" : ""}`}
+                aria-invalid={Boolean(languageError)}
+                className={`mt-2 h-11 w-full rounded-lg border bg-white px-3 text-base outline-none focus:ring-2 disabled:bg-stone-50 disabled:text-stone-500 sm:max-w-xs sm:text-sm ${
+                  languageError
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                    : "border-stone-300 focus:border-teal-700 focus:ring-teal-100"
+                }`}
+                disabled={!languages || isStarting}
+                id="tutor-language"
+                onChange={(event) => {
+                  setLanguage(event.target.value);
+                  setLanguageError(null);
+                }}
+                value={language}
+              >
+                {(languages ?? ENGLISH_ONLY).map((option) => (
+                  <option key={option.code} lang={option.code} value={option.code}>
+                    {option.ownName}
+                  </option>
+                ))}
+              </select>
+              {languageError ? (
+                <p className="mt-1.5 text-xs font-medium text-red-700" id="tutor-language-error">
+                  {languageError}
+                </p>
+              ) : null}
+              <p className="mt-2 text-sm leading-6 text-stone-600" id="tutor-language-help">
+                Tiro will speak and listen in this language; the screens and the Work Map stay as the expert wrote them.
+                {languagesFailed ? " Other languages couldn’t be loaded, so this lesson will be in English." : null}
+              </p>
+            </div>
             <button className="mt-6 h-11 rounded-lg bg-teal-900 px-5 text-sm font-semibold text-white outline-none hover:bg-teal-950 disabled:cursor-wait disabled:bg-teal-100 disabled:text-teal-700 focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2" disabled={isStarting} onClick={() => void startSession()} type="button">
               {isStarting ? "Starting session…" : "Start a tutor session"}
             </button>
