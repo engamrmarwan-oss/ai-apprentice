@@ -7,7 +7,7 @@ import type {
   WorkMapStep,
 } from "@/capture/debrief";
 import type { Question } from "@/contract";
-import { debriefPhaseLabel, openQuestionCount } from "./types";
+import { debriefPhaseLabel, hasEmptyMap, openQuestionCount } from "./types";
 
 type DebriefViewProps = {
   onBuild: () => Promise<void>;
@@ -32,7 +32,8 @@ export function DebriefView({
   view,
 }: DebriefViewProps) {
   const openItems = openQuestionCount(view);
-  const canEdit = view.phase === "teach_back";
+  const emptyMap = hasEmptyMap(view);
+  const canEdit = view.phase === "teach_back" && !emptyMap;
 
   return (
     <div className="min-w-0 space-y-8">
@@ -65,14 +66,16 @@ export function DebriefView({
         >
           I have answered
         </button>
-        <button
-          className="h-10 rounded-lg bg-teal-900 px-4 text-sm font-semibold text-white outline-none hover:bg-teal-950 disabled:cursor-not-allowed disabled:bg-teal-100 disabled:text-teal-700 focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"
-          disabled={!canEdit}
-          onClick={() => void onConfirm()}
-          type="button"
-        >
-          Confirm Work Map
-        </button>
+        {emptyMap ? null : (
+          <button
+            className="h-10 rounded-lg bg-teal-900 px-4 text-sm font-semibold text-white outline-none hover:bg-teal-950 disabled:cursor-not-allowed disabled:bg-teal-100 disabled:text-teal-700 focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"
+            disabled={!canEdit}
+            onClick={() => void onConfirm()}
+            type="button"
+          >
+            Confirm Work Map
+          </button>
+        )}
       </section>
 
       {view.problem ? (
@@ -147,7 +150,9 @@ export function DebriefView({
         </aside>
       </div>
 
-      {view.workMap ? (
+      {emptyMap ? (
+        <NothingToKeep view={view} />
+      ) : view.workMap ? (
         <TeachBack
           canEdit={canEdit}
           onConfirm={onConfirm}
@@ -269,6 +274,39 @@ function TeachBack({
       >
         Confirm Work Map
       </button>
+    </section>
+  );
+}
+
+function NothingToKeep({ view }: { view: EngineDebriefView }) {
+  return (
+    <section className="border-t border-stone-200 pt-8" aria-labelledby="teach-back-heading">
+      <h2 className="text-3xl font-semibold tracking-[-0.035em]" id="teach-back-heading">
+        Tiro has nothing it can keep from this session
+      </h2>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">
+        A Work Map needs at least one step the expert explained. Nothing from this session was solid enough to keep, so there is no Work Map to confirm. Record another session and explain why you do what you do as you work.
+      </p>
+
+      {view.leftOut.length ? (
+        <section className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4" aria-labelledby="left-out-heading">
+          <h3 className="font-semibold text-amber-950" id="left-out-heading">What was left out, and why</h3>
+          <ul className="mt-2 space-y-3 text-sm leading-6 text-amber-950">
+            {view.leftOut.map((item, index) => (
+              <li key={`${item.what}-${index}`}>
+                <p>
+                  <span className="font-semibold">{label(item.what)}:</span> {item.text}
+                </p>
+                <p className="text-amber-900">{item.why}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : (
+        <p className="mt-6 rounded-xl border border-dashed border-stone-300 p-4 text-sm leading-6 text-stone-600">
+          Tiro found no step or rule to put in the map at all.
+        </p>
+      )}
     </section>
   );
 }
