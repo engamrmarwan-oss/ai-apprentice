@@ -227,12 +227,22 @@ describe("how the floor closes", () => {
     expect(closedWith(done.map((one) => one.action))?.reason).toBe("yielded");
   });
 
-  it("closes at once when the agent starts a third turn", () => {
+  it("closes at once when the agent asks a third question", () => {
     const conductor = withOpenFloor();
     conductor.agentSaid(13_500, "So you held it, correct?");
     conductor.expertReplied(16_000);
     conductor.agentSaid(17_000, "Why hold it?");
-    expect(closedWith(conductor.agentSaid(20_000, "And another thing?"))).toMatchObject({ reason: "limit", agentTurns: 2 });
+    expect(closedWith(conductor.agentSaid(20_000, "And another thing?"))).toMatchObject({ reason: "limit", agentTurns: 2, asked: 2 });
+  });
+
+  it("lets the agent acknowledge the last answer in a word, and closes after it", () => {
+    const conductor = withOpenFloor();
+    conductor.agentSaid(13_500, "So you held it, correct?");
+    conductor.expertReplied(16_000);
+    conductor.agentSaid(17_000, "Why hold it?");
+    conductor.expertReplied(22_000);
+    expect(conductor.agentSaid(22_500, "Noted.")).toEqual([]);
+    expect(closedWith(conductor.yielded(22_600))).toMatchObject({ reason: "yielded", agentTurns: 3, asked: 2, followUpAnswered: true });
   });
 
   it("gives up when the expert does not answer", () => {

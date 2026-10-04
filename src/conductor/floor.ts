@@ -51,8 +51,9 @@ export type FloorRecord = {
   closedAt: number;
   reason: CloseReason;
   plan: TurnPlan | null;
-  /** How many times Tiro spoke. */
+  /** How many times Tiro spoke, and how many of those asked something. */
   agentTurns: number;
+  asked: number;
   /** Whether Tiro got as far as its follow-up question, and when it asked it. */
   followUpAskedAt: number | null;
   /** Whether the expert said anything after the follow-up. */
@@ -83,6 +84,8 @@ type Open = {
   openedAt: number;
   plan: TurnPlan | null;
   agentTurns: number;
+  /** How many of Tiro's turns asked something. Only these are limited. */
+  asked: number;
   /** Whether Tiro's latest turn asked something. A turn that asks nothing ends the floor. */
   lastTurnAsked: boolean;
   lastAgentTurnAt: number | null;
@@ -120,7 +123,9 @@ export function createConductor(config: WorkflowConfig) {
   let lastOwnTurnClosedAt = -Infinity;
 
   const inWindow = (t: number) => ownTurns.filter((at) => t - at < config.questions_window_ms).length;
-  const turnLimit = (kind: FloorKind) => (kind === "opening" ? config.opening_turns : 1 + config.follow_ups);
+  /** How many times Tiro may ask on one floor. When the expert called it, they speak first and Tiro has only its follow-ups. */
+  const askLimit = (kind: FloorKind) =>
+    kind === "opening" ? config.opening_turns : kind === "called" ? config.follow_ups : 1 + config.follow_ups;
 
   function open(kind: FloorKind, t: number, withPlan: TurnPlan | null): Action {
     floor = {
@@ -128,6 +133,7 @@ export function createConductor(config: WorkflowConfig) {
       openedAt: t,
       plan: withPlan,
       agentTurns: 0,
+      asked: 0,
       lastTurnAsked: false,
       lastAgentTurnAt: null,
       agentQuietAt: null,
@@ -151,6 +157,7 @@ export function createConductor(config: WorkflowConfig) {
       reason,
       plan: floor.plan,
       agentTurns: floor.agentTurns,
+      asked: floor.asked,
       followUpAskedAt: floor.followUpAskedAt,
       followUpAnswered: floor.followUpAnswered,
     };
@@ -206,7 +213,7 @@ export function createConductor(config: WorkflowConfig) {
     }
 
     if (floor.repliedSinceTurn && floor.lastReplyAt !== null) {
-      if (floor.yielded || floor.agentTurns >= turnLimit(floor.kind)) return floor.yielded ? "yielded" : "answered";
+      if (floor.yielded || floor.asked >= askLimit(floor.kind)) return floor.yielded ? "yielded" : "answered";
       // Tiro may still follow up. If it does not, the exchange is over.
       return t - floor.lastReplyAt >= config.after_answer_ms ? "answered" : null;
     }
@@ -270,19 +277,25 @@ export function createConductor(config: WorkflowConfig) {
       if (floor && !speaking) floor.agentQuietAt = t;
     },
 
-    /** Tiro said something. More turns than it is allowed closes the floor at once. */
+    /**
+     * Tiro said something. Only turns that ask are limited: one more question
+     * than it is allowed closes the floor at once. A turn that asks nothing, a
+     * word of acknowledgement, ends the floor as soon as it has been said.
+     */
     agentSaid(t: number, text: string): Action[] {
       if (!floor) return [];
-      if (floor.agentTurns >= turnLimit(floor.kind)) return close(t, "limit");
-      floor.agentTurns++;
       // Tiro's first words on a floor it was given always call for an answer, however they are punctuated.
-      floor.lastTurnAsked = (floor.agentTurns === 1 && floor.kind !== "called") || asks(text);
+      const asking = (floor.agentTurns === 0 && floor.kind !== "called") || asks(text);
+      if (asking && floor.asked >= askLimit(floor.kind)) return close(t, "limit");
+      floor.agentTurns++;
+      if (asking) floor.asked++;
+      floor.lastTurnAsked = asking;
       floor.lastAgentTurnAt = t;
       floor.agentQuietAt = null;
       floor.repliedSinceTurn = false;
       floor.activitySince = null;
-      // On a summary floor the second turn is the follow-up, if it asks anything.
-      if (floor.kind === "summary" && floor.agentTurns === 2 && floor.lastTurnAsked) floor.followUpAskedAt = t;
+      // On a summary floor the second question is the follow-up.
+      if (floor.kind === "summary" && asking && floor.asked === 2) floor.followUpAskedAt = t;
       return [];
     },
 
