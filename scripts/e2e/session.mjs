@@ -274,14 +274,21 @@ const turns = view.floors.filter((floor) => floor.kind === "summary" && floor.ag
 const asked = stored.questions.filter((question) => question.status === "asked" || question.status === "answered");
 const guardrail = asked.filter((question) => ["limit", "exception", "stop_and_ask"].includes(question.kind));
 const expert = stored.utterances.filter((utterance) => utterance.speaker === "expert");
-// In ten minutes Tiro takes at least three turns, 90 seconds apart. A shorter replay leaves room for fewer.
+// In ten minutes Tiro takes at least three turns. A shorter replay leaves room for fewer.
 const expectedTurns = Math.min(3, Math.max(1, Math.floor((seconds - 30) / 110)));
+// How long after each decision Tiro began to speak about it, in seconds.
+const lags = turns.flatMap((floor) => {
+  const first = view.spoken.find((one) => one.speaker === "agent" && one.start_ms >= floor.openedAt && one.start_ms <= floor.closedAt);
+  return first && floor.plan ? [Math.round((first.start_ms - floor.plan.decisionAt) / 1000)] : [];
+});
 
 const checks = [
   ["Reads decisions from the screen", decisions.length > 0, `${stored.events.length} events, ${decisions.length} of them decisions`],
   ["Keeps a transcript of the expert", expert.length >= 3, `${expert.length} stretches of speech`],
   ["Opens with a conversation about the goal", view.floors.some((floor) => floor.kind === "opening" && floor.agentTurns > 0), ""],
   [`Takes ${expectedTurns} or more turns at a pause`, turns.length >= expectedTurns, `${turns.length}`],
+  // A turn opens within 20 seconds of its decision; the voice needs a moment more to start.
+  ["Speaks about a decision while it is fresh", lags.length > 0 && lags.every((lag) => lag <= 25), `${lags.join(", ")} seconds after`],
   ["Asks a guardrail question and links its answer", guardrail.some((question) => question.answer_utterance_id), guardrail.map((question) => `${question.kind}: ${question.text}`).join(" | ") || "none"],
   ["Listens when called by name", view.floors.some((floor) => floor.kind === "called"), ""],
   ["Leaves the rest of its questions for the debrief", stored.questions.every((question) => question.status !== "queued" || question.channel === "debrief"), `${stored.questions.filter((question) => question.status === "queued").length} waiting`],
