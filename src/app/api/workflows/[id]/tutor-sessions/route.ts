@@ -1,5 +1,7 @@
 import type { NextRequest } from "next/server";
-import { fail, ok, unavailable } from "@/server/http";
+import { z } from "zod";
+import { fail, ok, readOptionalBody, unavailable } from "@/server/http";
+import { languageSchema } from "@/server/languages";
 import { requireWorkflowRole } from "@/server/require-user";
 import { listSessions } from "@/server/sessions";
 import { startTutorSession } from "@/server/tutor";
@@ -22,15 +24,20 @@ export async function GET(request: NextRequest, context: RouteContext<"/api/work
 
 /**
  * Starts a tutor session for the person signed in, on the workflow's newest
- * confirmed Work Map. Anyone on the workflow may be taught it. `no_map` (409)
- * when the expert has not confirmed a Work Map yet.
+ * confirmed Work Map. Anyone on the workflow may be taught it. The body may
+ * name the `language` the lesson is held in, as a two-letter code; without
+ * one it is English. `no_map` (409) when the expert has not confirmed a Work
+ * Map yet.
  */
 export async function POST(request: NextRequest, context: RouteContext<"/api/workflows/[id]/tutor-sessions">) {
   const { id } = await context.params;
   const check = await requireWorkflowRole(request, id);
   if (!check.ok) return check.response;
 
-  const started = await startTutorSession(id, check.user);
+  const body = await readOptionalBody(request, z.strictObject({ language: languageSchema.optional() }));
+  if (!body.ok) return body.response;
+
+  const started = await startTutorSession(id, check.user, body.value.language);
   if (started.ok) return ok({ session: started.session, work_map: started.work_map });
   return started.reason === "no_map"
     ? fail(409, "no_map", "There is nothing to teach yet: the expert has not confirmed a Work Map for this workflow.")

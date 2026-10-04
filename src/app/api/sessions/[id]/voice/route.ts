@@ -3,7 +3,8 @@ import { scribeToken, signedUrlFor } from "@/server/elevenlabs";
 import { fail, ok } from "@/server/http";
 import { requireRecordingSession } from "@/server/require-session";
 import { loadBaseline } from "@/server/sessions";
-import { mapAsText, mapOfTutorSession } from "@/server/tutor";
+import { languageName } from "@/server/languages";
+import { expertLanguageOf, mapAsText, mapOfTutorSession } from "@/server/tutor";
 
 export const dynamic = "force-dynamic";
 
@@ -13,8 +14,9 @@ export const dynamic = "force-dynamic";
  * the tutor for a tutor session), a single-use transcription token, and the
  * values that agent's prompt template takes. A tutor is handed the confirmed
  * Work Map it teaches, read fresh, and its id, so it can look the map up
- * again through Tiro's MCP server. Call it again to reconnect. The workspace
- * key never leaves the server.
+ * again through Tiro's MCP server; and the language of the lesson, with the
+ * language the expert spoke. Call it again to reconnect. The workspace key
+ * never leaves the server.
  */
 export async function POST(request: NextRequest, context: RouteContext<"/api/sessions/[id]/voice">) {
   const { id } = await context.params;
@@ -29,8 +31,12 @@ export async function POST(request: NextRequest, context: RouteContext<"/api/ses
     return ok({
       signed_url: signed.value,
       scribe_token: scribe.value,
+      // The lesson's language: the engine has the tutor speak it and the transcriber listen for it.
+      language: check.session.language,
       variables: {
         learner_name: check.user.name,
+        language: languageName(check.session.language),
+        expert_language: languageName(await expertLanguageOf(taught.work_map)),
         tool_name: check.workflow.tool.name,
         task: check.workflow.task,
         expert_role: check.workflow.role ?? "the expert",

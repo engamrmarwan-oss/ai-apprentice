@@ -8,7 +8,7 @@
 // the transcriber does, the server checks what was said against the rules,
 // and only then is the tutor told what to answer. So a wrong prediction is
 // never waved through by a model that wanted to be agreeable.
-import { CommitStrategy, Conversation, RealtimeEvents, Scribe, type RealtimeConnection } from "@elevenlabs/client";
+import { CommitStrategy, Conversation, RealtimeEvents, Scribe, type Language, type RealtimeConnection } from "@elevenlabs/client";
 import { DEFAULT_CONFIG } from "@/conductor/config";
 import { describeEvent } from "@/conductor/describe";
 import type { TiroEvent } from "@/contract/event";
@@ -80,7 +80,7 @@ async function call<T>(path: string, init: RequestInit): Promise<Result<T>> {
 
 const json = (method: "POST", body: unknown = {}): RequestInit => ({ method, headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
 
-type VoiceGrant = { signed_url: string; scribe_token: string; variables: Record<string, string> };
+type VoiceGrant = { signed_url: string; scribe_token: string; language?: string; variables: Record<string, string> };
 type FrameAnswer = {
   frame: { id: string; t_ms: number };
   read: boolean;
@@ -332,10 +332,12 @@ export function createTutorEngine(sessionId: string, workMap: WorkMap, onView: (
     update({ voice: "lost", agentSpeaking: false, partial: "", floor: { state: "closed", kind: null }, problem: "The voice connection dropped. Tiro keeps watching the screen." });
   }
 
-  function listen(token: string): RealtimeConnection {
+  function listen(token: string, language: string): RealtimeConnection {
     const connection = Scribe.connect({
       token,
       modelId: "scribe_v2_realtime",
+      // A lesson in another language is listened to in that language.
+      ...(language !== "en" ? { languageCode: language } : {}),
       commitStrategy: CommitStrategy.VAD,
       vadSilenceThresholdSecs: Math.min(3, Math.max(0.3, config.speech_silent_ms / 1000)),
       keyterms: config.wake_words.slice(0, 1),
@@ -401,11 +403,14 @@ export function createTutorEngine(sessionId: string, workMap: WorkMap, onView: (
       update({ voice: "off", problem: grant.message });
       return false;
     }
+    const language = grant.value.language ?? "en";
     try {
       const session = await Conversation.startSession({
         signedUrl: grant.value.signed_url,
         connectionType: "websocket",
         dynamicVariables: grant.value.variables,
+        // The tutor speaks the lesson's language, whatever language the map is written in.
+        ...(language !== "en" ? { overrides: { agent: { language: language as Language } } } : {}),
         clientTools,
         onConnect: ({ conversationId }) => {
           void call(`${base}/conversation`, json("POST", { conversation_id: conversationId }));
@@ -423,7 +428,7 @@ export function createTutorEngine(sessionId: string, workMap: WorkMap, onView: (
       session.setMicMuted(true);
       session.setVolume({ volume: 0 });
       voice = session;
-      scribe = listen(grant.value.scribe_token);
+      scribe = listen(grant.value.scribe_token, language);
       update({ voice: "on" });
       return true;
     } catch {

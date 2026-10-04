@@ -58,7 +58,13 @@ export function TutorBench() {
 
   const begin = async (workflowId: string) => {
     setError(null);
-    const response = await fetch(`/api/workflows/${workflowId}/tutor-sessions`, { method: "POST", credentials: "same-origin" });
+    // A lesson in another language: open the bench with ?language=de.
+    const language = new URLSearchParams(window.location.search).get("language");
+    const response = await fetch(`/api/workflows/${workflowId}/tutor-sessions`, {
+      method: "POST",
+      credentials: "same-origin",
+      ...(language ? { headers: { "content-type": "application/json" }, body: JSON.stringify({ language }) } : {}),
+    });
     const answer = await response.json().catch(() => null);
     if (!response.ok || !answer?.ok) {
       setError(answer?.error?.message ?? `The server answered ${response.status}.`);

@@ -43,3 +43,16 @@ export async function readBody<S extends z.ZodType>(request: Request, schema: S)
   }
   return { ok: false, response: fail(400, "invalid_input", "Some fields need correcting.", fields) };
 }
+
+/**
+ * As `readBody`, for a route whose body may be left out: no body at all is
+ * read as an empty object, so the schema's own defaults apply.
+ */
+export async function readOptionalBody<S extends z.ZodType>(request: Request, schema: S): Promise<Parsed<z.infer<S>>> {
+  const text = await request.text().catch(() => "");
+  if (text.trim() === "") {
+    const empty = schema.safeParse({});
+    if (empty.success) return { ok: true, value: empty.data };
+  }
+  return readBody(new Request(request.url, { method: "POST", body: text }), schema);
+}

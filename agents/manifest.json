@@ -47,9 +47,11 @@
       "prompt": "prompts/tutor.md",
       "variables": [
         "learner_name",
+        "language",
         "tool_name",
         "task",
         "expert_role",
+        "expert_language",
         "work_map_id",
         "work_map"
       ],

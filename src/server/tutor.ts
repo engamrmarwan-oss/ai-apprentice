@@ -18,13 +18,15 @@ const SESSION_COLUMNS = "id, workflow_id, kind, language, phase, user_id, conver
 const RECENT_EVENTS = 12;
 
 /**
- * Starts a tutor session on the workflow's newest confirmed Work Map. The
- * session pins that version: what is taught does not change under the
- * learner. `no_map` when the expert has not confirmed one yet.
+ * Starts a tutor session on the workflow's newest confirmed Work Map, held
+ * in the learner's language. The session pins that version: what is taught
+ * does not change under the learner. `no_map` when the expert has not
+ * confirmed one yet.
  */
 export async function startTutorSession(
   workflowId: string,
   user: User,
+  language = "en",
 ): Promise<{ ok: true; session: Session; work_map: WorkMapView } | { ok: false; reason: "no_map" } | Unavailable> {
   const latest = await latestWorkMap(workflowId, true);
   if (!latest.ok) return unavailable;
@@ -35,7 +37,7 @@ export async function startTutorSession(
     const session = mustHave(
       await client
         .from("sessions")
-        .insert({ workflow_id: workflowId, kind: "tutor", phase: "teach", user_id: user.id, started_at: new Date().toISOString() })
+        .insert({ workflow_id: workflowId, kind: "tutor", phase: "teach", language, user_id: user.id, started_at: new Date().toISOString() })
         .select(SESSION_COLUMNS)
         .single(),
     );
@@ -59,6 +61,18 @@ export async function mapOfTutorSession(sessionId: string): Promise<{ ok: true; 
   const run = await runOf(sessionId);
   if (!run.ok) return unavailable;
   return run.run ? loadWorkMap(run.run.work_map_id) : { ok: true, work_map: null };
+}
+
+/**
+ * The language the expert spoke when they taught a map, as a two-letter
+ * code. English when it cannot be read: the tutor then quotes the expert as
+ * the words stand.
+ */
+export async function expertLanguageOf(map: Pick<WorkMapView, "session_id">): Promise<string> {
+  const read = await withDatabase(async (client, signal) =>
+    must(await client.from("sessions").select("language").eq("id", map.session_id).abortSignal(signal).maybeSingle()),
+  );
+  return read.ok && read.value?.language ? read.value.language : "en";
 }
 
 /** The confirmed process as the tutor is handed it at the start of a session: steps and rules, each rule with its id and the expert's words. */
