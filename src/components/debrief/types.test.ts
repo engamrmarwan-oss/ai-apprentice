@@ -1,18 +1,35 @@
 import { describe, expect, it } from "vitest";
-import { debriefFixture } from "@/fixtures/debrief";
-import {
-  answeredQuestionCount,
-  floorLabel,
-  openDebriefQuestions,
-} from "./types";
+import { EMPTY_DEBRIEF } from "@/capture/debrief";
+import type { Question } from "@/contract";
+import { debriefPhaseLabel, openQuestionCount } from "./types";
 
-describe("debrief presentation helpers", () => {
-  it("separates open debrief items from answered questions", () => {
-    expect(openDebriefQuestions(debriefFixture.questions)).toHaveLength(3);
-    expect(answeredQuestionCount(debriefFixture.questions)).toBe(2);
+const question = (id: string, status: Question["status"]): Question => ({
+  answer_utterance_id: null,
+  baseline_statement_id: null,
+  channel: "debrief",
+  id,
+  kind: "reason",
+  score: 0.8,
+  session_id: "session-id",
+  status,
+  text: "Why?",
+  trigger_event_id: null,
+});
+
+describe("debrief view helpers", () => {
+  it("counts open questions from ask and listed", () => {
+    expect(
+      openQuestionCount({
+        ...EMPTY_DEBRIEF,
+        ask: [question("ask", "asked")],
+        listed: [question("listed", "queued"), question("done", "answered")],
+      }),
+    ).toBe(2);
   });
 
-  it("turns the floor state into plain language", () => {
-    expect(floorLabel(debriefFixture.floor)).toBe("Tiro is listening");
+  it("describes the engine phase", () => {
+    expect(debriefPhaseLabel({ ...EMPTY_DEBRIEF, phase: "building" })).toBe(
+      "Building the Work Map",
+    );
   });
 });
