@@ -1,7 +1,7 @@
 // Runs one expert session end to end with nobody at the keyboard, and checks
 // that it produced what the capture phase asks for.
 //
-//   npm run check:session -- <app address> <recording folder> [seconds] [--keep] [--save=<file>]
+//   npm run check:session -- <app address> <recording folder> [seconds] [--debrief] [--keep] [--as-demo] [--save=<file>]
 //
 // A tab replays a recorded session of the tool (a folder with manifest.json
 // and frames/, as the recorder at /spikes/record saves it) in place of the
@@ -25,7 +25,7 @@ import { createClient } from "@supabase/supabase-js";
 import { chromium } from "playwright-core";
 
 const args = process.argv.slice(2).filter((arg) => !arg.startsWith("--"));
-const keep = process.argv.includes("--keep");
+const keep = process.argv.includes("--keep") || process.argv.includes("--as-demo");
 const withDebrief = process.argv.includes("--debrief");
 const saveTo = process.argv.find((arg) => arg.startsWith("--save="))?.slice("--save=".length);
 const [appUrl, recording, secondsArg = "150"] = args;
@@ -81,7 +81,15 @@ const replayUrl = `http://127.0.0.1:${server.address().port}/`;
 const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, { auth: { persistSession: false } });
 const code = readFileSync(path.join(repo, "fixtures/local/signup-codes.txt"), "utf8").trim().split("\n").at(-1).split(/\s+/)[1];
 const stamp = Date.now();
-const account = { email: `e2e.capture.${stamp}@example.com`, password: `pw-${stamp}-capture`, name: "Robin" };
+// With --as-demo, the session is run as the demo expert and everything is kept: this is how the demo
+// accounts get a confirmed Work Map. The password is read from the local file and never printed.
+const asDemo = process.argv.includes("--as-demo");
+const demo = (label) => {
+  const line = readFileSync(path.join(repo, "fixtures/local/demo-accounts.txt"), "utf8").split("\n").findLast((one) => one.startsWith(`${label}:`));
+  const [email, password] = line.slice(label.length + 1).trim().split(/\s+/);
+  return { email, password };
+};
+const account = asDemo ? { ...demo("Demo expert"), name: "Demo expert" } : { email: `e2e.capture.${stamp}@example.com`, password: `pw-${stamp}-capture`, name: "Robin" };
 
 const started = Date.now();
 const say = (...parts) => console.log(((Date.now() - started) / 1000).toFixed(1).padStart(6), ...parts);
@@ -138,8 +146,10 @@ try {
   const page = await context.newPage();
   page.on("pageerror", (error) => say("page error:", String(error).slice(0, 300)));
 
-  const signUp = await page.request.post(`${appUrl}/api/auth/sign-up`, { data: { ...account, invite_code: code } });
-  if (!signUp.ok()) throw new Error(`sign-up failed: ${signUp.status()}`);
+  const signUp = asDemo
+    ? await page.request.post(`${appUrl}/api/auth/sign-in`, { data: { email: account.email, password: account.password } })
+    : await page.request.post(`${appUrl}/api/auth/sign-up`, { data: { ...account, invite_code: code } });
+  if (!signUp.ok()) throw new Error(`${asDemo ? "sign-in" : "sign-up"} failed: ${signUp.status()}`);
 
   await page.goto(`${appUrl}/spikes/session`);
   await page.getByPlaceholder("The tool, for example its name").fill("Crystal");
@@ -313,6 +323,14 @@ try {
     const map = await (await page.request.get(`${appUrl}/api/workflows/${session.workflow.id}/work-map`)).json();
     debrief = { phase: state.phase, verified: state.reading[0], doubted: state.reading[1], asked, said: state.said, map: map.work_map ?? null, session: session.session };
     if (saveTo) writeFileSync(saveTo, JSON.stringify({ ...result, debrief }, null, 2));
+    if (asDemo && map.work_map?.status === "confirmed") {
+      // What a judge needs beyond the map: the new hire on the workflow, the tool map, and the rules compiled against it.
+      const workflow = session.workflow.id;
+      const invited = await page.request.post(`${appUrl}/api/workflows/${workflow}/invitations`, { data: { email: demo("Demo new hire").email } });
+      const tool = await page.request.post(`${appUrl}/api/workflows/${workflow}/tool-map`);
+      const compiled = await page.request.post(`${appUrl}/api/work-maps/${map.work_map.id}/compile`);
+      say("demo: new hire invited", invited.status(), "· tool map", tool.status(), "· rules compiled", compiled.status());
+    }
   }
 } finally {
   await browser.close();
