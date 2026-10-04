@@ -10,7 +10,7 @@ export default function SignUpPage() {
       alternateAction="Sign in"
       alternateHref="/sign-in"
       alternatePrompt="Already have an account?"
-      description="Create an account with an invite code, or use the email an expert invited to a workflow."
+      description="Use your name, your work email and a password. If an expert invited you, use the email they invited."
       title="Create your account"
     >
       <AuthForm kind="sign-up" />
