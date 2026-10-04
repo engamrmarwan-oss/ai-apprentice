@@ -1,7 +1,7 @@
 // Runs one expert session end to end with nobody at the keyboard, and checks
 // that it produced what the capture phase asks for.
 //
-//   npm run check:session -- <app address> <recording folder> [seconds] [--keep]
+//   npm run check:session -- <app address> <recording folder> [seconds] [--keep] [--save=<file>]
 //
 // A tab replays a recorded session of the tool (a folder with manifest.json
 // and frames/, as the recorder at /spikes/record saves it) in place of the
@@ -12,9 +12,11 @@
 //
 // It signs up an account of its own with the newest sign-up code and removes
 // it, with everything it recorded, at the end. `--keep` leaves it in place.
+// `--save=<file>` writes the session's record (events, speech, turns,
+// questions and the engine's trace) to a file before it is removed.
 // Prints no secret. Exits with 1 if a check fails.
 import { execFileSync } from "node:child_process";
-import { createReadStream, existsSync, mkdtempSync, readFileSync, statSync } from "node:fs";
+import { createReadStream, existsSync, mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -24,6 +26,7 @@ import { chromium } from "playwright-core";
 
 const args = process.argv.slice(2).filter((arg) => !arg.startsWith("--"));
 const keep = process.argv.includes("--keep");
+const saveTo = process.argv.find((arg) => arg.startsWith("--save="))?.slice("--save=".length);
 const [appUrl, recording, secondsArg = "150"] = args;
 if (!appUrl || !recording || !existsSync(path.join(recording, "manifest.json"))) {
   console.error("Usage: npm run check:session -- <app address> <recording folder> [seconds] [--keep]");
@@ -239,6 +242,7 @@ try {
   await until((state) => state.now.Session === "ended", 60_000, "the task to end");
   const [download] = await Promise.all([page.waitForEvent("download", { timeout: 20_000 }), page.getByRole("button", { name: "Download the result" }).click()]);
   result = JSON.parse(readFileSync(await download.path(), "utf8"));
+  if (saveTo) writeFileSync(saveTo, JSON.stringify(result, null, 2));
 } finally {
   await browser.close();
   server.close();
