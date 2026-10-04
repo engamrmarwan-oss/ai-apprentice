@@ -25,9 +25,9 @@ export function AppShell({
   const navigation = getNavigation(workflow);
 
   return (
-    <div className="min-h-dvh bg-stone-50 text-stone-950 md:grid md:grid-cols-[15rem_minmax(0,1fr)]">
-      <aside className="border-b border-stone-200 bg-white md:sticky md:top-0 md:h-dvh md:border-r md:border-b-0">
-        <div className="flex h-full flex-col px-4 py-4 md:px-5 md:py-6">
+    <div className="min-h-dvh overflow-x-hidden bg-stone-50 text-stone-950 md:grid md:grid-cols-[15rem_minmax(0,1fr)] md:overflow-x-visible">
+      <aside className="min-w-0 overflow-x-hidden border-b border-stone-200 bg-white md:sticky md:top-0 md:h-dvh md:overflow-x-visible md:border-r md:border-b-0">
+        <div className="flex h-full min-w-0 flex-col px-4 py-4 md:px-5 md:py-6">
           <div className="flex items-center justify-between gap-3">
             <Link
               className="flex w-fit items-center gap-2 rounded-lg px-2 py-1 text-xl font-semibold tracking-[-0.03em] outline-none focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"
@@ -56,7 +56,7 @@ export function AppShell({
 
           <nav
             aria-label="Primary navigation"
-            className="mt-4 flex gap-2 overflow-x-auto pb-1 md:mt-8 md:block md:space-y-7 md:overflow-visible"
+            className="mt-4 flex w-full min-w-0 max-w-full gap-2 overflow-x-auto pb-1 md:mt-8 md:block md:space-y-7 md:overflow-visible"
           >
             {navigation.map((group) => (
               <div className="shrink-0 md:block" key={group.label}>
