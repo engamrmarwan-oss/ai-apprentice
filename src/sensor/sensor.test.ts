@@ -27,7 +27,7 @@ describe("diffGrids", () => {
   const blank = grid(10, 10);
 
   it("reports no change for identical grids", () => {
-    expect(diffGrids(blank, grid(10, 10))).toEqual({ changed: false, fraction: 0, region: null });
+    expect(diffGrids(blank, grid(10, 10))).toEqual({ changed: false, count: 0, fraction: 0, region: null });
   });
 
   it("ignores brightness moves below the cell threshold", () => {
@@ -42,6 +42,7 @@ describe("diffGrids", () => {
     const next = withCells(blank, 200, [[2, 3], [5, 6]]);
     expect(diffGrids(blank, next)).toEqual({
       changed: true,
+      count: 2,
       fraction: 0.02,
       region: { x: 0.2, y: 0.3, width: 0.4, height: 0.4 },
     });
@@ -50,6 +51,7 @@ describe("diffGrids", () => {
   it("treats a resized frame as fully changed", () => {
     expect(diffGrids(blank, grid(12, 10))).toEqual({
       changed: true,
+      count: 120,
       fraction: 1,
       region: { x: 0, y: 0, width: 1, height: 1 },
     });

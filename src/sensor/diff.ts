@@ -6,6 +6,8 @@ export type Region = { x: number; y: number; width: number; height: number };
 
 export type Diff = {
   changed: boolean;
+  /** How many of the grid's cells changed. */
+  count: number;
   /** Share of the grid's cells that changed, 0 to 1. */
   fraction: number;
   /** The box around every changed cell, or null when nothing changed. */
@@ -51,7 +53,7 @@ export function diffGrids(
 ): Diff {
   const { width, height } = current;
   if (previous.width !== width || previous.height !== height) {
-    return { changed: true, fraction: 1, region: { x: 0, y: 0, width: 1, height: 1 } };
+    return { changed: true, count: width * height, fraction: 1, region: { x: 0, y: 0, width: 1, height: 1 } };
   }
 
   let count = 0;
@@ -71,9 +73,10 @@ export function diffGrids(
     }
   }
 
-  if (count < options.minCells) return { changed: false, fraction: 0, region: null };
+  if (count < options.minCells) return { changed: false, count: 0, fraction: 0, region: null };
   return {
     changed: true,
+    count,
     fraction: count / (width * height),
     region: {
       x: minX / width,
