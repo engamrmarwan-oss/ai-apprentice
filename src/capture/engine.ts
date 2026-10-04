@@ -13,7 +13,7 @@ import { createConductor, type Action, type Conductor, type FloorKind, type Floo
 import type { TiroEvent } from "@/contract/event";
 import type { Question } from "@/contract/question";
 import { startScreenSensor, type ScreenSensor, type SensorFrame } from "@/sensor/screen-sensor";
-import { hearsWakeWord, replacePending, spokenText, startsVisit, triggerFor } from "./parts";
+import { heardTrigger, hearsWakeWord, RELAY_AFTER_MS, replacePending, spokenText, startsVisit, triggerFor } from "./parts";
 
 /** One stretch of speech, as the capture screen shows it. `id` is set once it is stored. */
 export type Spoken = { key: number; id: string | null; speaker: "expert" | "new_hire" | "agent"; start_ms: number; end_ms: number; text: string };
@@ -355,9 +355,36 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
     update({ agentSpeaking: speaking });
   }
 
+  /** What the expert has answered since Tiro last spoke, and the wait before it is passed on to an agent that has not reacted. */
+  let unanswered: string[] = [];
+  let cancelRelay: (() => void) | null = null;
+
+  /**
+   * The agent listens for itself, but a short answer can pass it by. If it has
+   * not reacted to what the expert said, the app tells it, so the turn goes on
+   * to its follow-up instead of ending in silence.
+   */
+  function relayAnswer(said: string) {
+    unanswered.push(said);
+    cancelRelay?.();
+    const open = floor;
+    cancelRelay = after(RELAY_AFTER_MS, () => {
+      cancelRelay = null;
+      if (!open || floor !== open || !voice || agentSpeaking || unanswered.length === 0) return;
+      trace(`the agent did not react: told it what the expert answered`);
+      voice.sendUserMessage(heardTrigger(unanswered));
+      unanswered = [];
+      // The agent is given its time again from here.
+      conductor.expertReplied(now());
+    });
+  }
+
   function onAgentSaid(message: string) {
     const text = spokenText(message);
     trace(`the agent ${floor ? "said" : "said, unheard"}: ${text}`);
+    unanswered = [];
+    cancelRelay?.();
+    cancelRelay = null;
     // With the floor closed Tiro is silenced: what it says then reaches nobody and is not kept.
     if (!text || !floor) return;
     const t = now();
@@ -439,6 +466,7 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
       if (floor) {
         floor.expert.push({ start, stored });
         conductor.expertReplied(t, start);
+        relayAnswer(said);
       } else if (pendingSettle && start <= pendingSettle.record.closedAt) {
         // Begun before the floor closed: it is the end of the expert's answer.
         pendingSettle.floor.expert.push({ start, stored });

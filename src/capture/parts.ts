@@ -24,6 +24,19 @@ export function spokenText(message: string): string {
     .trim();
 }
 
+/** How long the agent is given to react to an answer by itself before the app tells it what was said. */
+export const RELAY_AFTER_MS = 2_000;
+
+/**
+ * The message that tells the agent what the expert answered. The agent
+ * listens for itself, but a short answer such as "Correct." can pass it by:
+ * it then waits for a reply that has already been given, and never asks its
+ * follow-up. The transcriber did hear it, so the app passes it on.
+ */
+export function heardTrigger(said: readonly string[]): string {
+  return `HEARD: The expert answered: "${said.join(" ")}"`;
+}
+
 /**
  * The message that gives the agent its turn. The capital word says which
  * kind of turn it is (agents/prompts/interviewer.md); the rest is data.

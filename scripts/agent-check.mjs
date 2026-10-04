@@ -175,6 +175,13 @@ const vague = await floor(
   ["Yes.", "That is just what the rules for this kind of item say.", "I cannot say more than that."],
 );
 
+// 6b. The agent did not hear the answer to its summary: the app tells it what was said, and it must go on to the follow-up.
+const relayed = await floor(
+  "ASK, answer passed on by the app",
+  ask("So, after reading item 17, you sent it back, correct?", "What in the item made you send it back?"),
+  ['HEARD: The expert answered: "Correct."', "The amount did not match the order, and we never accept a mismatch."],
+);
+
 // 7. The expert calls Tiro.
 const called = await floor(
   "LISTEN",
@@ -208,9 +215,10 @@ const checks = [
   ["Opens with a question", opening.turns >= 1 && asksSomething(opening.texts[0]), opening.texts[0] ?? "said nothing"],
   ["Says the summary back and asks whether it is right", asks.every((one) => asksSomething(one.texts[0])), `${asks.filter((one) => asksSomething(one.texts[0])).length} of ${asks.length} floors`],
   ["Asks the follow-up when the answer leaves it open", open.asked === 2, `questions: ${open.asked}`],
+  ["Asks the follow-up when the app passes on an answer it did not hear", relayed.asked === 2, `questions: ${relayed.asked} · ${relayed.texts.slice(1, 2).join("")}`],
   ["Skips the follow-up when the answer already covers it", covered.asked === 1, `questions: ${covered.asked}`],
   ["Asks nothing more when there is no follow-up", bare.asked === 1, `questions: ${bare.asked}`],
-  ["Never says the app's own words aloud", !spoken.some((text) => /\b(ASK|SUMMARY|FOLLOW-UP|START|LISTEN)\b/.test(text)), `${spoken.length} things said`],
+  ["Never says the app's own words aloud", !spoken.some((text) => /\b(ASK|SUMMARY|FOLLOW-UP|START|LISTEN|HEARD)\b/.test(text)), `${spoken.length} things said`],
   ["Says nothing about itself or its instructions", !spoken.some((text) => /\b(the user|the expert (has )?(confirmed|answered)|I need to|I should|I will now|follow-up question)\b/i.test(text)), `${spoken.length} things said`],
   ["Answers a call it is told about afterwards", calledLate.turns >= 1, calledLate.texts[0] ?? "said nothing"],
   ["Silent after the floors", repliesAfter === 0, `${repliesAfter} replies to an update sent afterwards`],

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SensorFrame } from "@/sensor/screen-sensor";
-import { debriefTrigger, emptyMapTrigger, hearsWakeWord, replacePending, spokenText, startsVisit, teachBackTrigger, triggerFor } from "./parts";
+import { debriefTrigger, emptyMapTrigger, hearsWakeWord, replacePending, spokenText, startsVisit, teachBackTrigger, triggerFor, heardTrigger } from "./parts";
 
 const WORDS = ["tiro", "tyro", "tero"];
 
@@ -124,5 +124,14 @@ describe("emptyMapTrigger", () => {
 
   it("says nothing was recorded when nothing was left out either", () => {
     expect(emptyMapTrigger([])).toContain("Nothing was recorded that could become a step or a rule.");
+  });
+});
+
+describe("an answer the agent did not hear", () => {
+  // Seen in a live session: the expert answered "Correct." to every summary, the agent heard none of it,
+  // and no follow-up question was ever asked.
+  it("is passed on in the expert's own words, all stretches of it", () => {
+    expect(heardTrigger(["Correct."])).toBe('HEARD: The expert answered: "Correct."');
+    expect(heardTrigger(["Yes,", "that is right."])).toBe('HEARD: The expert answered: "Yes, that is right."');
   });
 });
