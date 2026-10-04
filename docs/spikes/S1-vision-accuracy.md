@@ -104,7 +104,7 @@ A simpler alternative is Opus alone, live, with no second pass: $0.26 a minute a
 
 Amr chose this simpler alternative. The live reader now defaults to Opus 5.5 at low effort, the setting measured here; `VISION_FAST_MODEL` still overrides it.
 
-One thing follows from having no second pass: the contract marks an event `verified` when the strong model has re-read it at the debrief. With one reader that mark needs a new meaning, which is raised with Amr at the start of Phase 2.
+One thing followed from having no second pass: the contract marked an event `verified` when the strong model had re-read it at the debrief. Amr clarified on 2026-10-04 that the re-reading meant is a spoken one: an event is verified when Tiro has read it back to the expert by voice and the expert has confirmed it. The contract now says so.
 
 ## Speed
 

@@ -19,7 +19,7 @@ const base = {
   session_id: id,
   t_ms: sessionTime,
   confidence: unitInterval,
-  /** Set by the strong-model pass at the debrief. Only verified events feed the Work Map. */
+  /** Set when Tiro has read the event back to the expert by voice at the debrief and the expert has confirmed it. */
   verified: z.boolean(),
   /** The settled frame the event was read from. */
   frame_id: id,

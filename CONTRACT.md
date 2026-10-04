@@ -37,7 +37,7 @@ One observed change on screen.
 | `type` | one of the seven types below | |
 | `t_ms` | integer ≥ 0 | When the settled frame was captured |
 | `confidence` | number 0–1 | The reading model's confidence |
-| `verified` | boolean | Set by the strong-model pass at the debrief. Only verified events feed the Work Map |
+| `verified` | boolean | Set when Tiro has read the event back to the expert by voice at the debrief and the expert has confirmed it. Only verified events feed the confirmed Work Map |
 | `frame_id` | id | The settled frame the event was read from |
 | `screen_id` | id or null | Tool map screen. Null while reading with an open vocabulary |
 | `element_id` | id or null | Tool map element involved |
