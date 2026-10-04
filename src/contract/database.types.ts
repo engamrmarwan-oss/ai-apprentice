@@ -890,6 +890,7 @@ export type Database = {
           id: string
           name: string
           origin: string
+          seen_as: string | null
           tool_id: string
           url_pattern: string | null
         }
@@ -899,6 +900,7 @@ export type Database = {
           id?: string
           name: string
           origin: string
+          seen_as?: string | null
           tool_id: string
           url_pattern?: string | null
         }
@@ -908,6 +910,7 @@ export type Database = {
           id?: string
           name?: string
           origin?: string
+          seen_as?: string | null
           tool_id?: string
           url_pattern?: string | null
         }
