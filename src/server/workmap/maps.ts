@@ -7,10 +7,11 @@ import { eventSchema, type TiroEvent } from "@/contract/event";
 import type { Question } from "@/contract/question";
 import type { Condition, JudgeSpec, RuleAction } from "@/contract/rule";
 import { must, mustHave, withDatabase } from "../accounts";
-import { loadBaseline, loadTimeline, queueQuestions, type SessionContext } from "../sessions";
+import { guardrailKinds, loadBaseline, loadTimeline, queueQuestions, type SessionContext } from "../sessions";
 import type { TiroClient } from "../supabase";
 import { assemble, joinStretches, type Assembled, type LeftOut, type Said } from "./assemble";
 import { proposeWorkMap, rewriteItem } from "./build";
+import { coverageQuestions } from "./coverage";
 import { whatIsMissing } from "./missing";
 
 type Unavailable = { ok: false; reason: "unavailable" };
@@ -354,12 +355,15 @@ export async function buildWorkMap(
 
   // A gap already asked about is not queued twice.
   const known = new Set(questions.map((question) => question.text));
-  const gaps = await queueQuestions(
-    session.id,
-    built.gaps
+  // Before the map is explained back, Tiro asks once for each guardrail kind it holds no rule of.
+  const guardrails = options.final ? null : await guardrailKinds(workflow);
+  const uncovered = guardrails?.ok ? coverageQuestions(guardrails.kinds, built.rules.map((rule) => rule.kind), known) : [];
+  const gaps = await queueQuestions(session.id, [
+    ...built.gaps
       .filter((gap) => !known.has(gap.text))
-      .map((gap) => ({ text: gap.text, kind: "reason", trigger_event_id: gap.trigger_event_id, baseline_statement_id: null, score: 0.9, channel: "debrief" })),
-  );
+      .map((gap) => ({ text: gap.text, kind: "reason" as const, trigger_event_id: gap.trigger_event_id, baseline_statement_id: null, score: 0.9, channel: "debrief" as const })),
+    ...uncovered.map((gap) => ({ text: gap.text, kind: gap.kind, trigger_event_id: null, baseline_statement_id: null, score: 0.8, channel: "debrief" as const })),
+  ]);
   return { ok: true, work_map: stored.value, gaps: gaps.ok ? gaps.questions : [], left_out: built.left_out };
 }
 

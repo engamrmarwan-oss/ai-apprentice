@@ -288,3 +288,33 @@ describe("whatIsMissing", () => {
     ).toEqual(["Step 1 has no screen moment.", "Step 2 has no reason in the expert's words.", "Rule 3 has no quote from the expert."]);
   });
 });
+
+describe("the guardrails a draft map still lacks", () => {
+  const kinds = ["limit", "exception", "stop_and_ask"] as const;
+
+  it("asks once for every guardrail kind the map has no rule of", async () => {
+    const { coverageQuestions } = await import("./coverage");
+    const asked = coverageQuestions(kinds, ["limit", "never"], new Set());
+    expect(asked.map((question) => question.kind)).toEqual(["exception", "stop_and_ask"]);
+    for (const question of asked) expect(question.text).toMatch(/\?$/);
+  });
+
+  it("asks nothing when the map holds a rule of each kind", async () => {
+    const { coverageQuestions } = await import("./coverage");
+    expect(coverageQuestions(kinds, ["limit", "exception", "stop_and_ask"], new Set())).toEqual([]);
+  });
+
+  it("does not ask again for a kind it has already asked about: an expert who said there is none is taken at their word", async () => {
+    const { coverageQuestions } = await import("./coverage");
+    const first = coverageQuestions(kinds, [], new Set());
+    expect(first).toHaveLength(3);
+    expect(coverageQuestions(kinds, [], new Set(first.map((question) => question.text)))).toEqual([]);
+  });
+
+  it("takes which kinds are guardrails from data, and names no tool or workflow", async () => {
+    const { coverageQuestions } = await import("./coverage");
+    expect(coverageQuestions(["limit"], [], new Set()).map((question) => question.kind)).toEqual(["limit"]);
+    expect(coverageQuestions(["reason"], [], new Set())).toEqual([]);
+    expect(coverageQuestions(kinds, [], new Set()).map((question) => question.text).join(" ")).not.toMatch(/crystal|requirement|invoice|priority/i);
+  });
+});

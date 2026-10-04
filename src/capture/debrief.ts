@@ -126,7 +126,7 @@ type Built = { work_map: WorkMap; gaps: Question[]; left_out: LeftOut[] };
 type VoiceGrant = { signed_url: string; variables: Record<string, string> };
 
 /** How many questions the validator may send back to be asked before the map is explained. */
-const GAP_QUESTIONS = 3;
+const GAP_QUESTIONS = 6;
 
 const forTeaching = (map: WorkMap): MapToTeach => ({
   steps: map.steps.map((step) => ({ position: step.position, title: step.title, decision: step.decision, reason: step.reason?.text ?? null })),
