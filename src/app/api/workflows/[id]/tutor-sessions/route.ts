@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { z } from "zod";
+import { DAILY_LIMIT_MESSAGE, mayStartSession } from "@/server/daily-limit";
 import { fail, ok, readOptionalBody, unavailable } from "@/server/http";
 import { languageSchema } from "@/server/languages";
 import { requireWorkflowRole } from "@/server/require-user";
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest, context: RouteContext<"/api/work
  * confirmed Work Map. Anyone on the workflow may be taught it. The body may
  * name the `language` the lesson is held in, as a two-letter code; without
  * one it is English. `no_map` (409) when the expert has not confirmed a Work
- * Map yet.
+ * Map yet; `daily_limit` (429) past the account's sessions for the day.
  */
 export async function POST(request: NextRequest, context: RouteContext<"/api/workflows/[id]/tutor-sessions">) {
   const { id } = await context.params;
@@ -36,6 +37,10 @@ export async function POST(request: NextRequest, context: RouteContext<"/api/wor
 
   const body = await readOptionalBody(request, z.strictObject({ language: languageSchema.optional() }));
   if (!body.ok) return body.response;
+
+  const may = await mayStartSession(check.user.id);
+  if (!may.ok) return unavailable();
+  if (!may.allowed) return fail(429, "daily_limit", DAILY_LIMIT_MESSAGE);
 
   const started = await startTutorSession(id, check.user, body.value.language);
   if (started.ok) return ok({ session: started.session, work_map: started.work_map });
