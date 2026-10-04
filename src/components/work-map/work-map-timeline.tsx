@@ -1,14 +1,13 @@
-import type { Rule } from "@/contract";
-import { describeEvent } from "@/conductor/describe";
-import { frameReading, type WorkMapFixture, type WorkMapStepItem } from "./types";
+import type { WorkMap, WorkMapRule, WorkMapStep } from "@/capture/debrief";
+import { rulesForStep } from "./types";
 
 export function WorkMapTimeline({
   map,
   onSelectRule,
   selectedRuleId,
 }: {
-  map: WorkMapFixture;
-  onSelectRule: (rule: Rule, step: WorkMapStepItem) => void;
+  map: WorkMap;
+  onSelectRule: (rule: WorkMapRule) => void;
   selectedRuleId: string | null;
 }) {
   return (
@@ -27,60 +26,71 @@ export function WorkMapTimeline({
         </span>
       </div>
 
-      <ol className="relative mt-7 space-y-8 before:absolute before:top-5 before:bottom-5 before:left-5 before:w-px before:bg-stone-300">
-        {map.steps.map((item) => (
-          <TimelineStep
-            item={item}
-            key={item.step.id}
-            onSelectRule={onSelectRule}
-            selectedRuleId={selectedRuleId}
-          />
-        ))}
-      </ol>
+      {map.steps.length ? (
+        <ol className="relative mt-7 space-y-8 before:absolute before:top-5 before:bottom-5 before:left-5 before:w-px before:bg-stone-300">
+          {map.steps.map((step) => (
+            <TimelineStep
+              key={step.id}
+              onSelectRule={onSelectRule}
+              rules={rulesForStep(map, step)}
+              selectedRuleId={selectedRuleId}
+              step={step}
+            />
+          ))}
+        </ol>
+      ) : (
+        <p className="mt-7 rounded-xl border border-dashed border-stone-300 p-5 text-sm leading-6 text-stone-600">
+          This Work Map does not contain any steps yet.
+        </p>
+      )}
     </section>
   );
 }
 
 function TimelineStep({
-  item,
   onSelectRule,
+  rules,
   selectedRuleId,
+  step,
 }: {
-  item: WorkMapStepItem;
-  onSelectRule: (rule: Rule, step: WorkMapStepItem) => void;
+  onSelectRule: (rule: WorkMapRule) => void;
+  rules: WorkMapRule[];
   selectedRuleId: string | null;
+  step: WorkMapStep;
 }) {
   return (
     <li className="relative grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] gap-4">
       <span className="relative z-10 grid size-10 place-items-center rounded-full border border-teal-800 bg-stone-50 text-sm font-bold tabular-nums text-teal-900">
-        {item.step.position}
+        {step.position}
       </span>
       <article className="min-w-0 pb-2">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="text-xl font-semibold tracking-[-0.025em] text-stone-950">
-              {item.step.title}
+              {step.title}
             </h3>
-            {item.step.is_judgment ? (
+            {step.is_judgment ? (
               <span className="mt-2 inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900">
                 Judgment step
               </span>
             ) : null}
           </div>
-          <span className="font-mono text-xs tabular-nums text-stone-500">
-            {clock(item.event.t_ms)}
-          </span>
+          {step.moment ? (
+            <span className="font-mono text-xs tabular-nums text-stone-500">
+              {clock(step.moment.t_ms)}
+            </span>
+          ) : null}
         </div>
 
         <div className="mt-5 grid min-w-0 gap-5 2xl:grid-cols-[minmax(15rem,0.9fr)_minmax(0,1.1fr)]">
-          <ScreenMoment item={item} />
+          <ScreenMoment step={step} />
           <div className="min-w-0 space-y-5">
             <div>
               <p className="text-xs font-semibold tracking-[0.1em] text-stone-500 uppercase">
                 Decision
               </p>
               <p className="mt-2 text-sm leading-6 text-stone-800">
-                {item.step.decision ?? describeEvent(item.event)}
+                {step.decision ?? step.moment?.what ?? "No decision recorded."}
               </p>
             </div>
             <figure className="border-t border-stone-200 pt-5">
@@ -88,7 +98,7 @@ function TimelineStep({
                 Why
               </figcaption>
               <blockquote className="mt-2 text-sm leading-6 text-stone-700">
-                “{item.reason.text_english ?? item.reason.text_original}”
+                {step.reason ? `“${step.reason.text}”` : "The expert has not given a reason yet."}
               </blockquote>
             </figure>
           </div>
@@ -98,59 +108,84 @@ function TimelineStep({
           <p className="text-xs font-semibold tracking-[0.1em] text-stone-500 uppercase">
             Rules from this step
           </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {item.rules.map((rule) => (
-              <button
-                aria-pressed={selectedRuleId === rule.id}
-                className={`rounded-lg border px-3 py-2 text-left text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-teal-700 ${
-                  selectedRuleId === rule.id
-                    ? "border-teal-800 bg-teal-50 text-teal-950"
-                    : "border-stone-300 bg-white text-stone-700 hover:border-teal-400 hover:text-teal-950"
-                }`}
-                key={rule.id}
-                onClick={() => onSelectRule(rule, item)}
-                type="button"
-              >
-                {rule.statement}
-              </button>
-            ))}
-          </div>
+          {rules.length ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {rules.map((rule) => (
+                <button
+                  aria-pressed={selectedRuleId === rule.id}
+                  className={`rounded-lg border px-3 py-2 text-left text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-teal-700 ${
+                    selectedRuleId === rule.id
+                      ? "border-teal-800 bg-teal-50 text-teal-950"
+                      : "border-stone-300 bg-white text-stone-700 hover:border-teal-400 hover:text-teal-950"
+                  }`}
+                  key={rule.id}
+                  onClick={() => onSelectRule(rule)}
+                  type="button"
+                >
+                  Rule {rule.number}: {rule.statement}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-2 text-sm text-stone-500">No rule is linked to this step.</p>
+          )}
         </div>
       </article>
     </li>
   );
 }
 
-function ScreenMoment({ item }: { item: WorkMapStepItem }) {
-  const reading = frameReading(item.frame);
+function ScreenMoment({ step }: { step: WorkMapStep }) {
+  const moment = step.moment;
+  const screen = moment?.screen;
 
   return (
     <figure className="min-w-0 overflow-hidden rounded-xl border border-stone-200 bg-stone-100">
       <div className="flex items-center justify-between gap-3 border-b border-stone-200 bg-white px-3 py-2">
         <figcaption className="truncate text-xs font-semibold text-stone-700">
-          {reading?.screen ?? "Screen moment"}
+          {screen?.name ?? "Screen moment"}
         </figcaption>
         <span className="shrink-0 text-[0.6875rem] font-medium text-stone-500">
-          Verified
+          {moment ? "Verified" : "Not captured"}
         </span>
       </div>
-      <div className="min-h-40 p-4">
-        <p className="truncate text-sm font-semibold text-stone-900">
-          {reading?.item ?? describeEvent(item.event)}
-        </p>
-        {reading?.fields.length ? (
-          <dl className="mt-4 grid gap-2">
-            {reading.fields.slice(0, 3).map((field) => (
-              <div className="flex items-start justify-between gap-3 text-xs" key={field.name}>
-                <dt className="text-stone-500">{field.name}</dt>
-                <dd className="max-w-[60%] text-right font-medium text-stone-800">{field.value}</dd>
-              </div>
-            ))}
-          </dl>
-        ) : (
-          <p className="mt-3 text-xs leading-5 text-stone-500">{describeEvent(item.event)}</p>
-        )}
-      </div>
+      {moment?.picture ? (
+        // This short-lived signed address comes from Tiro's Work Map route.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          alt={moment.what}
+          className="aspect-video w-full bg-stone-100 object-cover object-top"
+          src={moment.picture}
+        />
+      ) : (
+        <div className="min-h-40 p-4">
+          <p className="text-sm font-semibold text-stone-900">
+            {screen?.item ?? moment?.what ?? "No screen moment is available."}
+          </p>
+          {screen?.fields.length ? (
+            <dl className="mt-4 grid gap-2">
+              {screen.fields.slice(0, 4).map((field) => (
+                <div className="flex items-start justify-between gap-3 text-xs" key={field.name}>
+                  <dt className="text-stone-500">{field.name}</dt>
+                  <dd className="max-w-[60%] text-right font-medium text-stone-800">
+                    {field.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          ) : null}
+        </div>
+      )}
+      {moment?.picture && screen?.fields.length ? (
+        <dl className="grid gap-2 border-t border-stone-200 bg-white p-3">
+          {screen.fields.slice(0, 4).map((field) => (
+            <div className="flex items-start justify-between gap-3 text-xs" key={field.name}>
+              <dt className="text-stone-500">{field.name}</dt>
+              <dd className="max-w-[60%] text-right font-medium text-stone-800">{field.value}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
     </figure>
   );
 }
