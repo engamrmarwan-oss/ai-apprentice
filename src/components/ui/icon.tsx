@@ -7,6 +7,7 @@ export type IconName =
   | "chevron-right"
   | "conversation"
   | "home"
+  | "key"
   | "log-out"
   | "map"
   | "overview"
@@ -34,6 +35,12 @@ const paths: Record<IconName, ReactNode> = {
     <>
       <path d="m3 11 9-8 9 8" />
       <path d="M5.5 9.5V21h13V9.5M9 21v-6h6v6" />
+    </>
+  ),
+  key: (
+    <>
+      <circle cx="7.5" cy="15.5" r="4.5" />
+      <path d="m10.7 12.3 9.3-9.3m-4 4 3 3m-6-1 2 2" />
     </>
   ),
   "log-out": (
