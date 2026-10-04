@@ -18,6 +18,7 @@
     "check:accounts": "node --env-file=.env.local scripts/accounts-check.mjs",
     "check:agent": "node --env-file=.env.local scripts/agent-check.mjs",
     "check:debrief": "node --env-file=.env.local scripts/debrief-check.mjs",
+    "check:setup": "node --env-file=.env.local scripts/setup-check.mjs",
     "check:session": "node --env-file=.env.local scripts/e2e/session.mjs",
     "check:tutor": "node --env-file=.env.local scripts/e2e/tutor.mjs"
   },
