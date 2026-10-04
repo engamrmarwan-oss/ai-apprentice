@@ -46,7 +46,7 @@ An earlier run of 28 seconds was stopped after the three sentences. It is kept w
 
 ### In text, with nobody speaking
 
-A script opens a session over the agent's own connection and never sends audio: screen updates go as context updates, triggers and answers as typed messages (`npm run spike:s2:text`). Run twice, with the same result each time:
+A script opens a session over the agent's own connection and never sends audio: screen updates go as context updates, triggers and answers as typed messages (`npm run spike:s2:text` at the time; since Phase 2 it is `npm run check:agent`, with more cases). Run twice, with the same result each time:
 
 | Check | Result |
 |---|---|

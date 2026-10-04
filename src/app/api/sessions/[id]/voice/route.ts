@@ -36,7 +36,6 @@ export async function POST(request: NextRequest, context: RouteContext<"/api/ses
       task: check.workflow.task,
       expert_role: check.workflow.role ?? "not stated",
       baseline: statements.length > 0 ? statements.map((statement) => `- ${statement.text}`).join("\n") : "Nothing is assumed yet.",
-      language: check.session.language,
     },
   });
 }

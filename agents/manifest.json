@@ -12,6 +12,7 @@
       "config": "interviewer.json",
       "prompt": "prompts/interviewer.md",
       "variables": [
+        "expert_name",
         "tool_name",
         "task",
         "expert_role",

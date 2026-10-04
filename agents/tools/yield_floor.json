@@ -2,7 +2,7 @@
   "tool_config": {
     "type": "client",
     "name": "yield_floor",
-    "description": "Give the floor back so the person can return to their work. Call it as soon as your question, and at most one follow-up, has been answered, or when the person shows they want to carry on working.",
+    "description": "Give the floor back so the person can return to their work. After it they cannot hear you and you cannot hear them. Call it once the person has answered and you have nothing left to ask, or when they show they want to carry on working. Never call it in the same turn in which you ask a question: wait for the answer first.",
     "expects_response": true,
     "response_timeout_secs": 20
   }

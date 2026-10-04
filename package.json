@@ -12,11 +12,11 @@
     "types:db": "npx supabase gen types typescript --project-id \"$SUPABASE_PROJECT_REF\" --schema public,evaluation > src/contract/database.types.ts",
     "agents:push": "node --env-file=.env.local scripts/agents-push.mjs",
     "spike:s1": "node --env-file=.env.local --conditions=react-server --import tsx scripts/spikes/s1-replay.mts",
-    "spike:s2:text": "node --env-file=.env.local scripts/spikes/s2-text-session.mjs",
     "spike:s3": "node --env-file=.env.local scripts/spikes/s3-key-frame.mjs",
     "signup-code": "node --env-file=.env.local scripts/signup-code.mjs",
     "demo-accounts": "node --env-file=.env.local scripts/demo-accounts.mjs",
-    "check:accounts": "node --env-file=.env.local scripts/accounts-check.mjs"
+    "check:accounts": "node --env-file=.env.local scripts/accounts-check.mjs",
+    "check:agent": "node --env-file=.env.local scripts/agent-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

@@ -6,7 +6,8 @@
   "conversation_config": {
     "turn": {
       "turn_timeout": -1,
-      "silence_end_call_timeout": -1
+      "silence_end_call_timeout": -1,
+      "turn_eagerness": "patient"
     },
     "conversation": {
       "max_duration_seconds": 3600,
@@ -19,13 +20,18 @@
         "agent_response",
         "agent_response_correction",
         "client_tool_call"
-      ]
+      ],
+      "file_input": {
+        "enabled": true,
+        "max_files_in_memory": 3,
+        "max_files_per_conversation": -1
+      }
     },
     "agent": {
       "first_message": "",
       "language": "en",
       "prompt": {
-        "llm": "claude-haiku-4-5",
+        "llm": "claude-sonnet-5-5",
         "built_in_tools": {
           "skip_turn": {
             "type": "system",
