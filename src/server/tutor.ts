@@ -2,10 +2,11 @@ import "server-only";
 import { describeEvent } from "@/conductor/describe";
 import type { RuleAction } from "@/contract/rule";
 import { must, mustHave, withDatabase, type User } from "./accounts";
-import { evaluate, type Lookup } from "./rules/evaluate";
+import { evaluate, type Lookup, type Shown } from "./rules/evaluate";
 import { judgeRules, type Situation } from "./rules/judge";
 import { tallyMastery, verdictsToChecks, type MasteryOutcome, type RuleVerdict } from "./rules/mastery";
 import { latestReading, loadTimeline, type Session, type SessionContext } from "./sessions";
+import { loadToolMap } from "./toolmap/store";
 import { latestWorkMap, loadWorkMap, type WorkMapRule, type WorkMapView } from "./workmap/maps";
 
 type Unavailable = { ok: false; reason: "unavailable" };
@@ -96,10 +97,9 @@ export type CheckResult = {
 export async function checkLearner(
   context: SessionContext,
   situation: Situation,
-  lookup: Lookup | null = null,
 ): Promise<CheckResult | { ok: false; reason: "no_map" } | Unavailable> {
   const { session, workflow } = context;
-  const [run, screen, timeline] = await Promise.all([runOf(session.id), latestReading(session.id), loadTimeline(session.id)]);
+  const [run, screen, timeline, tool] = await Promise.all([runOf(session.id), latestReading(session.id), loadTimeline(session.id), loadToolMap(workflow.id)]);
   if (!run.ok || !timeline.ok) return unavailable;
   if (!run.run) return { ok: false, reason: "no_map" };
   const loaded = await loadWorkMap(run.run.work_map_id);
@@ -109,11 +109,15 @@ export async function checkLearner(
   const rules = loaded.work_map.rules.filter((rule) => rule.status === "confirmed" || rule.status === "corrected");
   const verdicts: RuleVerdict[] = [];
 
-  // Fixed checks first: they need no model. Without a way to look elements up, such a rule is judged like the rest.
-  const fixed = lookup ? rules.filter((rule) => rule.check_type === "deterministic" && rule.condition) : [];
-  for (const rule of fixed) {
-    const outcome = evaluate(rule.condition!, lookup!);
-    if (outcome !== "unknown") verdicts.push({ rule_id: rule.id, verdict: outcome === "fired" ? "broken" : "kept", explanation: null });
+  // Fixed checks first: they need no model. A fixed check describes a screen that breaks its rule, so it speaks
+  // only for what the learner has done, and only when it fires. Everything else is judged.
+  if (situation.kind === "action" && screen.ok && screen.state && tool.ok && tool.tool_map) {
+    const lookup = screenLookup(tool.tool_map.screens.flatMap((one) => one.elements), screen.state.fields);
+    for (const rule of rules) {
+      if (rule.check_type === "deterministic" && rule.condition && evaluate(rule.condition, lookup) === "fired") {
+        verdicts.push({ rule_id: rule.id, verdict: "broken", explanation: null });
+      }
+    }
   }
 
   const judged = rules.filter((rule) => !verdicts.some((verdict) => verdict.rule_id === rule.id));
@@ -145,6 +149,22 @@ export async function checkLearner(
     return rule && verdict.verdict === "broken" ? [{ rule, explanation: verdict.explanation, action: rule.action }] : [];
   });
   return { ok: true, verdicts, caught };
+}
+
+/**
+ * Looks tool-map elements up on the screen the learner has open: an element
+ * shows what the field with its label shows. An element with no such field is
+ * not on this screen.
+ */
+export function screenLookup(elements: { id: string; label: string }[], fields: { name: string; value: string }[]): Lookup {
+  const shown = new Map(fields.map((field) => [field.name.trim().toLowerCase(), field.value]));
+  const labels = new Map(elements.map((element) => [element.id, element.label.trim().toLowerCase()]));
+  return (elementId): Shown | undefined => {
+    const label = labels.get(elementId);
+    if (label === undefined || !shown.has(label)) return undefined;
+    const value = shown.get(label)!;
+    return value.trim() === "" ? null : value;
+  };
 }
 
 export type MasteryReport = {
