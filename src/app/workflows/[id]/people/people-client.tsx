@@ -178,96 +178,62 @@ function PeopleView({ workflowId }: { workflowId: string }) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8 md:px-10 md:py-12 lg:px-14">
+    <div className="tiro-enter mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 md:px-10 md:py-10 lg:px-12">
       <header className="border-b border-stone-200 pb-9">
         <p className="text-sm font-semibold text-teal-800">Workflow access</p>
-        <h1 className="mt-2 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">People</h1>
+        <h1 className="mt-2 text-4xl font-medium tracking-[-0.025em] sm:text-[2.75rem]">People</h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600">
           Invite new hires to learn this workflow and see who already has access.
         </p>
       </header>
 
-      <section className="grid min-w-0 gap-8 py-9 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
-        <div className="min-w-0">
-          {state.status === "loading" ? (
-            <p className="text-sm text-stone-600" aria-live="polite">Loading people…</p>
-          ) : state.status === "error" ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-5">
-              <h2 className="font-semibold text-red-950">People didn’t load</h2>
-              <p className="mt-2 text-sm leading-6 text-red-800">{state.message}</p>
-              <button
-                className="mt-4 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-red-800 outline-none hover:bg-red-100 focus-visible:ring-2 focus-visible:ring-red-700"
-                onClick={() => {
-                  setState({ status: "loading" });
-                  void refreshPeople();
-                }}
-                type="button"
-              >
-                Try again
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-10">
-              <PeopleList data={state.data} onWithdraw={withdraw} withdrawingId={withdrawingId} />
-            </div>
-          )}
-        </div>
-
-        <aside className="min-w-0">
-          <div className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
-            <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-xl bg-teal-50 text-teal-900">
-                <Icon className="size-5" name="people" />
-              </span>
-              <h2 className="text-xl font-semibold tracking-[-0.025em]">Invite a new hire</h2>
-            </div>
-            <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
-              Tiro does not send an email. After inviting someone, tell them yourself which
-              email address to use when they sign up.
-            </p>
-            <form className="mt-5" noValidate onSubmit={(event) => void invite(event)}>
-              <label className="text-sm font-semibold text-stone-800" htmlFor="invite-email">
-                Email address
-              </label>
-              <input
-                aria-describedby={emailError ? "invite-email-error" : undefined}
-                aria-invalid={Boolean(emailError)}
-                autoComplete="email"
-                className={`mt-2 h-11 w-full rounded-lg border px-3 text-base outline-none focus:ring-2 sm:text-sm ${
-                  emailError
-                    ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                    : "border-stone-300 focus:border-teal-700 focus:ring-teal-100"
-                }`}
-                id="invite-email"
-                name="email"
-                placeholder="new.hire@example.com"
-                type="email"
-              />
-              {emailError ? (
-                <p className="mt-1.5 text-xs font-medium text-red-700" id="invite-email-error">
-                  {emailError}
-                </p>
-              ) : null}
-              <button
-                className="mt-4 h-11 w-full rounded-lg bg-teal-900 px-4 text-sm font-semibold text-white outline-none hover:bg-teal-950 disabled:cursor-wait disabled:bg-stone-400 focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"
-                disabled={isInviting || state.status !== "ready"}
-                type="submit"
-              >
-                {isInviting ? "Adding person…" : "Add person"}
-              </button>
-            </form>
-            {formError ? (
-              <p className="mt-4 text-sm leading-6 text-red-700" role="alert">
-                {formError}
-              </p>
-            ) : null}
-            {notice ? (
-              <p className="mt-4 text-sm leading-6 text-teal-800" aria-live="polite">
-                {notice}
-              </p>
-            ) : null}
+      <section className="grid gap-7 border-b border-stone-200 py-7 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(26rem,1.2fr)] lg:items-end" aria-labelledby="invite-heading">
+        <div>
+          <div className="flex items-center gap-3">
+            <span className="grid size-9 place-items-center rounded-md bg-teal-50 text-teal-900"><Icon className="size-4" name="people" /></span>
+            <h2 className="text-lg font-bold tracking-[-0.02em]" id="invite-heading">Invite a new hire</h2>
           </div>
-        </aside>
+          <p className="mt-3 text-xs leading-5 text-red-700">
+            Tiro does not send an email. Tell the person yourself which email address to use when they sign up.
+          </p>
+        </div>
+        <form className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]" noValidate onSubmit={(event) => void invite(event)}>
+          <div>
+            <label className="sr-only" htmlFor="invite-email">Email address</label>
+            <input
+              aria-describedby={emailError ? "invite-email-error" : undefined}
+              aria-invalid={Boolean(emailError)}
+              autoComplete="email"
+              className={`h-11 w-full rounded-md border bg-white px-3 text-base outline-none focus:ring-2 sm:text-sm ${
+                emailError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : "border-stone-300 focus:border-blue-700 focus:ring-blue-100"
+              }`}
+              id="invite-email"
+              name="email"
+              placeholder="new.hire@example.com"
+              type="email"
+            />
+            {emailError ? <p className="mt-1.5 text-xs font-medium text-red-700" id="invite-email-error">{emailError}</p> : null}
+          </div>
+          <button className="h-11 rounded-md bg-teal-900 px-5 text-xs font-bold text-white outline-none hover:bg-teal-800 disabled:cursor-wait disabled:bg-stone-400 focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2" disabled={isInviting || state.status !== "ready"} type="submit">
+            {isInviting ? "Adding person…" : "Add person"}
+          </button>
+        </form>
+        {formError ? <p className="text-sm leading-6 text-red-700 lg:col-start-2" role="alert">{formError}</p> : null}
+        {notice ? <p className="text-sm leading-6 text-teal-800 lg:col-start-2" aria-live="polite">{notice}</p> : null}
+      </section>
+
+      <section className="min-w-0 py-9">
+        {state.status === "loading" ? (
+          <p className="text-sm text-stone-600" aria-live="polite">Loading people…</p>
+        ) : state.status === "error" ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-5">
+            <h2 className="font-semibold text-red-950">People didn’t load</h2>
+            <p className="mt-2 text-sm leading-6 text-red-800">{state.message}</p>
+            <button className="mt-4 rounded-md bg-white px-3 py-2 text-sm font-semibold text-red-800 outline-none hover:bg-red-100 focus-visible:ring-2 focus-visible:ring-red-700" onClick={() => { setState({ status: "loading" }); void refreshPeople(); }} type="button">Try again</button>
+          </div>
+        ) : (
+          <div className="space-y-10"><PeopleList data={state.data} onWithdraw={withdraw} withdrawingId={withdrawingId} /></div>
+        )}
       </section>
     </div>
   );

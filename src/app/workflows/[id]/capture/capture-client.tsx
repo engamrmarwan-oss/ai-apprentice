@@ -167,11 +167,11 @@ function CaptureScreen({ workflowId }: { workflowId: string }) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 md:px-10 md:py-12 lg:px-14">
+    <div className="tiro-enter mx-auto w-full max-w-[88rem] px-5 py-8 sm:px-8 md:px-10 md:py-10 lg:px-12">
       <header className="flex flex-col gap-5 border-b border-stone-200 pb-8 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-teal-800">Expert session</p>
-          <h1 className="mt-2 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Capture the work</h1>
+          <h1 className="mt-2 text-4xl font-medium tracking-[-0.025em] sm:text-[2.75rem]">Capture the work</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600">
             Work through a real example and think aloud. Tiro will watch, listen, and ask about the decisions it notices.
           </p>
@@ -186,11 +186,11 @@ function CaptureScreen({ workflowId }: { workflowId: string }) {
 
       {!sessionId ? (
         <section className="py-10">
-          <div className="max-w-2xl rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
+          <div className="max-w-2xl border-y border-stone-200 py-8">
             <span className="grid size-11 place-items-center rounded-xl bg-teal-50 text-teal-900">
               <Icon className="size-5" name="record" />
             </span>
-            <h2 className="mt-5 text-2xl font-semibold tracking-[-0.03em]">Start a session</h2>
+            <h2 className="tiro-display mt-5 text-3xl font-medium tracking-[-0.02em]">Start a session</h2>
             <p className="mt-3 text-sm leading-6 text-stone-600">
               This creates a session in setup. You’ll connect voice and open the companion before choosing the tool tab to share.
             </p>
@@ -279,19 +279,18 @@ function SetupPanel({
   }
 
   return (
-    <section className="mt-8 rounded-2xl border-2 border-teal-800 bg-white p-5 sm:p-7" aria-labelledby="setup-heading">
-      <p className="text-xs font-semibold tracking-[0.14em] text-teal-800 uppercase">Do these in order</p>
-      <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]" id="setup-heading">Set up Tiro before sharing</h2>
+    <section className="mt-8 border-y border-stone-200 bg-white/45 p-5 sm:p-7" aria-labelledby="setup-heading">
+      <h2 className="text-2xl font-semibold tracking-[-0.03em]" id="setup-heading">Set up Tiro before sharing</h2>
       <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-600">
         Chrome moves to the shared tab as soon as you choose it. Connect voice and open the companion first, while Tiro’s tab is still in front.
       </p>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-stone-200 p-4">
+      <div className="mt-6 grid gap-0 border-y border-stone-200 sm:grid-cols-2">
+        <div className="py-5 sm:pr-6">
           <p className="text-xs font-semibold text-stone-500 uppercase">Step 1</p>
           <h3 className="mt-1 font-semibold">Connect voice</h3>
           <p className="mt-2 text-sm leading-6 text-stone-600">Allows microphone access and opens the always-on-top companion window.</p>
           <button
-            className="mt-4 h-10 rounded-lg bg-teal-900 px-4 text-sm font-semibold text-white outline-none hover:bg-teal-950 disabled:cursor-wait disabled:bg-stone-300 disabled:text-stone-600 focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"
+            className="mt-4 h-10 rounded-lg bg-teal-900 px-4 text-sm font-semibold text-white outline-none hover:bg-teal-950 disabled:cursor-wait disabled:bg-teal-100 disabled:text-teal-700 focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"
             disabled={view.phase !== "idle"}
             onClick={() => void onConnect()}
             type="button"
@@ -309,12 +308,12 @@ function SetupPanel({
           ) : null}
           {companionOpen ? <p className="mt-3 text-xs font-medium text-teal-700">Companion open</p> : null}
         </div>
-        <div className="rounded-xl border border-stone-200 p-4">
+        <div className="border-t border-stone-200 py-5 sm:border-t-0 sm:border-l sm:pl-6">
           <p className="text-xs font-semibold text-stone-500 uppercase">Step 2</p>
           <h3 className="mt-1 font-semibold">Share the tool’s tab</h3>
           <p className="mt-2 text-sm leading-6 text-stone-600">Choose only the tab where you do the task. Capture begins immediately.</p>
           <button
-            className="mt-4 h-10 rounded-lg bg-teal-900 px-4 text-sm font-semibold text-white outline-none hover:bg-teal-950 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-600 focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"
+            className="mt-4 h-10 rounded-lg bg-teal-900 px-4 text-sm font-semibold text-white outline-none hover:bg-teal-950 disabled:cursor-not-allowed disabled:bg-teal-100 disabled:text-teal-700 focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"
             disabled={view.phase !== "ready" || !companionOpen}
             onClick={() => void onShare()}
             type="button"
@@ -340,7 +339,7 @@ function CaptureControls({
 }) {
   const active = view.phase === "capturing";
   return (
-    <section className="mt-8 flex flex-wrap items-center gap-3 rounded-xl border border-stone-200 bg-white p-4" aria-label="Capture controls">
+    <section className="mt-8 flex flex-wrap items-center gap-3 border-y border-stone-200 bg-white/60 p-4" aria-label="Capture controls">
       <div className="mr-auto min-w-48">
         <p className="text-xs font-semibold tracking-[0.1em] text-stone-500 uppercase">Tiro</p>
         <p className="mt-1 font-semibold text-stone-900">{floorLine(view)}</p>
@@ -362,7 +361,7 @@ function CaptureControls({
         {view.muted ? "Unmute" : "Mute"}
       </button>
       <button
-        className="h-10 rounded-lg bg-red-700 px-4 text-sm font-semibold text-white outline-none hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-600 focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
+        className="h-10 rounded-lg bg-red-700 px-4 text-sm font-semibold text-white outline-none hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-red-100 disabled:text-red-700 focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
         disabled={!active}
         onClick={() => void onEnd()}
         type="button"
@@ -375,14 +374,14 @@ function CaptureControls({
 
 function CaptureDashboard({ view }: { view: CaptureView }) {
   return (
-    <div className="mt-6 grid min-w-0 gap-6 xl:grid-cols-[minmax(20rem,0.8fr)_minmax(0,1.2fr)]">
+    <div className="mt-6 grid min-w-0 gap-5 xl:grid-cols-[minmax(32rem,1.35fr)_minmax(20rem,0.65fr)]">
       <div className="min-w-0 space-y-6">
         <Panel title="Tool preview" detail={`${view.frames} frame${view.frames === 1 ? "" : "s"}${view.reading ? " · Reading" : ""}`}>
           <FramePreview frame={view.lastFrame} />
         </Panel>
         <Panel title="What Tiro will say next">
           {view.planned ? (
-            <div className="rounded-xl bg-teal-50 p-4 text-sm leading-6 text-teal-950">
+            <div className="border-l border-blue-700 bg-blue-50/60 p-4 text-sm leading-6 text-stone-800">
               <p>{view.planned.summary}</p>
               {view.planned.question ? <p className="mt-2 font-semibold">{view.planned.question}</p> : null}
             </div>
@@ -394,7 +393,7 @@ function CaptureDashboard({ view }: { view: CaptureView }) {
           {view.questions.length ? (
             <ol className="space-y-3">
               {view.questions.map((question) => (
-                <li className="rounded-xl border border-stone-200 p-3" key={question.id}>
+                <li className="border-b border-stone-200 p-3 last:border-b-0" key={question.id}>
                   <p className="text-sm leading-6 text-stone-900">{question.text}</p>
                   <p className="mt-2 text-xs font-medium text-stone-500">
                     {question.kind.replaceAll("_", " ")} · {question.status} · {question.channel}
@@ -426,7 +425,7 @@ function CaptureDashboard({ view }: { view: CaptureView }) {
               <EmptyLine text="Speech will appear here once capture begins." />
             )}
             {view.partial ? (
-              <p className="mt-3 border-l-2 border-teal-400 pl-3 text-sm leading-6 text-stone-500" aria-live="polite">
+              <p className="mt-3 border-l border-teal-400 pl-3 text-sm leading-6 text-stone-500" aria-live="polite">
                 Hearing: {view.partial}
               </p>
             ) : null}
@@ -470,7 +469,7 @@ function FramePreview({ frame }: { frame: Blob | null }) {
 
 function Panel({ children, detail, title }: { children: ReactNode; detail?: string; title: string }) {
   return (
-    <section className="min-w-0 rounded-2xl border border-stone-200 bg-white p-5">
+    <section className="min-w-0 rounded-lg border border-stone-300 bg-white p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold tracking-[-0.02em]">{title}</h2>
         {detail ? <span className="text-xs font-medium text-stone-500">{detail}</span> : null}

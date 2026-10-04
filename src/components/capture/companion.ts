@@ -33,17 +33,17 @@ export async function openCaptureCompanion(
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       * { box-sizing: border-box; }
-      body { margin: 0; background: #0f2f2d; color: #fff; font: 14px system-ui, sans-serif; }
-      main { min-height: 100vh; padding: 16px; display: flex; flex-direction: column; }
-      .eyebrow { color: #99f6e4; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-      .state { margin: 7px 0 0; font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
-      .detail { min-height: 18px; margin-top: 5px; color: #ccfbf1; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-top: auto; padding-top: 14px; }
-      button { min-height: 38px; border: 1px solid #5eead4; border-radius: 9px; background: #134e4a; color: #fff; font: 600 12px system-ui, sans-serif; cursor: pointer; }
-      button:hover:not(:disabled) { background: #115e59; }
-      button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-      button:disabled { cursor: not-allowed; border-color: #496563; color: #86a6a3; opacity: .75; }
-      .off-record { grid-column: 1 / -1; min-height: 30px; border-style: dashed; background: transparent; }
+      body { margin: 0; background: #fffefa; color: #18211e; font: 14px system-ui, sans-serif; }
+      main { min-height: 100vh; padding: 0 14px 12px; display: flex; flex-direction: column; }
+      .eyebrow { margin: 0 -14px 12px; padding: 12px 14px; background: #123e35; color: #fff; font-size: 10px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+      .state { font: 600 20px/1.2 Georgia, serif; letter-spacing: -.02em; }
+      .detail { min-height: 18px; margin-top: 6px; color: #59635f; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; margin: auto -14px -12px; padding-top: 12px; background: #d8d5cc; border-top: 1px solid #d8d5cc; }
+      button { min-height: 48px; border: 0; background: #fffefa; color: #123e35; font: 700 11px system-ui, sans-serif; cursor: pointer; }
+      button:hover:not(:disabled) { background: #f5f2eb; }
+      button:focus-visible { outline: 2px solid #247ca1; outline-offset: -3px; }
+      button:disabled { cursor: not-allowed; color: #8b918e; opacity: .75; }
+      .off-record { grid-column: 1 / -1; min-height: 28px; color: #59635f; background: #ebe9e2; }
     </style>`;
 
   const main = doc.createElement("main");

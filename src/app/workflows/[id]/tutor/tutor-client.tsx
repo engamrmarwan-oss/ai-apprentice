@@ -192,10 +192,10 @@ function TutorScreen({ workflowId }: { workflowId: string }) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 md:px-10 md:py-12 lg:px-14">
+    <div className="tiro-enter mx-auto w-full max-w-[88rem] px-5 py-8 sm:px-8 md:px-10 md:py-10 lg:px-12">
       <header className="flex flex-col gap-5 border-b border-stone-200 pb-8 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Tutor</h1>
+          <h1 className="text-4xl font-medium tracking-[-0.025em] sm:text-[2.75rem]">Tutor</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600">
             Share a practice case. Tiro will ask what you would do, check your answer against the expert’s rules, and intervene before a mistake when it can.
           </p>
@@ -210,8 +210,8 @@ function TutorScreen({ workflowId }: { workflowId: string }) {
 
       {!view ? (
         <section className="py-10">
-          <div className="max-w-2xl rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold tracking-[-0.03em]">Start a tutor session</h2>
+          <div className="max-w-2xl border-y border-stone-200 py-8">
+            <h2 className="tiro-display text-3xl font-medium tracking-[-0.02em]">Start a tutor session</h2>
             <p className="mt-3 text-sm leading-6 text-stone-600">
               Tiro will use this workflow’s newest confirmed Work Map. You will connect voice and open the companion before sharing the tool tab.
             </p>

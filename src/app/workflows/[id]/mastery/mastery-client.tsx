@@ -92,10 +92,10 @@ function MasteryView({ workflowId }: { workflowId: string }) {
       : undefined;
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8 md:px-10 md:py-12 lg:px-14">
+    <div className="tiro-enter mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 md:px-10 md:py-10 lg:px-12">
       <header className="flex flex-col gap-5 border-b border-stone-200 pb-8 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Mastery report</h1>
+          <h1 className="text-4xl font-medium tracking-[-0.025em] sm:text-[2.75rem]">Mastery report</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600">
             How each of the expert’s rules went in your tutor session, and what to practise next.
           </p>
@@ -164,7 +164,7 @@ function EmptyState({ workflowId }: { workflowId: string }) {
   return (
     <div className="mx-auto grid min-h-[70dvh] max-w-2xl place-items-center px-6 py-12 text-center">
       <div>
-        <h1 className="text-4xl font-semibold tracking-[-0.04em] text-balance sm:text-5xl">
+        <h1 className="text-4xl font-medium tracking-[-0.025em] text-balance sm:text-[2.75rem]">
           Mastery report
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-stone-600">

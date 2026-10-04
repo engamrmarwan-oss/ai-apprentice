@@ -39,7 +39,7 @@ export function DebriefView({
     <div className="min-w-0 space-y-8">
       <section
         aria-label="Debrief controls"
-        className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-5 sm:flex-row sm:items-center"
+        className="flex flex-col gap-4 border-y border-stone-200 bg-white/60 p-5 sm:flex-row sm:items-center"
       >
         <div className="mr-auto">
           <p className="text-xs font-semibold tracking-[0.1em] text-stone-500 uppercase">
@@ -86,7 +86,7 @@ export function DebriefView({
 
       <div className="grid min-w-0 gap-8 xl:grid-cols-[minmax(0,1.25fr)_minmax(19rem,0.75fr)]">
         <section
-          className="min-w-0 rounded-2xl border border-stone-200 bg-white"
+          className="min-w-0 rounded-lg border border-stone-300 bg-white"
           aria-labelledby="conversation-heading"
         >
           <div className="flex items-center justify-between gap-3 border-b border-stone-200 p-5 sm:p-6">
@@ -109,7 +109,7 @@ export function DebriefView({
                 const agent = line.speaker === "agent";
                 return (
                   <li className={`flex ${agent ? "justify-start" : "justify-end"}`} key={line.key}>
-                    <div className={`max-w-[92%] rounded-2xl px-4 py-3 sm:max-w-[78%] ${agent ? "rounded-tl-sm bg-stone-100 text-stone-900" : "rounded-tr-sm bg-teal-900 text-white"}`}>
+                    <div className={`max-w-[92%] rounded-lg px-4 py-3 sm:max-w-[78%] ${agent ? "border-l border-blue-700 bg-blue-50/60 text-stone-900" : "bg-teal-900 text-white"}`}>
                       <div className={`flex items-center gap-2 text-xs font-semibold ${agent ? "text-stone-500" : "text-teal-100"}`}>
                         <span>{agent ? "Tiro" : "You"}</span>
                         <span aria-hidden="true">·</span>
@@ -162,7 +162,7 @@ export function DebriefView({
         />
       ) : (
         <section className="border-t border-stone-200 pt-8" aria-labelledby="teach-back-heading">
-          <h2 className="text-3xl font-semibold tracking-[-0.035em]" id="teach-back-heading">
+          <h2 className="tiro-display text-3xl font-medium tracking-[-0.02em]" id="teach-back-heading">
             Teach-back
           </h2>
           <p className="mt-3 text-sm leading-6 text-stone-600">
@@ -194,7 +194,7 @@ function TeachBack({
     <section className="border-t border-stone-200 pt-8" aria-labelledby="teach-back-heading">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-3xl font-semibold tracking-[-0.035em]" id="teach-back-heading">
+          <h2 className="tiro-display text-3xl font-medium tracking-[-0.02em]" id="teach-back-heading">
             Here’s what Tiro learned
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">
@@ -209,7 +209,7 @@ function TeachBack({
           const rules = map.rules.filter((rule) => rule.steps.includes(step.position));
           return (
             <li className="grid gap-4 py-6 sm:grid-cols-[2rem_minmax(0,1fr)]" key={`${step.id}:${step.title}:${step.decision ?? ""}`}>
-              <span className="grid size-8 place-items-center rounded-full bg-stone-100 text-sm font-bold text-stone-700">
+              <span className="tiro-display grid size-8 place-items-center text-lg font-medium text-stone-500">
                 {step.position}
               </span>
               <div className="min-w-0">
@@ -219,7 +219,7 @@ function TeachBack({
                     <p className="mt-1 text-sm leading-6 text-stone-600">
                       {step.decision ?? "No decision recorded."}
                     </p>
-                    <p className="mt-3 text-sm leading-6 text-stone-700">
+                    <p className="tiro-evidence mt-3 border-l border-amber-500 bg-amber-50/60 px-4 py-3 text-base leading-6 italic text-stone-700">
                       {step.reason ? `“${step.reason.text}”` : "The expert has not given a reason yet."}
                     </p>
                   </div>
@@ -237,10 +237,10 @@ function TeachBack({
                 {rules.length ? (
                   <ul className="mt-4 space-y-3">
                     {rules.map((rule) => (
-                      <li className="rounded-xl bg-stone-50 p-4" key={`${rule.id}:${rule.version}`}>
+                      <li className="border-l border-stone-300 bg-white/50 p-4" key={`${rule.id}:${rule.version}`}>
                         <p className="text-xs font-semibold text-stone-500">Rule {rule.number}</p>
                         <p className="mt-1 text-sm font-semibold leading-6 text-stone-900">{rule.statement}</p>
-                        <p className="mt-2 text-xs leading-5 text-stone-600">“{rule.quote.text}”</p>
+                        <p className="tiro-evidence mt-2 text-sm leading-5 italic text-stone-600">“{rule.quote.text}”</p>
                         {canEdit ? <RuleEditor onSave={onEditRule} rule={rule} /> : null}
                       </li>
                     ))}
@@ -281,7 +281,7 @@ function TeachBack({
 function NothingToKeep({ view }: { view: EngineDebriefView }) {
   return (
     <section className="border-t border-stone-200 pt-8" aria-labelledby="teach-back-heading">
-      <h2 className="text-3xl font-semibold tracking-[-0.035em]" id="teach-back-heading">
+      <h2 className="tiro-display text-3xl font-medium tracking-[-0.02em]" id="teach-back-heading">
         Tiro has nothing it can keep from this session
       </h2>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">
@@ -442,7 +442,7 @@ function RuleEditor({
 
 function Panel({ children, detail, title }: { children: ReactNode; detail?: string; title: string }) {
   return (
-    <section className="min-w-0 rounded-2xl border border-stone-200 bg-white p-5">
+    <section className="min-w-0 rounded-lg border border-stone-200 bg-white p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold tracking-[-0.02em]">{title}</h2>
         {detail ? <span className="text-xs font-medium text-stone-500">{detail}</span> : null}

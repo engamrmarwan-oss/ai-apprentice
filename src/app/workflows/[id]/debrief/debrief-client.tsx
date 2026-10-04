@@ -129,10 +129,10 @@ function DebriefScreen({ workflowId }: { workflowId: string }) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 md:px-10 md:py-12 lg:px-14">
+    <div className="tiro-enter mx-auto w-full max-w-[88rem] px-5 py-8 sm:px-8 md:px-10 md:py-10 lg:px-12">
       <header className="flex flex-col gap-5 border-b border-stone-200 pb-8 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Debrief</h1>
+          <h1 className="text-4xl font-medium tracking-[-0.025em] sm:text-[2.75rem]">Debrief</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600">
             Fill the gaps Tiro could not ask about while you worked, then check the workflow it learned.
           </p>

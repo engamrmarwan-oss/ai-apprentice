@@ -31,23 +31,23 @@ export async function openTutorCompanion(
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       * { box-sizing: border-box; }
-      body { margin: 0; background: #0f2f2d; color: #fff; font: 14px system-ui, sans-serif; }
-      main { min-height: 100vh; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-      .label { color: #99f6e4; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-      .state { margin-top: 5px; font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
-      .detail { margin-top: 5px; color: #ccfbf1; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .replay { display: none; overflow: hidden; border: 1px solid #5eead4; border-radius: 12px; background: #fff; color: #1c1917; }
+      body { margin: 0; background: #f5f2eb; color: #18211e; font: 14px system-ui, sans-serif; }
+      main { min-height: 100vh; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+      .label { color: #315f73; font-size: 9px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+      .state { margin-top: 5px; font: 600 20px/1.2 Georgia, serif; letter-spacing: -.02em; }
+      .detail { margin-top: 5px; color: #59635f; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .replay { display: none; overflow: hidden; border: 1px solid #d8d5cc; border-radius: 8px; background: #fffefa; color: #18211e; box-shadow: 0 14px 32px rgba(24,33,30,.1); }
       .replay.visible { display: block; }
-      .replay img { display: none; width: 100%; max-height: 210px; object-fit: cover; object-position: top; background: #f5f5f4; }
+      .replay img { display: none; width: 100%; max-height: 210px; object-fit: cover; object-position: top; background: #ebe9e2; }
       .replay img.visible { display: block; }
       .replay-copy { padding: 12px; }
       .replay-rule { margin: 4px 0 0; font-weight: 700; line-height: 1.4; }
-      .replay-quote { margin: 7px 0 0; color: #57534e; font-size: 12px; line-height: 1.5; }
-      .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-top: auto; }
-      button { min-height: 40px; border: 1px solid #5eead4; border-radius: 9px; background: #134e4a; color: #fff; font: 600 12px system-ui, sans-serif; cursor: pointer; }
-      button:hover:not(:disabled) { background: #115e59; }
-      button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-      button:disabled { cursor: not-allowed; border-color: #496563; color: #86a6a3; opacity: .75; }
+      .replay-quote { margin: 7px 0 0; color: #59635f; font: italic 13px/1.5 Georgia, serif; }
+      .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; margin-top: auto; border: 1px solid #d8d5cc; background: #d8d5cc; }
+      button { min-height: 46px; border: 0; background: #fffefa; color: #123e35; font: 700 11px system-ui, sans-serif; cursor: pointer; }
+      button:hover:not(:disabled) { background: #f5f2eb; }
+      button:focus-visible { outline: 2px solid #247ca1; outline-offset: -3px; }
+      button:disabled { cursor: not-allowed; color: #8b918e; opacity: .75; }
     </style>`;
 
   const main = doc.createElement("main");
@@ -69,7 +69,7 @@ export async function openTutorCompanion(
   replayCopy.className = "replay-copy";
   const replayLabel = doc.createElement("div");
   replayLabel.className = "label";
-  replayLabel.style.color = "#0f766e";
+  replayLabel.style.color = "#a96713";
   replayLabel.textContent = "What the expert did";
   const replayRule = doc.createElement("p");
   replayRule.className = "replay-rule";
