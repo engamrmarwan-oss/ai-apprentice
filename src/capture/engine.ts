@@ -16,7 +16,7 @@ import { startScreenSensor, type ScreenSensor, type SensorFrame } from "@/sensor
 import { hearsWakeWord, replacePending, spokenText, triggerFor } from "./parts";
 
 /** One stretch of speech, as the capture screen shows it. `id` is set once it is stored. */
-export type Spoken = { key: number; id: string | null; speaker: "expert" | "agent"; start_ms: number; end_ms: number; text: string };
+export type Spoken = { key: number; id: string | null; speaker: "expert" | "new_hire" | "agent"; start_ms: number; end_ms: number; text: string };
 
 export type CaptureView = {
   phase: "idle" | "preparing" | "ready" | "capturing" | "ending" | "ended";

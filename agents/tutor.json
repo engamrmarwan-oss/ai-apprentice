@@ -6,7 +6,8 @@
   "conversation_config": {
     "turn": {
       "turn_timeout": -1,
-      "silence_end_call_timeout": -1
+      "silence_end_call_timeout": -1,
+      "turn_eagerness": "patient"
     },
     "conversation": {
       "max_duration_seconds": 3600,
@@ -25,7 +26,7 @@
       "first_message": "",
       "language": "en",
       "prompt": {
-        "llm": "claude-haiku-4-5",
+        "llm": "claude-sonnet-5-5",
         "built_in_tools": {
           "skip_turn": {
             "type": "system",
