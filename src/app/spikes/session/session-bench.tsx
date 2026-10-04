@@ -55,6 +55,8 @@ export function SessionBench() {
   const [companionOpen, setCompanionOpen] = useState(false);
   const engine = useRef<CaptureEngine | null>(null);
   const companion = useRef<Companion | null>(null);
+  /** Everything the engine did, one line each: for working out afterwards what happened. Kept out of the page. */
+  const trace = useRef<string[]>([]);
 
   const attempt = async (work: () => Promise<unknown>) => {
     setError(null);
@@ -99,10 +101,15 @@ export function SessionBench() {
     attempt(async () => {
       const answer = await send(`/api/workflows/${workflowId}/sessions`, "POST", {});
       const id: string = answer.session.id;
-      engine.current = createCaptureEngine(id, (next) => {
-        setView(next);
-        companion.current?.show(next);
-      });
+      trace.current = [];
+      engine.current = createCaptureEngine(
+        id,
+        (next) => {
+          setView(next);
+          companion.current?.show(next);
+        },
+        { trace: (t, line) => trace.current.push(`${(t / 1000).toFixed(1)} ${line}`) },
+      );
       setSessionId(id);
     });
 
@@ -110,7 +117,8 @@ export function SessionBench() {
     attempt(async () => {
       const stored = sessionId ? await send(`/api/sessions/${sessionId}`, "GET") : null;
       const shown = { ...view, lastFrame: undefined };
-      const blob = new Blob([JSON.stringify({ sessionId, view: shown, checks: checks(view), stored }, null, 2)], { type: "application/json" });
+      const result = { sessionId, view: shown, checks: checks(view), trace: trace.current, stored };
+      const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = `tiro-session-${sessionId}.json`;

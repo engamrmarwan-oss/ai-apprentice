@@ -109,7 +109,12 @@ type PlanAnswer = {
 /** What the engine remembers about the floor that is open. */
 type OpenFloor = { kind: FloorKind; plan: TurnPlan | null; expert: { start: number; stored: Promise<string | null> }[] };
 
-export function createCaptureEngine(sessionId: string, onView: (view: CaptureView) => void) {
+export type EngineOptions = {
+  /** Called with one line for each thing that happens, with the session time. For a test page's log; not for the product's screens. */
+  trace?: (t: number, line: string) => void;
+};
+
+export function createCaptureEngine(sessionId: string, onView: (view: CaptureView) => void, options: EngineOptions = {}) {
   const base = `/api/sessions/${sessionId}`;
   let view: CaptureView = EMPTY_VIEW;
   let config: WorkflowConfig = DEFAULT_CONFIG;
@@ -120,10 +125,15 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
   let epoch = 0;
   const now = () => (epoch ? Math.max(0, Math.round(performance.timeOrigin + performance.now() - epoch)) : 0);
 
+  const trace = (line: string) => options.trace?.(now(), line);
+
   let sensor: ScreenSensor | null = null;
   let voice: Voice | null = null;
   let scribe: RealtimeConnection | null = null;
   let agentSpeaking = false;
+  let agentSpeakingSince = 0;
+  /** Whether Tiro's voice can be heard at all. With the floor closed it is turned down to nothing. */
+  let audible = false;
   let floor: OpenFloor | null = null;
   let spokenKey = 0;
 
@@ -200,7 +210,10 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
   function silence() {
     cancelSilence?.();
     cancelSilence = null;
-    if (!floor) voice?.setVolume({ volume: 0 });
+    if (floor) return;
+    voice?.setVolume({ volume: 0 });
+    audible = false;
+    trace("silenced");
   }
 
   function openFloor(kind: FloorKind, plan: TurnPlan | null) {
@@ -209,7 +222,9 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
     cancelSilence?.();
     cancelSilence = null;
     voice.setVolume({ volume: 1 });
+    audible = true;
     voice.setMicMuted(false);
+    trace(`floor opened: ${kind}`);
 
     const trigger = triggerFor(kind, plan);
     const frameId = plan ? planFrame.get(plan) : undefined;
@@ -245,6 +260,7 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
     floor = null;
     update({ floors: [...view.floors, record] });
     voice?.setMicMuted(true);
+    trace(`floor closed: ${record.reason}, Tiro spoke ${record.agentTurns} times`);
     // Let Tiro finish what it has begun to say, then make sure nothing more is heard.
     if (agentSpeaking || agentLine) cancelSilence = after(6_000, silence);
     else silence();
@@ -283,6 +299,7 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
 
   const clientTools = {
     yield_floor: () => {
+      trace("the agent gave the floor back");
       run(conductor.yielded(now()));
       return "The floor is closed.";
     },
@@ -294,8 +311,11 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
   };
 
   function onAgentSpeaking(speaking: boolean) {
+    if (speaking === agentSpeaking) return;
     agentSpeaking = speaking;
     const t = now();
+    agentSpeakingSince = t;
+    trace(speaking ? "the agent starts speaking" : "the agent stops speaking");
     conductor.agentSpeaking(t, speaking);
     if (!speaking) {
       flushAgentLine(t);
@@ -306,6 +326,7 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
 
   function onAgentSaid(message: string) {
     const text = spokenText(message);
+    trace(`the agent ${floor ? "said" : "said, unheard"}: ${text}`);
     // With the floor closed Tiro is silenced: what it says then reaches nobody and is not kept.
     if (!text || !floor) return;
     const t = now();
@@ -339,14 +360,15 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
 
     connection.on(RealtimeEvents.PARTIAL_TRANSCRIPT, ({ text }) => {
       if (!text.trim() || !capturing() || view.muted) return;
-      // While Tiro talks, what the microphone picks up is most likely Tiro.
-      if (agentSpeaking) return;
+      // While Tiro can be heard talking, what the microphone picks up is most likely Tiro.
+      if (agentSpeaking && audible) return;
       const t = now();
       utteranceStart ??= t;
       heardOutside = true;
       conductor.speechHeard(t);
       if (!floor && !calledThisUtterance && view.voice === "on" && hearsWakeWord(text, config.wake_words)) {
         calledThisUtterance = true;
+        trace("the expert called Tiro");
         run(conductor.called(t));
       }
       update({ partial: text, floor: conductor.view(t) });
@@ -364,9 +386,11 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
       const said = text.trim();
       // Nothing of it was heard while Tiro was quiet: it is Tiro's own voice, not the expert's.
       if (!said || !mine || !capturing() || view.muted) {
+        if (said) trace(`transcript dropped${mine ? "" : " as Tiro's own voice"}: ${said}`);
         finishSettle();
         return;
       }
+      trace(`the expert said: ${said}`);
       const stored = keep("expert", start, t, said);
       if (floor) {
         floor.expert.push({ start, stored });
@@ -455,6 +479,7 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
         question: plan.question ? { id: plan.question.id, text: plan.question.text, score: plan.question.score } : null,
       };
       planFrame.set(turn, plan.frame_id);
+      trace(`planned: ${turn.summary} | ${turn.question?.text ?? "no follow-up"}`);
       const replaced = conductor.planReady(turn);
       // Tiro speaks about the very last decision. The question about the one before waits for the debrief.
       if (replaced?.question) patchQuestion(replaced.question.id, { channel: "debrief" });
@@ -483,7 +508,10 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
     if (!result.read) return;
     before = frame.small;
     conductor.frameRead(frame.t, result.new_words);
-    for (const event of result.events) tell(`Screen: ${describeEvent(event)}`);
+    for (const event of result.events) {
+      tell(`Screen: ${describeEvent(event)}`);
+      trace(`read at ${frame.t}: ${describeEvent(event)}`);
+    }
     update({
       screen: result.screen,
       events: [...view.events, ...result.events],
@@ -522,6 +550,8 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
       for (const one of due) one.run();
     }
     if (!capturing()) return;
+    // The voice client can miss the end of the agent's speech. Nobody talks for half a minute in one breath.
+    if (agentSpeaking && t - agentSpeakingSince > 30_000) onAgentSpeaking(false);
     // A pointer or a spinner is not the expert at work.
     if (change === "major") run(conductor.screenMoved(t));
     // Without a voice, or while the expert has muted Tiro, there is nobody to give the floor to.
