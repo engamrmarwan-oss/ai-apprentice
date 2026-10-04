@@ -32,6 +32,7 @@ export function fakeDb(answers: Record<string, Answer> = {}) {
       eq: (column: string, value: unknown) => ((call.filters[column] = value), builder),
       is: (column: string, value: unknown) => ((call.filters[column] = value), builder),
       order: () => builder,
+      limit: () => builder,
       abortSignal: () => builder,
       maybeSingle: answer,
       single: answer,

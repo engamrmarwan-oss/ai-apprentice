@@ -386,6 +386,10 @@ A tutor session teaches the workflow's newest confirmed Work Map to the person s
 
 Starts a tutor session. Returns `{ session, work_map }`: the session (its `kind` is `tutor`, its `phase` is `teach`) and the Work Map it teaches, in the shape above. `no_map` (409) when the expert has not confirmed a Work Map yet.
 
+### `GET /api/workflows/{id}/tutor-sessions`
+
+The tutor sessions the person signed in has had on the workflow, newest first: `{ "sessions": [{ "id", "phase", "started_at", "ended_at", ... }] }`. For anyone on the workflow; each person sees only their own. A session whose `phase` is `ended` has its final report. This is how a screen finds a report again after the Tutor page has been left.
+
 ### `GET /api/sessions/{id}/report`
 
 The mastery report of a tutor session, during it or after it has ended.
