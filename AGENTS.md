@@ -61,7 +61,7 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 | `src/app/` (except `api/` and `spikes/`) | Pages and layouts | Codex |
 | `supabase/migrations/` | Database schema. Apply with `npx supabase db push`, then `npm run types:db` | Claude Code |
 | `agents/` | ElevenLabs agent configurations, prompts and client tools. Push with `npm run agents:push` | Claude Code |
-| `scripts/`, `.github/` | Gate, CI, sign-up codes (`npm run signup-code`), demo accounts (`npm run demo-accounts`), agent push, the interviewer's text check (`npm run check:agent`) | Claude Code |
+| `scripts/`, `.github/` | Gate, CI, sign-up codes (`npm run signup-code`), demo accounts (`npm run demo-accounts`), agent push, the interviewer's text check (`npm run check:agent`), a whole expert session run with nobody at the keyboard (`npm run check:session`) | Claude Code |
 | `docs/spikes/` | Written spike results | Claude Code |
 
 <!-- BEGIN:nextjs-agent-rules -->
