@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon } from "@/components/ui/icon";
 import { getNavigation, type OpenWorkflow } from "./navigation";
 
@@ -23,6 +23,17 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const navigation = getNavigation(workflow);
+  const navRef = useRef<HTMLElement>(null);
+
+  // On a phone the navigation is a strip that scrolls sideways: bring the current page into it.
+  useEffect(() => {
+    const nav = navRef.current;
+    const current = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!nav || !current || nav.scrollWidth <= nav.clientWidth) return;
+    const navBox = nav.getBoundingClientRect();
+    const box = current.getBoundingClientRect();
+    nav.scrollLeft += box.left - navBox.left - (navBox.width - box.width) / 2;
+  }, [pathname]);
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-stone-50 text-stone-950 md:grid md:grid-cols-[15rem_minmax(0,1fr)] md:overflow-x-visible">
@@ -56,6 +67,7 @@ export function AppShell({
 
           <nav
             aria-label="Primary navigation"
+            ref={navRef}
             className="mt-4 flex w-full min-w-0 max-w-full gap-2 overflow-x-auto pb-1 md:mt-8 md:block md:space-y-7 md:overflow-visible"
           >
             {navigation.map((group) => (

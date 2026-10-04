@@ -108,7 +108,7 @@ export function HomeClient() {
         <header className="flex flex-col gap-6 border-b border-stone-200 pb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="max-w-3xl text-4xl font-semibold tracking-[-0.04em] text-balance sm:text-5xl">
-              Welcome back, {firstName}
+              Welcome, {firstName}
             </h1>
             <p className="mt-3 max-w-2xl text-base leading-7 text-stone-600">
               Teach Tiro how you make decisions, or continue learning from an
@@ -195,7 +195,7 @@ function WorkflowSection({
                     {workflow.tool.name}
                   </span>
                 </span>
-                <span className="hidden rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-600 capitalize sm:inline-flex">
+                <span className="hidden rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-600 sm:inline-flex">
                   {workflow.role === "expert" ? "Expert" : "New hire"}
                 </span>
                 <Icon

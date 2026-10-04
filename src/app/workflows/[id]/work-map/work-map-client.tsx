@@ -15,12 +15,14 @@ type MapState =
 export function WorkMapClient({ workflowId }: { workflowId: string }) {
   return (
     <AuthenticatedApp workflowId={workflowId}>
-      {() => <WorkMapScreen workflowId={workflowId} />}
+      {({ workflow }) => (
+        <WorkMapScreen isExpert={workflow?.role === "expert"} workflowId={workflowId} />
+      )}
     </AuthenticatedApp>
   );
 }
 
-function WorkMapScreen({ workflowId }: { workflowId: string }) {
+function WorkMapScreen({ isExpert, workflowId }: { isExpert: boolean; workflowId: string }) {
   const router = useRouter();
   const [mapState, setMapState] = useState<MapState>({ state: "loading" });
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
@@ -87,7 +89,13 @@ function WorkMapScreen({ workflowId }: { workflowId: string }) {
   if (!mapState.map) {
     return (
       <CenteredStatus
-        message="Finish an expert capture and debrief to create the first version of this workflow’s Work Map."
+        action={isExpert ? "Start capturing" : undefined}
+        message={
+          isExpert
+            ? "Capture a session and confirm its debrief to make the first version of this workflow’s Work Map."
+            : "The expert has not confirmed a Work Map for this workflow yet. It will appear here when they do, and then you can practise it with the tutor."
+        }
+        onAction={isExpert ? () => router.push(`/workflows/${encodeURIComponent(workflowId)}/capture`) : undefined}
         title="No Work Map yet"
       />
     );
