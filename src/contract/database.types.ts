@@ -362,32 +362,41 @@ export type Database = {
         Row: {
           changed_region: Json | null
           created_at: string
+          height: number | null
           id: string
           is_key: boolean
+          reading: Json | null
           redacted: boolean
           session_id: string
           storage_path: string
           t_ms: number
+          width: number | null
         }
         Insert: {
           changed_region?: Json | null
           created_at?: string
+          height?: number | null
           id?: string
           is_key?: boolean
+          reading?: Json | null
           redacted?: boolean
           session_id: string
           storage_path: string
           t_ms: number
+          width?: number | null
         }
         Update: {
           changed_region?: Json | null
           created_at?: string
+          height?: number | null
           id?: string
           is_key?: boolean
+          reading?: Json | null
           redacted?: boolean
           session_id?: string
           storage_path?: string
           t_ms?: number
+          width?: number | null
         }
         Relationships: [
           {
@@ -686,6 +695,7 @@ export type Database = {
       }
       sessions: {
         Row: {
+          conversation_id: string | null
           created_at: string
           ended_at: string | null
           id: string
@@ -697,6 +707,7 @@ export type Database = {
           workflow_id: string
         }
         Insert: {
+          conversation_id?: string | null
           created_at?: string
           ended_at?: string | null
           id?: string
@@ -708,6 +719,7 @@ export type Database = {
           workflow_id: string
         }
         Update: {
+          conversation_id?: string | null
           created_at?: string
           ended_at?: string | null
           id?: string
