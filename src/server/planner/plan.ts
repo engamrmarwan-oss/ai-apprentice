@@ -32,8 +32,8 @@ export type PlanInput = {
   baseline: BaselineStatement[];
   /** What has happened on screen, oldest first. */
   events: TiroEvent[];
-  /** The decision just made: the decision events of one frame. */
-  decision: TiroEvent[];
+  /** When the expert came to the screen they are on, on the session's clock. Events from then on happened on it. */
+  sinceMs: number;
   /** What the screen shows now. */
   screen: ScreenState | null;
   /** What has been said, oldest first. */
@@ -50,25 +50,25 @@ const RECENT_UTTERANCES = 40;
 
 const PLAN_SYSTEM = `You help an apprentice learn a task by watching an expert do it in a business application.
 
-The apprentice stays silent while the expert works. At a pause just after a decision it may take one short turn: it says back what the expert just decided and asks whether it has that right, and then, only if something worth knowing is still open, it asks one follow-up question.
+The apprentice stays silent while the expert works. Once the expert has spent a while on one screen and pauses, it may take one short turn: it sums up what the expert is doing on this screen and asks whether it has that right, and then, only if something worth knowing is still open, it asks one follow-up question.
 
 You are given:
 - TASK: the application, the task and the expert's role.
 - BASELINE: what the apprentice assumes so far, numbered from 0. None of it is confirmed. It may be empty.
-- EVENTS: what has happened on screen, oldest first, with the seconds since the session started.
+- BEFORE: what happened on screen before the expert came to this screen, oldest first, with the seconds since the session started.
 - SCREEN: what the screen shows now.
+- ON THIS SCREEN: what the expert has done since coming to this screen, oldest first. It may be empty: the expert may have been reading.
 - SAID: what the expert and the apprentice have said aloud, oldest first.
 - QUESTIONS: the questions the apprentice already holds, asked or not.
-- DECISION: the decision the expert just made.
 
 Return two things.
 
-summary: one sentence for the apprentice to say aloud. It says back the decision just made, tied to what led to it: what the expert did or looked at just before, on this screen or the one before. It ends by asking whether that is right. Its shape is "So, after ..., you ..., correct?". Say it as a colleague would say it aloud: name the item once, as it appears on screen, and say what was decided. Do not recite field names or old and new values unless the decision cannot be said without them. One short sentence, at most 20 words. Say only what EVENTS, SCREEN and SAID show: do not explain, praise, guess a reason or ask why.
+summary: one sentence for the apprentice to say aloud. It sums up what the expert is doing on this screen, as part of the task: what this screen is for in the task, and what the expert's work here comes to. Say it the way a colleague who has followed along would put it, at the level of the work, not of the clicks. Never replay the last action, and never list what was clicked, pressed, typed or changed, or field names and values: say what they add up to. If nothing has been done here yet, say what the expert is looking at here and what it is for in the task. End by asking whether that is right, for example with "right?" or "correct?". One short sentence, at most 25 words. Build it only from TASK, BEFORE, SCREEN, ON THIS SCREEN and SAID: do not praise, do not give a reason for a choice and do not ask why.
 
-candidates: up to three follow-up questions about this decision, the most useful first. Each is one short spoken question about one thing, in plain words, that the expert can answer in a sentence or two. For each give:
+candidates: up to three follow-up questions about what the expert did on this screen, the most useful first. If the expert has done nothing here yet, return none. Each is one short spoken question about one thing, in plain words, that the expert can answer in a sentence or two. For each give:
 - kind: one of
-  reason: why this decision.
-  limit: whether there is a threshold or a line that changes the decision.
+  reason: why this choice.
+  limit: whether there is a threshold or a line that changes the choice.
   exception: when the usual way does not apply.
   stop_and_ask: when the expert would stop and ask someone before deciding.
   deviation: the expert did something a BASELINE statement did not predict. Give that statement's number in baseline_statement.
@@ -78,7 +78,7 @@ candidates: up to three follow-up questions about this decision, the most useful
 - baseline_statement: the number of the BASELINE statement the question is about, or null.
 
 Rules:
-- Ask about this decision and this task. Never ask about the application in general.
+- Ask about this screen's work and this task. Never ask about the application in general.
 - Do not repeat or reword a question that is in QUESTIONS.
 - Never put a guess into a question: ask what the reason is, do not offer one.
 - Do not ask the expert to confirm what happened: the summary does that.`;
@@ -92,19 +92,21 @@ export function planContent(input: PlanInput): string {
     who: utterance.speaker === "agent" ? "apprentice" : "expert",
     text: utterance.text,
   }));
-  const happened = input.events.slice(-RECENT_EVENTS).map((event) => ({ t: seconds(event.t_ms), what: describeEvent(event) }));
+  const line = (event: TiroEvent) => ({ t: seconds(event.t_ms), what: describeEvent(event) });
+  const here = input.events.filter((event) => event.t_ms >= input.sinceMs);
+  const before = input.events.filter((event) => event.t_ms < input.sinceMs).slice(-Math.max(0, RECENT_EVENTS - here.length));
   const parts = [
     `TASK:\n${JSON.stringify({ application: input.workflow.tool, task: input.workflow.task, expert_role: input.workflow.role })}`,
     `BASELINE:\n${JSON.stringify(input.baseline.map((statement, n) => ({ n, text: statement.text, source: statement.source, status: statement.status })))}`,
-    `EVENTS:\n${JSON.stringify(happened)}`,
+    `BEFORE:\n${JSON.stringify(before.map(line))}`,
     `SCREEN:\n${JSON.stringify(input.screen ? { screen: input.screen.screen, item: input.screen.item, fields: input.screen.fields } : null)}`,
+    `ON THIS SCREEN, since ${seconds(input.sinceMs)} s:\n${JSON.stringify(here.slice(-RECENT_EVENTS).map(line))}`,
     `SAID:\n${JSON.stringify(said)}`,
     `QUESTIONS:\n${JSON.stringify(input.questions)}`,
-    `DECISION:\n${JSON.stringify(input.decision.map((event) => ({ t: seconds(event.t_ms), what: describeEvent(event) })))}`,
   ];
   if (!input.guardrailAsked && input.guardrailKinds.length > 0) {
     parts.push(
-      `The apprentice has not yet asked a question of these kinds: ${input.guardrailKinds.join(", ")}. If one fits this decision, include it.`,
+      `The apprentice has not yet asked a question of these kinds: ${input.guardrailKinds.join(", ")}. If one fits what the expert did here, include it.`,
     );
   }
   parts.push(`Write the summary and the questions in this language: ${input.language}.`);

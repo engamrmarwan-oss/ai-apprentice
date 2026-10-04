@@ -174,7 +174,7 @@ describe("planContent", () => {
     language: "en",
     baseline: [{ id: "b1", text: "Invoices are paid within 30 days.", source: "uploaded_process", status: "assumed" }],
     events: [event({ type: "open_item", t_ms: 20_000, payload: { item: "Invoice 3" } }), event({})],
-    decision: [event({})],
+    sinceMs: 60_000,
     screen: { screen: "Invoice", item: "Invoice 3", fields: [{ name: "Amount", value: "12,400" }] },
     utterances: [
       { id: "u1", session_id: "s", speaker: "expert", start_ms: 30_000, end_ms: 33_000, text: "This one is from a new supplier." },
@@ -192,6 +192,12 @@ describe("planContent", () => {
     expect(content).toContain('"who":"expert","text":"This one is from a new supplier."');
     expect(content).toContain('"who":"apprentice"');
     expect(content).toContain('"n":0,"text":"Invoices are paid within 30 days."');
+  });
+
+  it("separates what happened on this screen from what happened before it", () => {
+    const content = planContent(input);
+    expect(content).toContain('BEFORE:\n[{"t":20,"what":"Opened Invoice 3."}]');
+    expect(content).toContain('ON THIS SCREEN, since 60 s:\n[{"t":61.5,"what":"Pressed \\"Hold\\" on Invoice 3."}]');
   });
 
   it("asks for a guardrail question only until one has been asked, naming the kinds from data", () => {

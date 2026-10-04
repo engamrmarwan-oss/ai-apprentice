@@ -26,10 +26,10 @@ describe("spokenText", () => {
 });
 
 describe("triggerFor", () => {
-  const plan = { decisionAt: 0, summary: "So, after opening it, you held it, correct?", question: { id: "q", text: "Why hold it?", score: 0.8 } };
+  const plan = { at: 0, summary: "So you are checking which orders can be released, correct?", question: { id: "q", text: "Why hold it?", score: 0.8 } };
 
   it("carries the summary and the follow-up for a turn at a pause", () => {
-    expect(triggerFor("summary", plan)).toBe("ASK:\nSUMMARY: So, after opening it, you held it, correct?\nFOLLOW-UP: Why hold it?");
+    expect(triggerFor("summary", plan)).toBe("ASK:\nSUMMARY: So you are checking which orders can be released, correct?\nFOLLOW-UP: Why hold it?");
   });
 
   it("says there is no follow-up when nothing is worth asking", () => {

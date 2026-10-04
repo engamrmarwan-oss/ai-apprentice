@@ -110,29 +110,31 @@ export async function ingestFrame(context: SessionContext, input: FrameInput): P
   };
 }
 
-/** What Tiro will say at the next pause about one decision. */
+/** What Tiro will say at the next pause about the screen the expert is on. */
 export type Plan = {
+  /** The latest frame of the screen: its picture goes to the voice conversation with the turn. */
   frame_id: string;
-  /** When the decision was made, on the session's clock. */
-  decision_t_ms: number;
-  /** The decision said back in one sentence, ending by asking whether it is right. */
+  /** What the expert is doing on the screen, in one sentence, ending by asking whether it is right. */
   summary: string;
   /** The follow-up to ask if the expert's answer leaves it open. Null when nothing is worth asking. */
   question: Question | null;
 };
 
-/** How many questions one decision may leave behind: one to ask live, the rest for the debrief. */
-const KEEP_PER_DECISION = 3;
+/** How many questions one screen visit may leave behind: one to ask live, the rest for the debrief. */
+const KEEP_PER_VISIT = 3;
 
 /**
- * Plans the turn for the decision made on one frame: a model proposes a
- * summary and follow-up questions, code decides which are kept. `plan` is null
- * when the frame holds no decision or the model could not be reached; the
- * session carries on without a turn for it.
+ * Plans the turn for the screen the expert has been on since `sinceMs`: a
+ * model proposes a summary of the work there and follow-up questions, code
+ * decides which are kept. The questions hang on the visit's last decision, or
+ * its last event when nothing was decided; a visit with no events leaves no
+ * questions. `plan` is null when the model could not be reached; the session
+ * carries on without a turn for it.
  */
-export async function planDecision(
+export async function planScreen(
   context: SessionContext,
   frameId: string,
+  sinceMs: number,
 ): Promise<{ ok: true; plan: Plan | null; questions: Question[] } | Unavailable> {
   const { session, workflow } = context;
   const [timeline, baseline, guardrails, screen] = await Promise.all([
@@ -144,9 +146,7 @@ export async function planDecision(
   if (!timeline.ok || !baseline.ok || !guardrails.ok) return { ok: false, reason: "unavailable" };
 
   const { events, utterances, questions } = timeline.timeline;
-  const decision = events.filter((event) => event.frame_id === frameId && isDecision(event));
   const nothing = { ok: true as const, plan: null, questions: [] };
-  if (decision.length === 0) return nothing;
 
   const asked = guardrailAsked(questions, guardrails.kinds);
   const proposed = await proposeQuestions({
@@ -154,7 +154,7 @@ export async function planDecision(
     language: session.language,
     baseline: baseline.statements,
     events,
-    decision,
+    sinceMs,
     screen: screen.ok ? screen.state : null,
     utterances,
     questions,
@@ -167,29 +167,28 @@ export async function planDecision(
   if (!summary) return nothing;
 
   // A press and the status change it caused are one decision: the questions hang on the change, which says what was decided.
-  const trigger = decision.find((event) => event.type === "status_change") ?? decision[0];
-  const kept = filterCandidates(proposed.value.output.candidates, {
-    triggerEventId: trigger.id,
-    existing: questions,
-    guardrailKinds: guardrails.kinds,
-    baseline: baseline.statements,
-    // The tool map arrives with tool recording. Until then nothing shows which options were passed over.
-    hasToolOptions: false,
-    guardrailBoost: workflow.config.guardrail_boost,
-    threshold: workflow.config.score_threshold,
-    keep: KEEP_PER_DECISION,
-  });
+  const here = events.filter((event) => event.t_ms >= sinceMs);
+  const decisions = here.filter(isDecision);
+  const trigger = decisions.findLast((event) => event.type === "status_change") ?? decisions.at(-1) ?? here.at(-1) ?? null;
+  const kept = trigger
+    ? filterCandidates(proposed.value.output.candidates, {
+        triggerEventId: trigger.id,
+        existing: questions,
+        guardrailKinds: guardrails.kinds,
+        baseline: baseline.statements,
+        // The tool map arrives with tool recording. Until then nothing shows which options were passed over.
+        hasToolOptions: false,
+        guardrailBoost: workflow.config.guardrail_boost,
+        threshold: workflow.config.score_threshold,
+        keep: KEEP_PER_VISIT,
+      })
+    : [];
   const queued = await queueQuestions(session.id, kept);
   const stored = queued.ok ? queued.questions : [];
 
   return {
     ok: true,
-    plan: {
-      frame_id: frameId,
-      decision_t_ms: trigger.t_ms,
-      summary,
-      question: stored.find((question) => question.channel === "live") ?? null,
-    },
+    plan: { frame_id: frameId, summary, question: stored.find((question) => question.channel === "live") ?? null },
     questions: stored,
   };
 }

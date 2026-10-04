@@ -19,7 +19,7 @@ vi.mock("./sessions", () => sessions);
 vi.mock("./vision/reading", () => ({ readFrame }));
 vi.mock("./planner/plan", async (original) => ({ ...(await original<typeof import("./planner/plan")>()), proposeQuestions }));
 
-import { ingestFrame, planDecision, type FrameInput } from "./capture";
+import { ingestFrame, planScreen, type FrameInput } from "./capture";
 
 const SESSION = "22222222-2222-4222-8222-222222222222";
 const context: SessionContext = {
@@ -132,38 +132,31 @@ const event = (id: string, patch: Partial<TiroEvent>): TiroEvent =>
 const candidate = (patch: Record<string, unknown>) => ({ text: "Why hold it?", kind: "reason", score: 0.7, answered_by: "none", baseline_statement: null, ...patch });
 const timeline = (events: TiroEvent[]) => ({ ok: true, timeline: { events, utterances: [], questions: [] } });
 
-describe("planDecision", () => {
-  it("plans nothing, and asks no model, for a frame that holds no decision", async () => {
-    sessions.loadTimeline.mockResolvedValue(timeline([event("e1", { type: "open_item", payload: { item: "Invoice 3" } })]));
-    expect(await planDecision(context, FRAME)).toEqual({ ok: true, plan: null, questions: [] });
-    expect(proposeQuestions).not.toHaveBeenCalled();
+describe("planScreen", () => {
+  const SINCE = 50_000;
+  const summed = (candidates: Record<string, unknown>[] = []) => ({
+    ok: true,
+    value: { output: { summary: " So you are going through Invoice 3\n before it is paid, right? ", candidates } },
   });
 
-  it("gives the summary to say back and lets the best question be the follow-up", async () => {
+  it("sums up the screen and lets the best question about it be the follow-up", async () => {
     const press = event("11111111-1111-4111-8111-111111111111", {});
     const change = event("11111111-1111-4111-8111-111111111112", {
       type: "status_change",
       payload: { item: "Invoice 3", field: "State", from: "Open", to: "On hold" },
     });
     sessions.loadTimeline.mockResolvedValue(timeline([press, change]));
-    proposeQuestions.mockResolvedValue({
-      ok: true,
-      value: {
-        output: {
-          summary: " So, after opening Invoice 3,\n you put it on hold, correct? ",
-          candidates: [
-            candidate({ text: "Why hold it?", score: 0.7 }),
-            candidate({ text: "Is there an amount above which you always hold?", kind: "limit", score: 0.6 }),
-            candidate({ text: "What is the state now?", answered_by: "screen", score: 0.9 }),
-          ],
-        },
-      },
-    });
+    proposeQuestions.mockResolvedValue(
+      summed([
+        candidate({ text: "Why hold it?", score: 0.7 }),
+        candidate({ text: "Is there an amount above which you always hold?", kind: "limit", score: 0.6 }),
+        candidate({ text: "What is the state now?", answered_by: "screen", score: 0.9 }),
+      ]),
+    );
 
-    const result = await planDecision(context, FRAME);
+    const result = await planScreen(context, FRAME, SINCE);
     if (!result.ok || !result.plan) throw new Error("expected a plan");
-    expect(result.plan.summary).toBe("So, after opening Invoice 3, you put it on hold, correct?");
-    expect(result.plan.decision_t_ms).toBe(61_500);
+    expect(result.plan).toMatchObject({ frame_id: FRAME, summary: "So you are going through Invoice 3 before it is paid, right?" });
     // No guardrail question has been asked yet, so the limit question is boosted past the reason.
     expect(result.plan.question).toMatchObject({ kind: "limit", channel: "live" });
     expect(result.questions.map((question) => [question.kind, question.channel])).toEqual([
@@ -172,24 +165,37 @@ describe("planDecision", () => {
     ]);
     // A press and the status change it caused are one decision: the questions hang on the change.
     expect(result.questions.every((question) => question.trigger_event_id === change.id)).toBe(true);
-    // The planner was shown both events as the decision.
-    expect(proposeQuestions.mock.calls[0][0].decision).toHaveLength(2);
+    // The planner was told when the expert came to this screen.
+    expect(proposeQuestions.mock.calls[0][0].sinceMs).toBe(SINCE);
+  });
+
+  it("hangs the questions on the last thing done when nothing on the screen was a decision", async () => {
+    const before = event("11111111-1111-4111-8111-111111111111", { t_ms: 10_000 });
+    const opened = event("11111111-1111-4111-8111-111111111113", { type: "open_item", t_ms: 52_000, payload: { item: "Invoice 3" } });
+    sessions.loadTimeline.mockResolvedValue(timeline([before, opened]));
+    proposeQuestions.mockResolvedValue(summed([candidate({ text: "Why this one first?" })]));
+    const result = await planScreen(context, FRAME, SINCE);
+    expect(result).toMatchObject({ ok: true, questions: [{ trigger_event_id: opened.id }] });
+  });
+
+  it("still sums up a screen where nothing was done, but keeps no question", async () => {
+    sessions.loadTimeline.mockResolvedValue(timeline([event("11111111-1111-4111-8111-111111111111", { t_ms: 10_000 })]));
+    proposeQuestions.mockResolvedValue(summed([candidate({ text: "Why this screen?" })]));
+    const result = await planScreen(context, FRAME, SINCE);
+    expect(result).toMatchObject({ ok: true, plan: { summary: "So you are going through Invoice 3 before it is paid, right?", question: null }, questions: [] });
   });
 
   it("plans nothing when the planner cannot be reached", async () => {
     sessions.loadTimeline.mockResolvedValue(timeline([event("11111111-1111-4111-8111-111111111111", {})]));
     proposeQuestions.mockResolvedValue({ ok: false, error: { code: "timeout", service: "planner", message: "too slow" } });
-    expect(await planDecision(context, FRAME)).toEqual({ ok: true, plan: null, questions: [] });
+    expect(await planScreen(context, FRAME, SINCE)).toEqual({ ok: true, plan: null, questions: [] });
     expect(sessions.queueQuestions).not.toHaveBeenCalled();
   });
 
   it("still gives a summary when no question is worth keeping", async () => {
     sessions.loadTimeline.mockResolvedValue(timeline([event("11111111-1111-4111-8111-111111111111", {})]));
-    proposeQuestions.mockResolvedValue({
-      ok: true,
-      value: { output: { summary: "So you held it, correct?", candidates: [candidate({ answered_by: "transcript" })] } },
-    });
-    const result = await planDecision(context, FRAME);
-    expect(result).toMatchObject({ ok: true, plan: { summary: "So you held it, correct?", question: null }, questions: [] });
+    proposeQuestions.mockResolvedValue(summed([candidate({ answered_by: "transcript" })]));
+    const result = await planScreen(context, FRAME, SINCE);
+    expect(result).toMatchObject({ ok: true, plan: { question: null }, questions: [] });
   });
 });
