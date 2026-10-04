@@ -33,6 +33,7 @@ export type SensorFrame = {
   cause: Cause;
   /** What differs from the last frame taken, as fractions of the frame. Null for the first frame. */
   region: Region | null;
+  /** The size of the frame of record, in pixels. */
   width: number;
   height: number;
   /** The whole frame at full resolution: the frame of record. */
@@ -56,6 +57,9 @@ const scope = self as unknown as {
 
 /** Width of the grid frames are compared on. Height follows the frame's shape. */
 const GRID_WIDTH = 192;
+
+/** The longest edge of the frame of record. A very large display is scaled down to it, so one frame stays a modest upload. */
+const RECORD_EDGE = 3200;
 
 let epoch = 0;
 const now = () => performance.timeOrigin + performance.now() - epoch;
@@ -101,8 +105,9 @@ function take(frame: VideoFrame, t: number, cause: Cause, region: Region | null)
   const width = frame.displayWidth;
   const height = frame.displayHeight;
 
-  const full = new OffscreenCanvas(width, height);
-  full.getContext("2d")!.drawImage(frame, 0, 0);
+  const record = fitWithin(width, height, RECORD_EDGE);
+  const full = new OffscreenCanvas(record.width, record.height);
+  full.getContext("2d")!.drawImage(frame, 0, 0, record.width, record.height);
 
   const fitted = fitWithin(width, height);
   const scaled = new OffscreenCanvas(fitted.width, fitted.height);
@@ -125,7 +130,17 @@ function take(frame: VideoFrame, t: number, cause: Cause, region: Region | null)
         jpeg(scaled, 0.85),
         cropped ? jpeg(cropped, 0.9) : null,
       ]);
-      scope.postMessage({ type: "frame", t, cause, region, width, height, full: fullBlob, small: smallBlob, changed: changedBlob });
+      scope.postMessage({
+        type: "frame",
+        t,
+        cause,
+        region,
+        width: record.width,
+        height: record.height,
+        full: fullBlob,
+        small: smallBlob,
+        changed: changedBlob,
+      });
     })
     // One frame that fails to encode must not stop the ones after it.
     .catch(() => {});

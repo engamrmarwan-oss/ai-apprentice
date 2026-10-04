@@ -15,6 +15,8 @@ export type ScreenSensorHandlers = {
 };
 
 export type ScreenSensor = {
+  /** When sharing began, in epoch milliseconds. Every time the sensor reports is counted from here. */
+  epoch: number;
   /** What is being shared, as the browser reports it. */
   surface: { width: number | null; height: number | null; displaySurface: string | null };
   /** Takes a frame now if the screen shows anything new, without waiting for it to settle. */
@@ -28,15 +30,11 @@ export function sensorSupported(): boolean {
 }
 
 /**
- * Starts watching a tab the person picks. `epoch` is the session's start in
- * epoch milliseconds; every time the sensor reports is counted from it.
- * Rejects if the browser cannot do this or the person declines to share.
+ * Starts watching a tab the person picks. The session's clock starts the
+ * moment they have picked it. Rejects if the browser cannot do this or the
+ * person declines to share.
  */
-export async function startScreenSensor(
-  epoch: number,
-  options: SensorOptions,
-  handlers: ScreenSensorHandlers,
-): Promise<ScreenSensor> {
+export async function startScreenSensor(options: SensorOptions, handlers: ScreenSensorHandlers): Promise<ScreenSensor> {
   if (!sensorSupported()) throw new Error("This browser cannot read a shared tab. Use Chrome or Edge.");
 
   const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -47,6 +45,7 @@ export async function startScreenSensor(
     surfaceSwitching: "include",
     preferCurrentTab: false,
   } as DisplayMediaStreamOptions);
+  const epoch = performance.timeOrigin + performance.now();
   const track = stream.getVideoTracks()[0];
   const settings = track.getSettings();
 
@@ -69,6 +68,7 @@ export async function startScreenSensor(
   worker.postMessage(start, [readable]);
 
   return {
+    epoch,
     surface: {
       width: settings.width ?? null,
       height: settings.height ?? null,
