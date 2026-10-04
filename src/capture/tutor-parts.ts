@@ -35,3 +35,18 @@ export function catchTrigger(what: { said: string } | { did: string }, caught: r
   );
   return `CATCH: ${learner}\n${rules.join("\n")}\nTHEN: ${again ? "ask what they would do instead" : "give the floor back"}`;
 }
+
+/** Longer than the transcriber ever waits before it commits what it heard: a stretch that has been quiet this long was not speech. */
+export const STRETCH_STALE_MS = 4_000;
+
+/**
+ * When the stretch of speech now being heard began. The transcriber sometimes
+ * reports a few words out of silence and never commits them. Left alone, the
+ * next thing the learner really says would be timed from that moment, and
+ * shown before the question it answers. A stretch that has gone quiet for
+ * longer than a commit takes is taken for noise: what is heard next starts
+ * a new one.
+ */
+export function stretchStart(start: number | null, lastHeardAt: number, t: number): number {
+  return start === null || t - lastHeardAt > STRETCH_STALE_MS ? t : start;
+}

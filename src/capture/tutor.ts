@@ -16,7 +16,7 @@ import { startScreenSensor, type ScreenSensor, type SensorFrame } from "@/sensor
 import type { WorkMap, WorkMapRule } from "./debrief";
 import type { Spoken } from "./engine";
 import { hearsWakeWord, replacePending, spokenText } from "./parts";
-import { catchTrigger, clearTrigger, itemTrigger, type TutorFloor } from "./tutor-parts";
+import { catchTrigger, clearTrigger, itemTrigger, stretchStart, type TutorFloor } from "./tutor-parts";
 
 /** A rule the learner broke, as the server reports it. */
 export type Caught = { rule: WorkMapRule; explanation: string | null; action: WorkMapRule["action"] };
@@ -150,6 +150,7 @@ export function createTutorEngine(sessionId: string, workMap: WorkMap, onView: (
   let agentLine: { text: string; start: number } | null = null;
 
   let utteranceStart: number | null = null;
+  let lastPartialAt = 0;
   let heardOutside = false;
   let heardOverTiro = false;
 
@@ -287,7 +288,7 @@ export function createTutorEngine(sessionId: string, workMap: WorkMap, onView: (
     yield_floor: () => {
       // While the learner still owes an answer, the floor stays open for it.
       if (floor && !floor.awaiting) closeFloor("the tutor gave it back");
-      return "The floor is closed.";
+      return "The floor is closed. Say nothing more until the app gives you a turn.";
     },
     replay_moment: (input: { rule_id?: unknown }) => {
       const rule = view.workMap.rules.find((one) => one.id === input.rule_id) ?? view.catches.at(-1)?.rule ?? null;
@@ -351,9 +352,11 @@ export function createTutorEngine(sessionId: string, workMap: WorkMap, onView: (
         heardOverTiro = true;
         return;
       }
-      utteranceStart ??= now();
+      const t = now();
+      utteranceStart = stretchStart(utteranceStart, lastPartialAt, t);
+      lastPartialAt = t;
       heardOutside = true;
-      if (floor) floor.lastHeardAt = now();
+      if (floor) floor.lastHeardAt = t;
       update({ partial: text });
     });
 

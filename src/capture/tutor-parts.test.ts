@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { catchTrigger, clearTrigger, itemTrigger } from "./tutor-parts";
+import { catchTrigger, clearTrigger, itemTrigger, STRETCH_STALE_MS, stretchStart } from "./tutor-parts";
 
 const rule = (number: number) => ({ id: `id-${number}`, number, statement: "Hold anything over the limit.", quote: { text: "I hold anything over the limit." } });
 
@@ -31,5 +31,22 @@ describe("the tutor's triggers", () => {
     expect(trigger).toContain('The learner did this on screen: Pressed "Release" on Order 7.');
     expect(trigger).not.toContain("WHAT GOES AGAINST IT");
     expect(trigger.endsWith("THEN: give the floor back")).toBe(true);
+  });
+});
+
+describe("when a stretch of the learner's speech began", () => {
+  it("is when the first words of it were heard", () => {
+    expect(stretchStart(null, 0, 27_000)).toBe(27_000);
+  });
+
+  it("stays put while the learner keeps talking", () => {
+    expect(stretchStart(27_000, 29_500, 30_000)).toBe(27_000);
+    expect(stretchStart(27_000, 30_000, 30_000 + STRETCH_STALE_MS)).toBe(27_000);
+  });
+
+  // Seen in a lesson held in German: words reported out of silence five seconds in, never committed,
+  // put the learner's answer at 0:05, before the question it answered at 0:06.
+  it("starts again when what was heard before was never committed and went quiet", () => {
+    expect(stretchStart(5_100, 5_100, 27_000)).toBe(27_000);
   });
 });
