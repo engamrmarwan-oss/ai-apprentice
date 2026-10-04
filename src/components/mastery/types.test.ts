@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { masteryReportFixture } from "@/fixtures/mastery-report";
-import { masterySummary } from "./types";
+import type { MasteryReport } from "@/capture/tutor";
+import { practiseRules } from "./types";
 
-describe("masterySummary", () => {
-  it("counts every documented mastery outcome", () => {
-    expect(masterySummary(masteryReportFixture.items)).toEqual({
-      needed_hint: 1,
-      not_encountered: 1,
-      passed_first_time: 1,
-      violated: 0,
-    });
+describe("practiseRules", () => {
+  it("keeps the priority order returned by the tutor report", () => {
+    const report = {
+      practise_next: [3, 1],
+      rules: [
+        { number: 1, statement: "First" },
+        { number: 2, statement: "Second" },
+        { number: 3, statement: "Third" },
+      ],
+    } as MasteryReport;
+
+    expect(practiseRules(report).map((rule) => rule.number)).toEqual([3, 1]);
   });
 });
