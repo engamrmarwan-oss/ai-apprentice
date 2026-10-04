@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { ok, unavailable } from "@/server/http";
 import { requireExpertSession } from "@/server/require-session";
 import { guardrailKinds, loadTimeline } from "@/server/sessions";
+import { refreshToolMap } from "@/server/toolmap/store";
 import { debriefOrder } from "@/server/workmap/select";
 import { verifyDecisions } from "@/server/workmap/verify";
 
@@ -19,7 +20,8 @@ export async function POST(request: NextRequest, context: RouteContext<"/api/ses
   const check = await requireExpertSession(request, id, ["debrief"]);
   if (!check.ok) return check.response;
 
-  const checked = await verifyDecisions(check);
+  // What this session read of the tool joins the tool map. The debrief does not wait on it and does not depend on it.
+  const [checked] = await Promise.all([verifyDecisions(check), refreshToolMap(check.workflow.id)]);
   if (!checked.ok) return unavailable();
 
   const [timeline, guardrails] = await Promise.all([loadTimeline(id), guardrailKinds(check.workflow)]);
