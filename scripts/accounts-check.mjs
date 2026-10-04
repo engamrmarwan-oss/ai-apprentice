@@ -18,11 +18,15 @@ if (!process.env.SUPABASE_URL || !key) {
 const admin = createClient(process.env.SUPABASE_URL, key, { auth: { persistSession: false } });
 
 const code = readFileSync("fixtures/local/signup-codes.txt", "utf8").trim().split("\n").at(-1).split(/\s+/)[1];
+// Later lines win, so the newest password for each account is the one used.
 const demo = Object.fromEntries(
-  readFileSync("fixtures/local/demo-accounts.txt", "utf8").trim().split("\n").map((line) => {
-    const [, email, password] = line.match(/: (\S+)\s+(\S+)$/);
-    return [email, password];
-  }),
+  readFileSync("fixtures/local/demo-accounts.txt", "utf8")
+    .trim()
+    .split("\n")
+    .flatMap((line) => {
+      const found = line.match(/: (\S+)\s+(\S+)$/);
+      return found ? [[found[1], found[2]]] : [];
+    }),
 );
 
 const stamp = Date.now();
