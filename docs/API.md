@@ -382,9 +382,15 @@ Expert only. Runs the rule compiler over a Work Map: a rule that can be checked 
 
 A tutor session teaches the workflow's newest confirmed Work Map to the person signed in, while they work a case in the tool. Anyone on the workflow can start one.
 
+### `GET /api/languages`
+
+The languages a tutor session can be held in: `{ "languages": [{ "code": "de", "name": "German", "own_name": "Deutsch" }] }`. Show `own_name` to the person choosing. English is among them and is what a session uses when none is chosen.
+
 ### `POST /api/workflows/{id}/tutor-sessions`
 
-Starts a tutor session. Returns `{ session, work_map }`: the session (its `kind` is `tutor`, its `phase` is `teach`) and the Work Map it teaches, in the shape above. `no_map` (409) when the expert has not confirmed a Work Map yet.
+Starts a tutor session. The body may be left out, or name the language of the lesson: `{ "language": "de" }`, a `code` from `GET /api/languages`. Tiro then speaks that language, listens for it, and gives the expert's words translated, saying that they are. What is on the screens and in the Work Map stays as it was written. `invalid_input` (400) for a language that is not on offer.
+
+Returns `{ session, work_map }`: the session (its `kind` is `tutor`, its `phase` is `teach`) and the Work Map it teaches, in the shape above. `no_map` (409) when the expert has not confirmed a Work Map yet.
 
 ### `GET /api/workflows/{id}/tutor-sessions`
 
@@ -415,7 +421,7 @@ The mastery report of a tutor session, during it or after it has ended.
 
 | Route | What it does |
 |---|---|
-| `POST /api/sessions/{id}/voice` | As in capture. For a tutor session it hands out the tutor's address, and the Work Map and its id as the tutor's prompt values. |
+| `POST /api/sessions/{id}/voice` | As in capture. For a tutor session it hands out the tutor's address, the lesson's `language`, and the Work Map, its id and the two languages as the tutor's prompt values. |
 | `POST /api/sessions/{id}/conversation`, `/frames`, `/utterances` | As in capture. The frames answer also carries `fields`: the fields of the item on screen, as `{ name, value }`. In a tutor session what the person says is stored with `speaker` `new_hire`. |
 | `POST /api/sessions/{id}/check` | Checks the learner against the rules. `{ "kind": "prediction", "said": "…" }` checks what they say they would do; `{ "kind": "action", "frame_id": "…" }` checks what they did on that frame. Returns `{ verdicts, caught }`. `caught` lists the rules they broke: `{ rule, explanation, action }`, where `rule` is the rule in the Work Map shape, with the expert's quote and screen moment. |
 | `POST /api/sessions/{id}/end` | Ends the tutor session. The report stays readable. |
