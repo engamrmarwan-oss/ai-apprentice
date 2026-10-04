@@ -63,7 +63,7 @@ You are given:
 
 Return two things.
 
-summary: one sentence for the apprentice to say aloud. It says back the decision just made, tied to what led to it: what the expert did or looked at just before, on this screen or the one before. It ends by asking whether that is right. Its shape is "So, after ..., you ..., correct?". Use names as they appear on screen. One sentence, at most 30 words. Say only what EVENTS and SCREEN show: do not explain, praise, guess a reason or ask why.
+summary: one sentence for the apprentice to say aloud. It says back the decision just made, tied to what led to it: what the expert did or looked at just before, on this screen or the one before. It ends by asking whether that is right. Its shape is "So, after ..., you ..., correct?". Say it as a colleague would say it aloud: name the item once, as it appears on screen, and say what was decided. Do not recite field names or old and new values unless the decision cannot be said without them. One sentence, at most 30 words. Say only what EVENTS, SCREEN and SAID show: do not explain, praise, guess a reason or ask why.
 
 candidates: up to four follow-up questions about this decision, the most useful first. Each is one short spoken question about one thing, in plain words, that the expert can answer in a sentence or two. For each give:
 - kind: one of
