@@ -139,7 +139,7 @@ The session as it stands, with everything recorded so far in time order.
   "ok": true,
   "session": { "id": "uuid", "workflow_id": "uuid", "kind": "expert", "language": "en", "phase": "capture", "started_at": "...", "ended_at": null },
   "workflow": { "id": "uuid", "task": "Review incoming invoices", "role": "Accounts payable specialist", "tool": { "id": "uuid", "name": "Invoice desk" } },
-  "config": { "screen_still_ms": 2500, "min_questions": 3, "...": "every setting, with defaults filled in" },
+  "config": { "screen_still_ms": 1500, "min_questions": 3, "...": "every setting, with defaults filled in" },
   "events": [Event],
   "utterances": [{ "id": "uuid", "session_id": "uuid", "speaker": "expert", "start_ms": 30000, "end_ms": 33000, "text": "This one is from a new supplier." }],
   "questions": [Question]
@@ -202,7 +202,7 @@ What the view holds (`CaptureView`):
 | `spoken` | `{ key, id, speaker, start_ms, end_ms, text }`, oldest first. `key` is stable from the first moment; `id` is set once stored |
 | `partial` | What the transcriber is hearing right now |
 | `questions` | The contract's questions |
-| `planned` | `{ summary, question }`: what Tiro will say at the next pause, or null |
+| `planned` | `{ summary, question }`: what Tiro will say at the next pause, or null. It goes back to null when the pause did not come in time |
 | `floors` | Every turn that has ended: `kind`, `openedAt`, `closedAt`, `reason`, `agentTurns`, `plan` |
 | `problem` | The last thing that went wrong, in plain words. The session carries on |
 

@@ -24,20 +24,21 @@ export const workflowConfigSchema = z.object({
   minor_hold_ms: ms(3_000),
 
   // --- When the floor may open ---
-  screen_still_ms: ms(2_500),
+  screen_still_ms: ms(1_500),
   speech_silent_ms: ms(1_500),
   /** Time allowed for reading text that has just appeared, per word, */
   reading_ms_per_word: ms(250),
   /** up to this much in all. */
-  reading_max_ms: ms(20_000),
-  /** How long after a decision Tiro may still speak about it without being behind on its minimum. */
-  decision_window_ms: ms(30_000),
-  /** Tiro takes at least this many turns in each window, and more when a question scores above the threshold. */
+  reading_max_ms: ms(5_000),
+  /** How long after a decision Tiro may still begin a turn about it. Later, its question waits for the debrief. */
+  decision_window_ms: ms(20_000),
+  /** Until Tiro has taken this many turns in a window, it takes one even when no question scores above the threshold. */
   min_questions: count(3),
   /** The most turns in one window. Null: no ceiling. */
   max_questions: z.int().positive().nullable().catch(null),
   questions_window_ms: ms(600_000),
-  min_gap_ms: ms(90_000),
+  /** From the end of one of Tiro's turns to the start of its next. */
+  min_gap_ms: ms(30_000),
   follow_ups: count(1),
 
   // --- While the floor is open ---

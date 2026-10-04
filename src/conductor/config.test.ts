@@ -5,10 +5,12 @@ describe("resolveConfig", () => {
   it("gives the design's defaults when a workflow stores nothing", () => {
     expect(resolveConfig({})).toMatchObject({
       settle_ms: 500,
-      screen_still_ms: 2_500,
+      screen_still_ms: 1_500,
       speech_silent_ms: 1_500,
       reading_ms_per_word: 250,
-      min_gap_ms: 90_000,
+      reading_max_ms: 5_000,
+      decision_window_ms: 20_000,
+      min_gap_ms: 30_000,
       follow_ups: 1,
       questions_window_ms: 600_000,
     });
