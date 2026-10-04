@@ -23,7 +23,7 @@ Screens read and write data only by calling route handlers under `/api`. They ne
 
 People sign in with an email and a password. An account has no role of its own: a role belongs to a workflow. Whoever creates a workflow is its expert, and the people the expert invites are its new hires. `GET /api/me` tells a screen who is signed in and which workflows they are on. Route handlers guard themselves with `requireUser` or `requireWorkflowRole` (`src/server/require-user.ts`).
 
-The routes a screen can call, with their request and response shapes, are in `docs/API.md`.
+The routes a screen can call, with their request and response shapes, are in `docs/API.md`. So is the capture engine, which the capture screen and the companion window render.
 
 ## Rules
 
@@ -51,15 +51,17 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 | Path | Content | Owner |
 |---|---|---|
 | `src/app/api/` | Route handlers | Claude Code |
-| `src/server/` | Server-only modules: environment, database client, fail-soft, accounts and sign-in (`accounts.ts`, `require-user.ts`), workflows and their people (`workflows.ts`), model router (`models.ts`), frame reading (`vision/`), ElevenLabs session addresses and tokens (`elevenlabs.ts`) | Claude Code |
+| `src/server/` | Server-only modules: environment, database client, fail-soft, accounts and sign-in (`accounts.ts`, `require-user.ts`), workflows and their people (`workflows.ts`), sessions and what they record (`sessions.ts`, `capture.ts`, `require-session.ts`), model router (`models.ts`), frame reading (`vision/`), question planner (`planner/`), ElevenLabs session addresses, tokens and picture uploads (`elevenlabs.ts`) | Claude Code |
 | `src/spikes/`, `scripts/spikes/` | Spike tooling that is not a page: scoring and replay | Claude Code |
 | `src/contract/` | The contract as Zod schemas; import from here, change only via `CONTRACT.md` | Shared |
-| `src/sensor/` | Screen sensor: frame diff, settle detection, capture | Claude Code |
-| `src/app/spikes/` | Throwaway test pages for the Phase 1 spikes. Not product screens | Claude Code |
+| `src/sensor/` | Screen sensor: frame diff, when to take a frame, the worker that reads the shared tab | Claude Code |
+| `src/conductor/` | The Conductor: per-workflow settings and the code that decides when Tiro may speak. Plain logic, no browser or server parts | Claude Code |
+| `src/capture/` | The capture engine: one expert session in the browser. Screens create it and render its view (`docs/API.md`) | Claude Code |
+| `src/app/spikes/` | Throwaway test pages: the Phase 1 spikes, and the session bench that runs a session before the product screens exist. Not product screens | Claude Code |
 | `src/app/` (except `api/` and `spikes/`) | Pages and layouts | Codex |
 | `supabase/migrations/` | Database schema. Apply with `npx supabase db push`, then `npm run types:db` | Claude Code |
 | `agents/` | ElevenLabs agent configurations, prompts and client tools. Push with `npm run agents:push` | Claude Code |
-| `scripts/`, `.github/` | Gate, CI, sign-up codes (`npm run signup-code`), demo accounts (`npm run demo-accounts`), agent push | Claude Code |
+| `scripts/`, `.github/` | Gate, CI, sign-up codes (`npm run signup-code`), demo accounts (`npm run demo-accounts`), agent push, the interviewer's text check (`npm run check:agent`) | Claude Code |
 | `docs/spikes/` | Written spike results | Claude Code |
 
 <!-- BEGIN:nextjs-agent-rules -->

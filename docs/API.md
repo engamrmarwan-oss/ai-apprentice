@@ -2,7 +2,7 @@
 
 What the screens can call. Every route lives under `/api`, takes and returns JSON, and is the only way a screen reads or writes data.
 
-**Status, 2026-10-04:** every route below is live on production and covered by an end-to-end check (`npm run check:accounts`).
+**Status, 2026-10-04:** every route below is live on production. The account and workflow routes are covered by an end-to-end check (`npm run check:accounts`).
 
 ## Conventions
 
@@ -115,6 +115,98 @@ Expert only. Withdraws an invitation that has not been taken up. Returns `{ "ok"
 | `not_found` | 404 | No such workflow, or the person is not on it. |
 | `not_expert` | 403 | The person is on the workflow but is not its expert. |
 | `already_member` | 409 | The invited person is already on the workflow. |
+
+## Expert sessions
+
+One session is one recording of the expert at work. Its phases, in order: `setup`, `capture`, `debrief`, `ended`.
+
+**A screen does not call most of these routes itself.** The capture engine (below) does, and hands the screen a view to render. The two a screen calls directly are the first two.
+
+Every session route answers `not_found` (404) unless the person signed in is the one who started the session and is still the workflow's expert. A route called in the wrong phase answers `wrong_phase` (409).
+
+### `POST /api/workflows/{id}/sessions`
+
+Expert only. Starts a session in its `setup` phase. Body: `{ "language": "en" }`, optional, a two-letter code.
+
+Returns `{ "ok": true, "session": Session }`.
+
+### `GET /api/sessions/{id}`
+
+The session as it stands, with everything recorded so far in time order.
+
+```json
+{
+  "ok": true,
+  "session": { "id": "uuid", "workflow_id": "uuid", "kind": "expert", "language": "en", "phase": "capture", "started_at": "...", "ended_at": null },
+  "workflow": { "id": "uuid", "task": "Review incoming invoices", "role": "Accounts payable specialist", "tool": { "id": "uuid", "name": "Invoice desk" } },
+  "config": { "screen_still_ms": 2500, "min_questions": 3, "...": "every setting, with defaults filled in" },
+  "events": [Event],
+  "utterances": [{ "id": "uuid", "session_id": "uuid", "speaker": "expert", "start_ms": 30000, "end_ms": 33000, "text": "This one is from a new supplier." }],
+  "questions": [Question]
+}
+```
+
+`Event` and `Question` are the records in `CONTRACT.md`. `speaker` is `expert` or `agent`. Times are milliseconds since the session started.
+
+### Routes the capture engine calls
+
+| Route | What it does |
+|---|---|
+| `POST /api/sessions/{id}/start` | Begins capture and starts the clock. |
+| `POST /api/sessions/{id}/voice` | Hands out a signed address for the interviewer, a single-use transcription token and the values for the interviewer's prompt. `voice_unavailable` (503) when voice cannot be started; capture carries on without it. |
+| `POST /api/sessions/{id}/conversation` | Records which voice conversation the session runs in. |
+| `POST /api/sessions/{id}/frames` | Takes one frame as a form (pictures and its time), stores it, reads it, and returns `{ frame, read, events, screen, new_words, questions }`. |
+| `POST /api/sessions/{id}/frames/{frame_id}/key` | Marks a key frame and passes its picture to the voice conversation. Returns `{ file_id }`, or `null` when the picture could not be passed on. |
+| `POST /api/sessions/{id}/plan` | Plans Tiro's turn for the decision on one frame. Returns `{ plan, questions }`; `plan` is `{ frame_id, decision_t_ms, summary, question }` or `null`. |
+| `POST /api/sessions/{id}/utterances` | Stores one stretch of speech. |
+| `PATCH /api/sessions/{id}/questions/{question_id}` | Records what became of a question: `status`, `channel`, `answer_utterance_id`. |
+| `POST /api/sessions/{id}/end-task` | The expert has finished. The session moves to `debrief`; questions still waiting to be asked live wait for the debrief. |
+
+## The capture engine
+
+`src/capture/engine.ts` runs one expert session in the browser: the screen sensor, the voice, the transcriber and the Conductor. It has no React in it. A screen creates one, gives it a callback, and renders the view it is handed. The session bench at `/spikes/session` is a bare example.
+
+```ts
+import { createCaptureEngine, EMPTY_VIEW, type CaptureView } from "@/capture/engine";
+
+const engine = createCaptureEngine(sessionId, (view: CaptureView) => render(view));
+```
+
+The start takes two clicks, because of how the browser behaves:
+
+1. `engine.prepare()` from a click, while Tiro's tab is in front. It loads the session and opens the voice; this is when the browser asks for the microphone. The view's `phase` goes `idle` → `preparing` → `ready`.
+2. Open the companion window now, if there is one: it also needs a click in Tiro's tab.
+3. `engine.share()` from a second click. The browser asks which tab to share and then **moves to that tab at once**, so nothing after this can need Tiro's tab. `phase` becomes `capturing` and Tiro opens with its greeting.
+
+| Call | What it does |
+|---|---|
+| `engine.callTiro()` | The button that calls Tiro. The same as saying its name. |
+| `engine.setMuted(true)` | Nothing the microphone hears is kept and Tiro takes no turn of its own, until unmuted. |
+| `engine.endTask()` | The expert has finished. `phase` goes `ending` → `ended`. Also happens when the expert stops sharing from the browser's own bar. |
+| `engine.reconnectVoice()` | Tries the voice again when the view's `voice` is `lost`. |
+| `engine.release()` | Lets go of the screen and the microphone without ending the task. Call it when the screen unmounts. |
+| `engine.view()` | The current view. |
+
+What the view holds (`CaptureView`):
+
+| Field | Meaning |
+|---|---|
+| `phase` | `idle`, `preparing`, `ready`, `capturing`, `ending`, `ended` |
+| `voice` | `off`, `connecting`, `on`, `lost`. Capture runs without voice; Tiro then only watches |
+| `floor` | `state` (`closed` or `open`), `kind` (`opening`, `summary`, `called`), `turnsInWindow`, `owed` (Tiro is behind on its three turns in ten minutes), `waitingFor` (`screen`, `speech`, `reading`, `gap`, `question` or null: why Tiro is not speaking yet) |
+| `agentSpeaking`, `muted` | |
+| `elapsedMs` | Time since sharing began |
+| `screen` | `{ name, item }`: what the screen shows now, as Tiro read it |
+| `reading`, `frames`, `lastFrame` | Whether a frame is being read, how many were taken, and the latest one as a picture (a `Blob`) for a preview |
+| `events` | The contract's events, oldest first |
+| `spoken` | `{ key, id, speaker, start_ms, end_ms, text }`, oldest first. `key` is stable from the first moment; `id` is set once stored |
+| `partial` | What the transcriber is hearing right now |
+| `questions` | The contract's questions |
+| `planned` | `{ summary, question }`: what Tiro will say at the next pause, or null |
+| `floors` | Every turn that has ended: `kind`, `openedAt`, `closedAt`, `reason`, `agentTurns`, `plan` |
+| `problem` | The last thing that went wrong, in plain words. The session carries on |
+
+`describeEvent(event)` and `isDecision(event)` in `src/conductor/describe.ts` turn an event into one plain line and say whether it is a decision.
 
 ## Other routes
 
