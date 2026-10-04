@@ -59,6 +59,7 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 | `src/capture/` | The capture engine: one expert session in the browser. Screens create it and render its view (`docs/API.md`) | Claude Code |
 | `src/app/spikes/` | Throwaway test pages: the Phase 1 spikes, and the session bench that runs a session before the product screens exist. Not product screens | Claude Code |
 | `src/app/` (except `api/` and `spikes/`) | Pages and layouts | Codex |
+| `src/components/` | What the pages are built from: the app shell, sign-in forms, the capture companion window, icons | Codex |
 | `supabase/migrations/` | Database schema. Apply with `npx supabase db push`, then `npm run types:db` | Claude Code |
 | `agents/` | ElevenLabs agent configurations, prompts and client tools. Push with `npm run agents:push` | Claude Code |
 | `scripts/`, `.github/` | Gate, CI, sign-up codes (`npm run signup-code`), demo accounts (`npm run demo-accounts`), agent push, the interviewer's text check (`npm run check:agent`), a whole expert session run with nobody at the keyboard (`npm run check:session`) | Claude Code |
