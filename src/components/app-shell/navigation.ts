@@ -43,23 +43,23 @@ export function getNavigation(workflow?: OpenWorkflow): NavigationGroup[] {
     ],
   };
 
-  const roleNavigation: NavigationGroup =
-    workflow.role === "expert"
-      ? {
-          label: "Teach",
-          items: [
-            { href: `${root}/capture`, icon: "record", label: "Capture" },
-            { href: `${root}/debrief`, icon: "conversation", label: "Debrief" },
-            { href: `${root}/people`, icon: "people", label: "People" },
-          ],
-        }
-      : {
-          label: "Learn",
-          items: [
-            { href: `${root}/tutor`, icon: "sparkles", label: "Tutor" },
-            { href: `${root}/mastery`, icon: "chart", label: "Mastery" },
-          ],
-        };
+  const teachingNavigation: NavigationGroup = {
+    label: "Teach",
+    items: [
+      { href: `${root}/capture`, icon: "record", label: "Capture" },
+      { href: `${root}/debrief`, icon: "conversation", label: "Debrief" },
+      { href: `${root}/people`, icon: "people", label: "People" },
+    ],
+  };
+  const learningNavigation: NavigationGroup = {
+    label: "Learn",
+    items: [
+      { href: `${root}/tutor`, icon: "sparkles", label: "Tutor" },
+      { href: `${root}/mastery`, icon: "chart", label: "Mastery" },
+    ],
+  };
 
-  return [workspaceNavigation, workflowNavigation, roleNavigation];
+  return workflow.role === "expert"
+    ? [workspaceNavigation, workflowNavigation, teachingNavigation, learningNavigation]
+    : [workspaceNavigation, workflowNavigation, learningNavigation];
 }
