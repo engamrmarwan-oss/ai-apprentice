@@ -125,6 +125,8 @@ try {
   r = await owner("GET", "/api/me");
   check("after sign-out, /api/me says signed_out", r.status === 401, `${r.status}`);
 } finally {
+  await other("POST", "/api/auth/sign-out");
+  await stranger("POST", "/api/auth/sign-out");
   // Remove what this run created. Deleting the accounts removes their profiles, sessions and memberships.
   const { data: tool } = workflowId ? await admin.from("workflows").select("tool_id").eq("id", workflowId).maybeSingle() : { data: null };
   if (workflowId) await admin.from("workflows").delete().eq("id", workflowId);

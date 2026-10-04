@@ -523,44 +523,6 @@ export type Database = {
           },
         ]
       }
-      role_links: {
-        Row: {
-          created_at: string
-          id: string
-          label: string | null
-          revoked_at: string | null
-          role: string
-          token_hash: string
-          workflow_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          label?: string | null
-          revoked_at?: string | null
-          role: string
-          token_hash: string
-          workflow_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          label?: string | null
-          revoked_at?: string | null
-          role?: string
-          token_hash?: string
-          workflow_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "role_links_workflow_id_fkey"
-            columns: ["workflow_id"]
-            isOneToOne: false
-            referencedRelation: "workflows"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       rule_kinds: {
         Row: {
           created_at: string
@@ -730,7 +692,6 @@ export type Database = {
           kind: string
           language: string
           phase: string
-          role_link_id: string | null
           started_at: string | null
           user_id: string | null
           workflow_id: string
@@ -742,7 +703,6 @@ export type Database = {
           kind: string
           language?: string
           phase?: string
-          role_link_id?: string | null
           started_at?: string | null
           user_id?: string | null
           workflow_id: string
@@ -754,19 +714,11 @@ export type Database = {
           kind?: string
           language?: string
           phase?: string
-          role_link_id?: string | null
           started_at?: string | null
           user_id?: string | null
           workflow_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "sessions_role_link_id_fkey"
-            columns: ["role_link_id"]
-            isOneToOne: false
-            referencedRelation: "role_links"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "sessions_user_id_fkey"
             columns: ["user_id"]
