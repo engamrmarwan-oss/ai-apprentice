@@ -227,6 +227,21 @@ describe("how the floor closes", () => {
     expect(closedWith(done.map((one) => one.action))?.reason).toBe("yielded");
   });
 
+  it("does not take words that began before Tiro's question for the answer to it", () => {
+    const conductor = withOpenFloor();
+    conductor.agentSaid(13_500, "So you held it, correct?");
+    // The expert says yes at 15 s. Tiro follows up at 16 s, before the transcriber reports the yes at 16.5 s.
+    conductor.agentSaid(16_000, "Why hold it?");
+    conductor.expertReplied(16_500, 15_000);
+    expect(run(conductor, 16_500, 25_000)).toEqual([]);
+    // The real answer.
+    conductor.expertReplied(27_000, 22_000);
+    expect(closedWith(run(conductor, 27_000, 28_000).map((one) => one.action))).toMatchObject({
+      reason: "answered",
+      followUpAnswered: true,
+    });
+  });
+
   it("closes at once when the agent asks a third question", () => {
     const conductor = withOpenFloor();
     conductor.agentSaid(13_500, "So you held it, correct?");
@@ -425,6 +440,14 @@ describe("the expert calling Tiro", () => {
   it("is ignored while a floor is already open", () => {
     const conductor = withOpenFloor();
     expect(conductor.called(13_000)).toEqual([]);
+  });
+});
+
+describe("losing the voice connection", () => {
+  it("closes an open floor, and leaves a closed one alone", () => {
+    const conductor = withOpenFloor();
+    expect(closedWith(conductor.voiceLost(14_000))?.reason).toBe("lost");
+    expect(conductor.voiceLost(15_000)).toEqual([]);
   });
 });
 

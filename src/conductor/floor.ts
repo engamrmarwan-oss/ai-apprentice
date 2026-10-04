@@ -42,7 +42,9 @@ export type CloseReason =
   /** Tiro had used its turns, or the floor had been open too long. */
   | "limit"
   /** The task or the session ended. */
-  | "ended";
+  | "ended"
+  /** The voice connection dropped. */
+  | "lost";
 
 /** What happened on a floor, for whoever keeps the record. */
 export type FloorRecord = {
@@ -299,9 +301,15 @@ export function createConductor(config: WorkflowConfig) {
       return [];
     },
 
-    /** The expert finished saying something while the floor was open. */
-    expertReplied(t: number): void {
+    /**
+     * The expert finished saying something while the floor was open. `startedAt`
+     * is when they began. The transcriber reports a stretch of speech a moment
+     * after it ends, and Tiro may already have spoken again by then: words that
+     * began before Tiro's latest turn are not an answer to it.
+     */
+    expertReplied(t: number, startedAt: number = t): void {
       if (!floor) return;
+      if (floor.lastAgentTurnAt !== null && startedAt < floor.lastAgentTurnAt) return;
       floor.repliedSinceTurn = true;
       floor.lastReplyAt = t;
       if (floor.followUpAskedAt !== null) floor.followUpAnswered = true;
@@ -333,6 +341,11 @@ export function createConductor(config: WorkflowConfig) {
       const next = plan;
       plan = null;
       return [open("summary", t, next)];
+    },
+
+    /** The voice connection dropped: nobody can speak or be heard, so an open floor closes. */
+    voiceLost(t: number): Action[] {
+      return close(t, "lost");
     },
 
     /** The task or the session is over. Returns the plan that was never used, so its question can wait for the debrief. */
