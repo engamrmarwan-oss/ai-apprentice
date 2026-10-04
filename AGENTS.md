@@ -23,7 +23,7 @@ Screens read and write data only by calling route handlers under `/api`. They ne
 
 People sign in with an email and a password. An account has no role of its own: a role belongs to a workflow. Whoever creates a workflow is its expert, and the people the expert invites are its new hires. `GET /api/me` tells a screen who is signed in and which workflows they are on. Route handlers guard themselves with `requireUser` or `requireWorkflowRole` (`src/server/require-user.ts`).
 
-The routes a screen can call, with their request and response shapes, are in `docs/API.md`. So are the capture engine, which the capture screen and the companion window render, the debrief engine, which the debrief screen renders, and the tutor engine, which the tutor screen renders.
+The routes a screen can call, with their request and response shapes, are in `docs/API.md`. So are the capture engine, which the capture screen and the companion window render, the debrief engine, which the debrief screen renders, and the tutor engine, which the tutor screen renders. The same document says how an agent outside Tiro reads a Work Map: the keys an expert makes, and the MCP server at `/api/mcp`.
 
 ## Rules
 
@@ -51,7 +51,7 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 | Path | Content | Owner |
 |---|---|---|
 | `src/app/api/` | Route handlers | Claude Code |
-| `src/server/` | Server-only modules: environment, database client, fail-soft, accounts and sign-in (`accounts.ts`, `require-user.ts`), workflows and their people (`workflows.ts`), sessions and what they record (`sessions.ts`, `capture.ts`, `require-session.ts`), model router (`models.ts`), frame reading (`vision/`), question planner (`planner/`), the debrief's second reading, the Work Map builder and its validator (`workmap/`, `require-map.ts`), the rule engine, its judge and the rule compiler (`rules/`), the tool map (`toolmap/`), the baseline (`baseline.ts`), tutor sessions and the mastery report (`tutor.ts`), ElevenLabs session addresses, tokens and picture uploads (`elevenlabs.ts`) | Claude Code |
+| `src/server/` | Server-only modules: environment, database client, fail-soft, accounts and sign-in (`accounts.ts`, `require-user.ts`), workflows and their people (`workflows.ts`), sessions and what they record (`sessions.ts`, `capture.ts`, `require-session.ts`), model router (`models.ts`), frame reading (`vision/`), question planner (`planner/`), the debrief's second reading, the Work Map builder and its validator (`workmap/`, `require-map.ts`), the rule engine, its judge and the rule compiler (`rules/`), the tool map (`toolmap/`), the baseline (`baseline.ts`), tutor sessions and the mastery report (`tutor.ts`), keys for agents outside Tiro (`agent-keys.ts`), Tiro's MCP server (`mcp/`), ElevenLabs session addresses, tokens and picture uploads (`elevenlabs.ts`) | Claude Code |
 | `src/spikes/`, `scripts/spikes/` | Spike tooling that is not a page: scoring and replay | Claude Code |
 | `src/contract/` | The contract as Zod schemas; import from here, change only via `CONTRACT.md` | Shared |
 | `src/sensor/` | Screen sensor: frame diff, when to take a frame, the worker that reads the shared tab | Claude Code |
@@ -61,8 +61,8 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 | `src/app/` (except `api/` and `spikes/`) | Pages and layouts | Codex |
 | `src/components/` | What the pages are built from: the app shell, sign-in forms, the capture companion window, icons | Codex |
 | `supabase/migrations/` | Database schema. Apply with `npx supabase db push`, then `npm run types:db` | Claude Code |
-| `agents/` | ElevenLabs agent configurations, prompts and client tools. Push with `npm run agents:push` | Claude Code |
-| `scripts/`, `.github/` | Gate, CI, sign-up codes (`npm run signup-code`), demo accounts (`npm run demo-accounts`), agent push, the interviewer's text checks (`npm run check:agent`, `npm run check:debrief`), a whole expert session and a whole tutor session run with nobody at the keyboard (`npm run check:session`, `npm run check:tutor`), the tool map, baseline and rule compiler against a running server (`npm run check:setup`) | Claude Code |
+| `agents/` | ElevenLabs agent configurations, prompts, client tools, and the entry that gives the tutor Tiro's MCP server. Push with `npm run agents:push` | Claude Code |
+| `scripts/`, `.github/` | Gate, CI, sign-up codes (`npm run signup-code`), demo accounts (`npm run demo-accounts`), agent push, the interviewer's text checks (`npm run check:agent`, `npm run check:debrief`), a whole expert session and a whole tutor session run with nobody at the keyboard (`npm run check:session`, `npm run check:tutor`), the tool map, baseline and rule compiler against a running server (`npm run check:setup`), Tiro's MCP server as an agent outside Tiro uses it (`npm run check:mcp`) | Claude Code |
 | `docs/spikes/` | Written spike results | Claude Code |
 
 <!-- BEGIN:nextjs-agent-rules -->

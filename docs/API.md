@@ -411,7 +411,7 @@ The mastery report of a tutor session, during it or after it has ended.
 
 | Route | What it does |
 |---|---|
-| `POST /api/sessions/{id}/voice` | As in capture. For a tutor session it hands out the tutor's address and the Work Map as the tutor's prompt values. |
+| `POST /api/sessions/{id}/voice` | As in capture. For a tutor session it hands out the tutor's address, and the Work Map and its id as the tutor's prompt values. |
 | `POST /api/sessions/{id}/conversation`, `/frames`, `/utterances` | As in capture. The frames answer also carries `fields`: the fields of the item on screen, as `{ name, value }`. In a tutor session what the person says is stored with `speaker` `new_hire`. |
 | `POST /api/sessions/{id}/check` | Checks the learner against the rules. `{ "kind": "prediction", "said": "…" }` checks what they say they would do; `{ "kind": "action", "frame_id": "…" }` checks what they did on that frame. Returns `{ verdicts, caught }`. `caught` lists the rules they broke: `{ rule, explanation, action }`, where `rule` is the rule in the Work Map shape, with the expert's quote and screen moment. |
 | `POST /api/sessions/{id}/end` | Ends the tutor session. The report stays readable. |
@@ -457,6 +457,72 @@ What the view holds (`TutorView`):
 | `catches` | Every rule the learner broke so far: `{ at, rule, explanation, before_acting, what }`. `before_acting` is true when it was caught in what they said, false when in what they did |
 | `replay` | The expert's moment to show now: a rule, with `quote.text` and `moment.picture`. Null when nothing is to be shown. It is set on a catch and cleared after half a minute. Show it where the learner can see it without leaving the tool: the companion window |
 | `report` | The mastery report, in the shape above, once the session has ended |
+
+## Agents outside Tiro
+
+A confirmed Work Map can also be read by an AI agent that is not Tiro, so that it does the task the way the expert does and stops where the expert would. The agent connects to Tiro's MCP server and presents a key. The workflow's expert makes the key, and can withdraw it. A key reads the confirmed Work Maps of its own workflow and nothing else: no drafts, no other workflow.
+
+All three routes are for the workflow's expert only.
+
+### `GET /api/workflows/{id}/agent-keys`
+
+The workflow's keys that still work, oldest first, and the address an agent connects to.
+
+```json
+{
+  "ok": true,
+  "keys": [
+    { "id": "…", "name": "My agent", "hint": "j56c", "created_at": "…", "last_used_at": null }
+  ],
+  "server_url": "https://…/api/mcp"
+}
+```
+
+`hint` is the last four characters of the key, so the expert can tell their keys apart. `last_used_at` is null until an agent has used the key.
+
+### `POST /api/workflows/{id}/agent-keys`
+
+Makes a key. Body: `{ "name": "My agent" }`, 1 to 80 characters. Returns `{ key, secret, server_url }`: `key` in the shape above, and `secret`, the key itself (`tiro_…`).
+
+`secret` is in this answer and nowhere else. Tiro keeps only its hash. Show it once, let the expert copy it, and say that it cannot be shown again.
+
+### `DELETE /api/workflows/{id}/agent-keys/{key_id}`
+
+Withdraws a key. An agent that holds it is refused from then on. `not_found` (404) when the workflow has no such working key.
+
+### What the expert gives their agent
+
+Two things: `server_url` and the key. The agent connects over MCP's streamable HTTP transport and sends the key in the `Authorization` header, as `Bearer tiro_…`. For an agent that takes its MCP servers as JSON:
+
+```json
+{
+  "mcpServers": {
+    "tiro": {
+      "type": "http",
+      "url": "<server_url>",
+      "headers": { "Authorization": "Bearer <the key>" }
+    }
+  }
+}
+```
+
+A screen that shows this should fill in `server_url` from the route and the key from the answer that made it.
+
+### What the agent can read
+
+Five tools, all read-only. With a workflow's key, `work_map_id` may be left out of every one: the newest confirmed map of that workflow is used.
+
+| Tool | Takes | Gives |
+|---|---|---|
+| `get_work_map` | | The tool and the task, every step in order with the expert's reason, and every rule with the expert's words and what to do when it would be broken |
+| `get_step` | `position` | One step, with its rules in full |
+| `list_rules_for_step` | `position` | The rules that belong to one step |
+| `get_rule` | `number` or `rule_id` | One rule as it stands now, after any correction |
+| `get_screen_moment` | `step` or `rule` | What the expert did at that moment, what the screen showed, and an address for its picture that works for about two hours |
+
+A field the expert marked as personal data in the tool map is left out of what `get_screen_moment` says the screen showed. The picture is the screen as it was.
+
+The tutor agent uses the same server, with the server's own secret in place of a key.
 
 ## Other routes
 
