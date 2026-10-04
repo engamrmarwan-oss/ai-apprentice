@@ -2,7 +2,7 @@
 
 What the screens can call. Every route lives under `/api`, takes and returns JSON, and is the only way a screen reads or writes data.
 
-**Status, 2026-10-04:** the accounts and workflow routes below are being built by Claude Code. Their shapes are fixed; screens can be built against them now.
+**Status, 2026-10-04:** every route below is live on production and covered by an end-to-end check (`npm run check:accounts`).
 
 ## Conventions
 
