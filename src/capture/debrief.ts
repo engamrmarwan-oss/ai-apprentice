@@ -12,8 +12,11 @@ import type { Question } from "@/contract/question";
 import type { Spoken } from "./engine";
 import { debriefTrigger, spokenText, teachBackTrigger, type MapToTeach } from "./parts";
 
+/** What the screen showed at a moment: its name, the item open on it and that item's fields. */
+export type ScreenRead = { name: string; item: string | null; fields: { name: string; value: string }[] };
+
 /** A moment on the expert's screen. `picture` is an address that works for about two hours. */
-export type Moment = { event_id: string; frame_id: string; t_ms: number; what: string; picture: string | null };
+export type Moment = { event_id: string; frame_id: string; t_ms: number; what: string; picture: string | null; screen: ScreenRead | null };
 
 export type WorkMapStep = {
   id: string;
@@ -41,6 +44,8 @@ export type WorkMapRule = {
   provenance: string;
   documented: boolean;
   check_type: string;
+  /** Every version of this rule, oldest first. The last one is the rule as it stands. */
+  history: { version: number; statement: string; status: string; created_at: string }[];
   /** The positions of the steps it belongs to. */
   steps: number[];
 };

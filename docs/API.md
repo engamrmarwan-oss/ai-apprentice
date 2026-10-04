@@ -231,7 +231,10 @@ For anyone on the workflow. The expert gets the newest Work Map, draft or confir
         "id": "…", "position": 1, "title": "Hold the order", "decision": "Held the order for review.",
         "is_judgment": true,
         "reason": { "utterance_id": "…", "text": "The expert's own words." },
-        "moment": { "event_id": "…", "frame_id": "…", "t_ms": 84700, "what": "Pressed \"Hold\" on Order 7.", "picture": "https://…" },
+        "moment": {
+          "event_id": "…", "frame_id": "…", "t_ms": 84700, "what": "Pressed \"Hold\" on Order 7.", "picture": "https://…",
+          "screen": { "name": "Orders", "item": "Order 7", "fields": [{ "name": "Amount", "value": "12,400" }] }
+        },
         "rules": [1]
       }
     ],
@@ -243,6 +246,7 @@ For anyone on the workflow. The expert gets the newest Work Map, draft or confir
         "moment": { "event_id": "…", "frame_id": "…", "t_ms": 84700, "what": "…", "picture": "https://…", "link": "direct" },
         "action": { "type": "block" },
         "status": "candidate", "provenance": "live_question", "documented": false, "check_type": "judged",
+        "history": [{ "version": 1, "statement": "…", "status": "candidate", "created_at": "…" }],
         "steps": [1]
       }
     ]
@@ -252,7 +256,8 @@ For anyone on the workflow. The expert gets the newest Work Map, draft or confir
 
 - `status` of the map is `draft` or `confirmed`.
 - A step's `reason` is `null` while the expert has not said why. A map with such a step cannot be confirmed.
-- `moment.picture` is the screen at that moment: a signed address that works for about two hours. Load the map again for a fresh one. It can be `null`.
+- `moment.picture` is the screen at that moment: a signed address that works for about two hours. Load the map again for a fresh one. It can be `null`. `moment.screen` is what the reader read on that screen: its name, the item open on it and that item's fields. It can be `null`.
+- A rule's `history` lists every version of it, oldest first; the last entry is the rule as it stands. A corrected rule has more than one.
 - A rule's `number` is its place in the list and stays the same when the rule is corrected. `steps` are the positions of the steps it belongs to; a step's `rules` are rule numbers.
 - `kind` is a key of the rule kinds table (`limit`, `exception`, `stop_and_ask`, `never`, `judgment`, or one a workflow adds). Show it as given.
 - `action.type` is `block`, `warn`, `ask`, or `escalate` (then with `role`).

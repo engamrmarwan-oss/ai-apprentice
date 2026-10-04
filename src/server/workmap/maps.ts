@@ -16,8 +16,11 @@ import { whatIsMissing } from "./missing";
 type Unavailable = { ok: false; reason: "unavailable" };
 const unavailable: Unavailable = { ok: false, reason: "unavailable" };
 
-/** A moment on the expert's screen: the event, and a short-lived address for its picture. */
-export type Moment = { event_id: string; frame_id: string; t_ms: number; what: string; picture: string | null };
+/** What the screen showed at a moment, as the reader read it: its name, the item open on it and that item's fields. */
+export type ScreenRead = { name: string; item: string | null; fields: { name: string; value: string }[] };
+
+/** A moment on the expert's screen: the event, what the screen showed, and a short-lived address for its picture. */
+export type Moment = { event_id: string; frame_id: string; t_ms: number; what: string; picture: string | null; screen: ScreenRead | null };
 
 export type WorkMapStep = {
   id: string;
@@ -49,6 +52,8 @@ export type WorkMapRule = {
   check_type: string;
   /** For a deterministic rule, the condition the generic engine works out. Null for a judged rule. */
   condition: Condition | null;
+  /** Every version of this rule, oldest first. The last one is the rule as it stands. */
+  history: { version: number; statement: string; status: string; created_at: string }[];
   /** The positions of the steps it belongs to. */
   steps: number[];
 };
@@ -79,6 +84,21 @@ function firstJudgeSpec(statement: string, quote: string, eventId: string, utter
   };
 }
 
+/** A frame's stored reading as what the screen showed. Null when the frame was never read. */
+function screenRead(reading: Json | null): ScreenRead | null {
+  if (reading === null || typeof reading !== "object" || Array.isArray(reading) || typeof reading.screen !== "string") return null;
+  const fields = Array.isArray(reading.fields) ? reading.fields : [];
+  return {
+    name: reading.screen,
+    item: typeof reading.item === "string" ? reading.item : null,
+    fields: fields.flatMap((field) =>
+      field !== null && typeof field === "object" && !Array.isArray(field) && typeof field.name === "string" && typeof field.value === "string"
+        ? [{ name: field.name, value: field.value }]
+        : [],
+    ),
+  };
+}
+
 async function readMap(client: TiroClient, mapId: string): Promise<WorkMapView | null> {
   const map = must(await client.from("work_maps").select(MAP_COLUMNS).eq("id", mapId).maybeSingle());
   if (!map) return null;
@@ -105,7 +125,7 @@ async function readMap(client: TiroClient, mapId: string): Promise<WorkMapView |
   const [utterances, events, frames, links] = await Promise.all([
     client.from("utterances").select("id, speaker, start_ms, end_ms, text_original").eq("session_id", map.session_id).order("start_ms"),
     eventIds.length ? client.from("events").select("id, session_id, type, t_ms, confidence, verified, frame_id, screen_id, element_id, payload").in("id", eventIds) : none,
-    frameIds.length ? client.from("frames").select("id, storage_path").in("id", frameIds) : none,
+    frameIds.length ? client.from("frames").select("id, storage_path, reading").in("id", frameIds) : none,
     ruleIds.length ? client.from("rule_links").select("rule_id, step_id").in("rule_id", ruleIds) : none,
   ]);
   // A quote is the whole thought: the stretch it points at, joined with what the expert went on to say in the same breath.
@@ -116,6 +136,7 @@ async function readMap(client: TiroClient, mapId: string): Promise<WorkMapView |
     ? await client.storage.from("frames").createSignedUrls(frameRows.map((row) => row.storage_path), PICTURE_SECONDS)
     : { data: [], error: null };
   const pictures = new Map(frameRows.map((row, index) => [row.id, signed.data?.[index]?.signedUrl ?? null]));
+  const screens = new Map(frameRows.map((row) => [row.id, screenRead(row.reading)]));
   const shown = new Map(
     (must(events) ?? []).flatMap((row) => {
       const parsed = eventSchema.safeParse(row);
@@ -127,7 +148,7 @@ async function readMap(client: TiroClient, mapId: string): Promise<WorkMapView |
   const moment = (eventId: string | null, frameId: string | null): Moment | null => {
     const event = eventId ? shown.get(eventId) : undefined;
     if (!event || !frameId) return null;
-    return { event_id: event.id, frame_id: frameId, t_ms: event.t_ms, what: describeEvent(event), picture: pictures.get(frameId) ?? null };
+    return { event_id: event.id, frame_id: frameId, t_ms: event.t_ms, what: describeEvent(event), picture: pictures.get(frameId) ?? null, screen: screens.get(frameId) ?? null };
   };
   const positionOf = new Map(steps.map((step) => [step.id, step.position]));
   const numberOf = new Map(current.map((rule, index) => [rule.id, index + 1]));
@@ -152,13 +173,17 @@ async function readMap(client: TiroClient, mapId: string): Promise<WorkMapView |
       kind: rule.kind,
       statement: rule.statement,
       quote: { utterance_id: rule.expert_quote_utterance_id, text: said.get(rule.expert_quote_utterance_id) ?? "" },
-      moment: { ...(moment(rule.moment_event_id, rule.moment_frame_id) ?? { event_id: rule.moment_event_id, frame_id: rule.moment_frame_id, t_ms: 0, what: "", picture: null }), link: rule.moment_link as "direct" | "related" },
+      moment: { ...(moment(rule.moment_event_id, rule.moment_frame_id) ?? { event_id: rule.moment_event_id, frame_id: rule.moment_frame_id, t_ms: 0, what: "", picture: null, screen: null }), link: rule.moment_link as "direct" | "related" },
       action: rule.action as RuleAction,
       status: rule.status,
       provenance: rule.provenance,
       documented: rule.documented,
       check_type: rule.check_type,
       condition: (rule.condition as Condition | null) ?? null,
+      history: allRules
+        .filter((one) => one.lineage_id === rule.lineage_id)
+        .sort((a, b) => a.version - b.version)
+        .map((one) => ({ version: one.version, statement: one.statement, status: one.status, created_at: one.created_at })),
       steps: linkRows.filter((link) => link.rule_id === rule.id).flatMap((link) => positionOf.get(link.step_id) ?? []).sort((a, b) => a - b),
     })),
   };
