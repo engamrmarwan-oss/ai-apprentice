@@ -56,7 +56,7 @@ const SPOKEN = {
     voice: "Anna",
     wrong: "Ich würde die Spezifikation sofort genehmigen und mit der Umsetzung beginnen. Die Tests können bis später warten.",
     right: "Dann würde ich zuerst die Testszenarien erzeugen und erst genehmigen, wenn sie vorhanden sind.",
-    spoken: /\b(der|die|das|und|ich|nicht|du|Sie|ist|würde|würdest|bevor|eine|einen)\b/g,
+    spoken: /\b(der|die|das|und|ich|nicht|du|sie|ist|würde|würdest|bevor|eine|einen)\b/gi,
     reason: /Testszenarien|getestet|testbar/i,
     translated: /übersetz|sinngemäß|auf Deutsch/i,
   },
@@ -278,6 +278,8 @@ try {
   const seen = new Set();
   const answers = ["wrong", "right"];
   let tiroLines = 0;
+  /** How many of Tiro's lines there were when the learner last answered. */
+  let answeredAt = 0;
   let quiet = 0;
   let sawReplay = false;
   let replayStarted = 0;
@@ -297,9 +299,10 @@ try {
       tiroLines = tiro.length;
       quiet = Math.max(quiet, Date.now() + 1_200);
     }
-    const last = tiro.at(-1) ?? "";
-    if (/^listening/.test(state.floor) && /\?/.test(last) && Date.now() > quiet && !seen.has(`answered:${tiro.length}`) && answers.length > 0) {
-      seen.add(`answered:${tiro.length}`);
+    // A person answers the question they were asked, whether or not Tiro added a word after it.
+    const asked = tiro.slice(answeredAt).some((line) => /\?/.test(line));
+    if (/^listening/.test(state.floor) && asked && Date.now() > quiet && answers.length > 0) {
+      answeredAt = tiro.length;
       await page.waitForTimeout(600);
       quiet = Date.now() + (await speak(answers.shift())) * 1000 + 800;
     }
@@ -319,6 +322,8 @@ try {
   const [download] = await Promise.all([page.waitForEvent("download", { timeout: 20_000 }), page.getByRole("button", { name: "Download the result" }).click()]);
   result = JSON.parse(readFileSync(await download.path(), "utf8"));
   result.sawReplay = sawReplay;
+  // How many of its lines the stand-in learner got to say: a check must not pass on something the transcriber heard in silence.
+  result.spokenLines = 2 - answers.length;
   if (saveTo) writeFileSync(saveTo, JSON.stringify(result, null, 2));
 } finally {
   await browser.close();
@@ -349,7 +354,7 @@ try {
 }
 
 if (!result) process.exit(1);
-const { view, trace } = result;
+const { view, trace, spokenLines } = result;
 const ACTIONS = ["commit", "status_change", "field_change"];
 const tiro = view.spoken.filter((line) => line.speaker === "agent");
 const learner = view.spoken.filter((line) => line.speaker !== "agent");
@@ -366,7 +371,7 @@ const checks = [
   ["Catches it before the learner acts", Boolean(first) && (!firstAction || first.at < firstAction.t_ms), first ? `caught at ${Math.round(first.at / 1000)} s, first action at ${firstAction ? Math.round(firstAction.t_ms / 1000) : "none"} s` : ""],
   ["Explains it in the expert's own words", afterCatch.some((line) => REASON.test(line.text)), afterCatch[0]?.text ?? ""],
   ["Shows the expert's screen at that moment", result.sawReplay && trace.some((line) => line.includes(`replay: rule ${broken?.number}`)), ""],
-  ["Lets the corrected answer through", view.catches.filter((one) => one.before_acting).length === 1 && learner.length >= 2, `${view.catches.length} catches in all`],
+  ["Lets the corrected answer through", view.catches.filter((one) => one.before_acting).length === 1 && spokenLines === 2, `${view.catches.length} catches in all, ${spokenLines} of the learner's 2 answers spoken`],
   ["Reports the rule as needing a hint, and to practise next", reported?.outcome === "needed_hint" && view.report?.practise_next[0] === broken?.number, view.report ? view.report.rules.map((rule) => `rule ${rule.number}: ${rule.outcome}`).join(", ") : "no report"],
 ];
 if (TRANSLATED) {
