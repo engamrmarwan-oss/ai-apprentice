@@ -275,14 +275,15 @@ describe("how the floor closes", () => {
     conductor.expertReplied(16_000);
     conductor.agentSaid(17_000, "Why hold it rather than reject it?");
     conductor.expertReplied(24_000);
-    const done = run(conductor, 24_000, 26_000);
+    // Tiro has nothing left to ask: the floor closes once the expert has been silent for three seconds.
+    const done = run(conductor, 24_000, 28_000);
+    expect(done.map((one) => one.at)).toEqual([27_000]);
     expect(closedWith(done.map((one) => one.action))).toMatchObject({
       reason: "answered",
       agentTurns: 2,
       followUpAskedAt: 17_000,
       followUpAnswered: true,
     });
-    expect(done[0].at).toBe(24_000);
   });
 
   it("closes by itself when the agent neither follows up nor gives the floor back", () => {
@@ -327,10 +328,27 @@ describe("how the floor closes", () => {
     expect(run(conductor, 16_500, 25_000)).toEqual([]);
     // The real answer.
     conductor.expertReplied(27_000, 22_000);
-    expect(closedWith(run(conductor, 27_000, 28_000).map((one) => one.action))).toMatchObject({
+    expect(closedWith(run(conductor, 27_000, 31_000).map((one) => one.action))).toMatchObject({
       reason: "answered",
       followUpAnswered: true,
     });
+  });
+
+  it("stays open after Tiro's last question while the expert answers in stretches", () => {
+    const conductor = withOpenFloor();
+    conductor.agentSaid(13_000, "So you held it, correct?");
+    conductor.expertReplied(16_000);
+    conductor.agentSaid(17_000, "Why hold it?");
+    // "In this case, I would..." then a pause, then the rest, as the transcriber delivers a real answer.
+    conductor.expertReplied(20_000, 18_000);
+    const done: { at: number; action: Action }[] = [];
+    for (let t = 20_000; t <= 40_000; t += 250) {
+      if (t >= 22_000 && t <= 30_000) conductor.speechHeard(t);
+      if (t === 30_000) conductor.expertReplied(t, 22_000);
+      for (const action of conductor.tick(t)) done.push({ at: t, action });
+    }
+    expect(done.map((one) => one.at)).toEqual([33_000]);
+    expect(closedWith(done.map((one) => one.action))).toMatchObject({ reason: "answered", followUpAnswered: true });
   });
 
   it("closes at once when the agent asks a third question", () => {

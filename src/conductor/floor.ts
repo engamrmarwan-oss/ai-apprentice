@@ -222,7 +222,12 @@ export function createConductor(config: WorkflowConfig) {
     }
 
     if (floor.repliedSinceTurn && floor.lastReplyAt !== null) {
-      if (floor.yielded || floor.asked >= askLimit(floor.kind)) return floor.yielded ? "yielded" : "answered";
+      if (floor.yielded) return "yielded";
+      // Tiro has nothing left to ask. An answer comes in stretches with pauses between them: the floor stays
+      // open until the expert has stopped, so that all of it is heard and Tiro can acknowledge it.
+      if (floor.asked >= askLimit(floor.kind)) {
+        return t - Math.max(floor.lastReplyAt, speechAt) >= config.answer_pause_ms ? "answered" : null;
+      }
       // Tiro may still follow up. If it does not, the exchange is over.
       return t - floor.lastReplyAt >= config.after_answer_ms ? "answered" : null;
     }

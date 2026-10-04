@@ -46,6 +46,8 @@ export const workflowConfigSchema = z.object({
   answer_wait_ms: ms(15_000),
   /** How long after an answer Tiro has to follow up before the floor closes. */
   after_answer_ms: ms(6_000),
+  /** After Tiro's last question, the expert has finished answering once they have been silent this long. */
+  answer_pause_ms: ms(3_000),
   /** Screen activity for this long, with the expert silent, sends the question to the debrief. */
   activity_grace_ms: ms(5_000),
   /** No floor stays open longer than this. */
