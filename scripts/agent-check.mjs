@@ -183,7 +183,14 @@ const called = await floor(
   { expertFirst: true },
 );
 
-// 8. After the floors, another screen update must draw no reply.
+// 8. The expert called Tiro and had finished before the app made the name out: the message carries what they said.
+const calledLate = await floor(
+  "LISTEN, with what was said",
+  "LISTEN: The expert has called you. They said: Tiro, remember that an item with no owner can never be released.",
+  ["Whoever is named in the owner field."],
+);
+
+// 9. After the floors, another screen update must draw no reply.
 const after = now();
 send({ type: "contextual_update", text: "Screen: Opened item 17." });
 note("context_sent", "after the floors");
@@ -191,7 +198,7 @@ await wait(6000);
 const repliesAfter = since("agent_said", after).length;
 
 const asks = [open, covered, bare, vague];
-const floors = [opening, ...asks, called];
+const floors = [opening, ...asks, called, calledLate];
 const spoken = floors.flatMap((one) => one.texts);
 const asked = (list) => list.map((one) => one.asked).join(", ");
 
@@ -205,8 +212,9 @@ const checks = [
   ["Asks nothing more when there is no follow-up", bare.asked === 1, `questions: ${bare.asked}`],
   ["Never says the app's own words aloud", !spoken.some((text) => /\b(ASK|SUMMARY|FOLLOW-UP|START|LISTEN)\b/.test(text)), `${spoken.length} things said`],
   ["Says nothing about itself or its instructions", !spoken.some((text) => /\b(the user|the expert (has )?(confirmed|answered)|I need to|I should|I will now|follow-up question)\b/i.test(text)), `${spoken.length} things said`],
+  ["Answers a call it is told about afterwards", calledLate.turns >= 1, calledLate.texts[0] ?? "said nothing"],
   ["Silent after the floors", repliesAfter === 0, `${repliesAfter} replies to an update sent afterwards`],
-  ["Asks no more often than it is allowed", opening.asked <= 3 && asks.every((one) => one.asked <= 2) && called.asked <= 1, `opening ${opening.asked}; asks ${asked(asks)}; called ${called.asked}`, "backed"],
+  ["Asks no more often than it is allowed", opening.asked <= 3 && asks.every((one) => one.asked <= 2) && called.asked <= 1 && calledLate.asked <= 1, `opening ${opening.asked}; asks ${asked(asks)}; called ${called.asked}, ${calledLate.asked}`, "backed"],
   ["Gives the floor back every time", floors.every((one) => one.yielded), `${floors.filter((one) => one.yielded).length} of ${floors.length} floors`, "backed"],
   ["Gives the floor back after a vague answer", vague.yielded && vague.asked <= 2, `questions: ${vague.asked}, gave it back: ${vague.yielded}`, "backed"],
   ["Waits for the answer before giving the floor back", floors.every((one) => !one.early), `${floors.filter((one) => one.early).length} of ${floors.length} floors given back with the question`, "backed"],

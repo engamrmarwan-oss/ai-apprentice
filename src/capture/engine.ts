@@ -139,8 +139,9 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
 
   // --- The transcriber's current stretch of speech ---
   let utteranceStart: number | null = null;
-  /** Whether any of it was heard while Tiro was not talking. If none was, it is Tiro's own voice. */
+  /** Whether any of it was heard while Tiro was quiet, and whether any was heard while Tiro could be heard talking. */
   let heardOutside = false;
+  let heardOverTiro = false;
   let calledThisUtterance = false;
   /** What Tiro is saying, until it stops and the line can be stored with its end. */
   let agentLine: { text: string; start: number } | null = null;
@@ -216,6 +217,9 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
     trace("silenced");
   }
 
+  /** What the expert said when their call was only made out once they had finished. The agent heard none of it. */
+  let saidWithCall: string | null = null;
+
   function openFloor(kind: FloorKind, plan: TurnPlan | null) {
     if (!voice) return;
     floor = { kind, plan, expert: [] };
@@ -226,7 +230,8 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
     voice.setMicMuted(false);
     trace(`floor opened: ${kind}`);
 
-    const trigger = triggerFor(kind, plan);
+    const trigger = triggerFor(kind, plan, saidWithCall);
+    saidWithCall = null;
     const frameId = plan ? planFrame.get(plan) : undefined;
     const fileId = frameId ? keyFiles.get(frameId) : undefined;
     if (fileId) voice.sendMultimodalMessage({ text: trigger, fileIds: [fileId] });
@@ -361,7 +366,10 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
     connection.on(RealtimeEvents.PARTIAL_TRANSCRIPT, ({ text }) => {
       if (!text.trim() || !capturing() || view.muted) return;
       // While Tiro can be heard talking, what the microphone picks up is most likely Tiro.
-      if (agentSpeaking && audible) return;
+      if (agentSpeaking && audible) {
+        heardOverTiro = true;
+        return;
+      }
       const t = now();
       utteranceStart ??= t;
       heardOutside = true;
@@ -377,20 +385,30 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
     connection.on(RealtimeEvents.COMMITTED_TRANSCRIPT, ({ text }) => {
       const t = now();
       const start = utteranceStart ?? t;
-      const mine = heardOutside;
+      // All of it was heard over Tiro's voice and none while Tiro was quiet: it is Tiro, not the expert.
+      const echo = heardOverTiro && !heardOutside;
+      const alreadyCalled = calledThisUtterance;
       utteranceStart = null;
       heardOutside = false;
+      heardOverTiro = false;
       calledThisUtterance = false;
       update({ partial: "" });
 
       const said = text.trim();
-      // Nothing of it was heard while Tiro was quiet: it is Tiro's own voice, not the expert's.
-      if (!said || !mine || !capturing() || view.muted) {
-        if (said) trace(`transcript dropped${mine ? "" : " as Tiro's own voice"}: ${said}`);
+      if (!said || echo || !capturing() || view.muted) {
+        if (said) trace(`transcript dropped${echo ? " as Tiro's own voice" : ""}: ${said}`);
         finishSettle();
         return;
       }
       trace(`the expert said: ${said}`);
+      conductor.speechHeard(t);
+      // The name was not made out while they were talking, only now.
+      if (!floor && !alreadyCalled && view.voice === "on" && hearsWakeWord(said, config.wake_words)) {
+        trace("the expert called Tiro (made out afterwards)");
+        saidWithCall = said;
+        run(conductor.called(t));
+        saidWithCall = null;
+      }
       const stored = keep("expert", start, t, said);
       if (floor) {
         floor.expert.push({ start, stored });

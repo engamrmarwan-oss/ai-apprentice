@@ -38,7 +38,13 @@ describe("triggerFor", () => {
 
   it("starts the opening and the called turn with their own words", () => {
     expect(triggerFor("opening", null)).toMatch(/^START:/);
-    expect(triggerFor("called", null)).toMatch(/^LISTEN:/);
+    expect(triggerFor("called", null)).toBe("LISTEN: The expert has called you.");
+  });
+
+  it("tells the agent what the expert said when the call was only made out afterwards", () => {
+    expect(triggerFor("called", null, "Tiro, anything above ten thousand needs a second signature.")).toBe(
+      "LISTEN: The expert has called you. They said: Tiro, anything above ten thousand needs a second signature.",
+    );
   });
 });
 

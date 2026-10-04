@@ -27,9 +27,13 @@ export function spokenText(message: string): string {
  * The message that gives the agent its turn. The capital word says which
  * kind of turn it is (agents/prompts/interviewer.md); the rest is data.
  */
-export function triggerFor(kind: FloorKind, plan: TurnPlan | null): string {
+export function triggerFor(kind: FloorKind, plan: TurnPlan | null, alreadySaid: string | null = null): string {
   if (kind === "opening") return "START: The session is beginning.";
-  if (kind === "called") return "LISTEN: The expert has called you.";
+  if (kind === "called") {
+    // The name is usually heard while the expert is still talking, and the agent hears the rest itself.
+    // When it was only made out afterwards, the agent heard none of it, so it is told what was said.
+    return alreadySaid ? `LISTEN: The expert has called you. They said: ${alreadySaid}` : "LISTEN: The expert has called you.";
+  }
   return `ASK:\nSUMMARY: ${plan?.summary ?? ""}\nFOLLOW-UP: ${plan?.question?.text ?? "none"}`;
 }
 
