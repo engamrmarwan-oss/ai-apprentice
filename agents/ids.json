@@ -10,5 +10,9 @@
   "agents": {
     "interviewer": "agent_9101m41pxaxkf8c91e60jawxz9g5",
     "tutor": "agent_0701m41pxe3ee3ft5gtr9c4rsmbf"
-  }
+  },
+  "secrets": {
+    "tiro_mcp_secret": "GxOau7cCRNT5pGaq1GAs"
+  },
+  "mcp_servers": {}
 }

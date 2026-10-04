@@ -30,6 +30,10 @@ const ids = existsSync(IDS_FILE)
   : { tools: {}, agents: {} };
 ids.secrets ??= {};
 ids.mcp_servers ??= {};
+/** Keeps an id the moment it is known, so a later failure cannot lose it and make the next push create it twice. */
+const keep = () => {
+  if (!dryRun) writeFileSync(IDS_FILE, `${JSON.stringify(ids, null, 2)}\n`);
+};
 
 /** Runs one CLI command with a JSON body on stdin and returns the parsed response. */
 function cli(command, body, params) {
@@ -95,6 +99,7 @@ for (const [key, entry] of Object.entries(manifest.mcp_servers ?? {})) {
     process.exit(1);
   }
   if (!knownSecret && !dryRun) ids.secrets[entry.secret.name] = secret.secret_id;
+  keep();
   console.log(`secret ${entry.secret.name}: ${dryRun ? "valid" : knownSecret ? "updated" : "created"}`);
 
   const secret_token = { secret_id: ids.secrets[entry.secret.name] ?? `dry-run-${entry.secret.name}` };
@@ -103,8 +108,14 @@ for (const [key, entry] of Object.entries(manifest.mcp_servers ?? {})) {
   const response = known
     ? cli(["agents", "mcp-servers", "update"], { approval_policy: config.approval_policy, response_timeout_secs: config.response_timeout_secs, secret_token }, { mcp_server_id: known })
     : cli(["agents", "mcp-servers", "create"], { config: { ...config, secret_token } });
+  if (failed(response) && response.error?.reason === "feature_not_available") {
+    // The workspace has MCP servers switched off. The agents still work without the lookup, so they are pushed without it.
+    console.log(`mcp server ${key}: not attached. MCP servers are not switched on for this ElevenLabs workspace. Agents are pushed without it; push again once they are.`);
+    continue;
+  }
   if (failed(response)) stop(`mcp server ${key}`, response);
   if (!known && !dryRun) ids.mcp_servers[key] = response.id;
+  keep();
   console.log(`mcp server ${key}: ${dryRun ? "valid" : known ? "updated" : "created"}`);
 }
 
@@ -116,15 +127,19 @@ for (const name of manifest.tools) {
     : cli(["agents", "tools", "create"], body);
   if (failed(response)) stop(`tool ${name}`, response);
   if (!known && !dryRun) ids.tools[name] = response.id;
+  keep();
   console.log(`tool ${name}: ${dryRun ? "valid" : known ? "updated" : "created"}`);
 }
 
 for (const [key, entry] of Object.entries(manifest.agents)) {
   const body = readJson(entry.config);
   const prompt = body.conversation_config.agent.prompt;
-  prompt.prompt = readFileSync(`${AGENTS_DIR}${entry.prompt}`, "utf8");
+  // An agent is told about its lookups only when it has them: a server that could not be attached is left out of the prompt too.
+  const servers = (entry.mcp_servers ?? []).filter((server) => dryRun || ids.mcp_servers[server]);
+  const lookup = servers.length > 0 && entry.lookup_prompt ? `\n${readFileSync(`${AGENTS_DIR}${entry.lookup_prompt}`, "utf8")}` : "";
+  prompt.prompt = `${readFileSync(`${AGENTS_DIR}${entry.prompt}`, "utf8")}${lookup}`;
   prompt.tool_ids = entry.tools.map((tool) => ids.tools[tool] ?? `dry-run-${tool}`);
-  prompt.mcp_server_ids = (entry.mcp_servers ?? []).map((server) => ids.mcp_servers[server] ?? `dry-run-${server}`);
+  prompt.mcp_server_ids = servers.map((server) => ids.mcp_servers[server] ?? `dry-run-${server}`);
 
   const known = ids.agents[key];
   const response = known
@@ -132,10 +147,8 @@ for (const [key, entry] of Object.entries(manifest.agents)) {
     : cli(["agents", "create"], body);
   if (failed(response)) stop(`agent ${key}`, response);
   if (!known && !dryRun) ids.agents[key] = response.agent_id;
+  keep();
   console.log(`agent ${key}: ${dryRun ? "valid" : known ? "updated" : "created"}`);
 }
 
-if (!dryRun) {
-  writeFileSync(IDS_FILE, `${JSON.stringify(ids, null, 2)}\n`);
-  console.log("ids written to agents/ids.json");
-}
+if (!dryRun) console.log("ids written to agents/ids.json");

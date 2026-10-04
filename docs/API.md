@@ -522,7 +522,7 @@ Five tools, all read-only. With a workflow's key, `work_map_id` may be left out 
 
 A field the expert marked as personal data in the tool map is left out of what `get_screen_moment` says the screen showed. The picture is the screen as it was.
 
-The tutor agent uses the same server, with the server's own secret in place of a key.
+The tutor agent can use the same server, with the server's own secret in place of a key. That needs MCP servers switched on for the ElevenLabs workspace; until then the tutor works from the map it is handed at the start.
 
 ## Other routes
 

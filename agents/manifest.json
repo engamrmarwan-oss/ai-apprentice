@@ -60,7 +60,8 @@
       ],
       "mcp_servers": [
         "tiro"
-      ]
+      ],
+      "lookup_prompt": "prompts/tutor-lookup.md"
     }
   }
 }

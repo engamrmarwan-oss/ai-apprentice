@@ -9,7 +9,7 @@ const readJson = (path: string) => JSON.parse(read(path));
 type Manifest = {
   tools: string[];
   mcp_servers: Record<string, { config: string; secret: { name: string; env: string }; tools: string[] }>;
-  agents: Record<string, { config: string; prompt: string; variables: string[]; tools: string[]; mcp_servers?: string[] }>;
+  agents: Record<string, { config: string; prompt: string; lookup_prompt?: string; variables: string[]; tools: string[]; mcp_servers?: string[] }>;
 };
 
 const manifest: Manifest = readJson("manifest.json");
@@ -77,7 +77,8 @@ describe("prompts", () => {
 
   // The manifest's list is what the server must pass when it starts a session.
   it.each(agents)("%s uses exactly the variables the manifest lists", (_key, entry) => {
-    expect([...new Set(variablesIn(read(entry.prompt)))].sort()).toEqual([...entry.variables].sort());
+    const whole = `${read(entry.prompt)}${entry.lookup_prompt ? read(entry.lookup_prompt) : ""}`;
+    expect([...new Set(variablesIn(whole))].sort()).toEqual([...entry.variables].sort());
   });
 
   it.each(agents)("%s is told about every tool it has", (_key, entry) => {
@@ -106,11 +107,13 @@ describe("Tiro's MCP server", () => {
   });
 
   it.each(agents.filter(([, entry]) => entry.mcp_servers?.length))("%s is told about every lookup it has, and which map to pass", (_key, entry) => {
-    const prompt = read(entry.prompt);
+    // The lookups are described in a part of their own, which is left out when the server cannot be attached.
+    const lookup = read(entry.lookup_prompt ?? "");
     for (const server of entry.mcp_servers ?? []) {
-      for (const tool of manifest.mcp_servers[server].tools) expect(prompt).toContain(`\`${tool}\``);
+      for (const tool of manifest.mcp_servers[server].tools) expect(lookup).toContain(`\`${tool}\``);
     }
-    expect(variablesIn(prompt)).toContain("work_map_id");
+    expect(variablesIn(lookup)).toContain("work_map_id");
+    for (const tool of Object.values(manifest.mcp_servers).flatMap((server) => server.tools)) expect(read(entry.prompt)).not.toContain(tool);
   });
 });
 
@@ -119,7 +122,7 @@ describe("generality", () => {
   const SPECIFIC = /crystal|requirement|invoice/i;
   const files = [
     "manifest.json",
-    ...agents.flatMap(([, entry]) => [entry.config, entry.prompt]),
+    ...agents.flatMap(([, entry]) => [entry.config, entry.prompt, ...(entry.lookup_prompt ? [entry.lookup_prompt] : [])]),
     ...manifest.tools.map((name) => `tools/${name}.json`),
     ...Object.values(manifest.mcp_servers).map((entry) => entry.config),
   ];
