@@ -1,31 +1,155 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
+  --canvas: #f5f2eb;
+  --surface: #fffefa;
+  --ink: #18211e;
+  --secondary: #59635f;
+  --pine: #123e35;
+  --pine-light: #ddebe6;
+  --amber: #a96713;
+  --amber-light: #f7e9cc;
+  --learning: #315f73;
+  --learning-light: #ddeaf0;
+  --danger: #a34437;
+  --danger-light: #f3dfdb;
+  --divider: #d8d5cc;
+  --focus: #247ca1;
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --shadow: 0 18px 46px rgba(24, 33, 30, 0.12);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-manrope);
+  --font-serif: var(--font-source-serif);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --color-stone-50: var(--canvas);
+  --color-stone-100: #ebe9e2;
+  --color-stone-200: var(--divider);
+  --color-stone-300: #c4c1b8;
+  --color-stone-400: #989f9b;
+  --color-stone-500: var(--secondary);
+  --color-stone-600: #4b5652;
+  --color-stone-700: #35413d;
+  --color-stone-800: #25312d;
+  --color-stone-900: #1e2925;
+  --color-stone-950: var(--ink);
+
+  --color-teal-50: var(--pine-light);
+  --color-teal-100: #c9ddd6;
+  --color-teal-200: #a7c7bc;
+  --color-teal-300: #86b0a2;
+  --color-teal-400: #659486;
+  --color-teal-500: #477c6e;
+  --color-teal-600: #2d695b;
+  --color-teal-700: #1d5d50;
+  --color-teal-800: #194e43;
+  --color-teal-900: var(--pine);
+  --color-teal-950: #0c2f28;
+
+  --color-amber-50: var(--amber-light);
+  --color-amber-100: #f1dbad;
+  --color-amber-200: #e5c07f;
+  --color-amber-300: #d6a452;
+  --color-amber-400: #c18428;
+  --color-amber-500: var(--amber);
+  --color-amber-600: #8d560f;
+  --color-amber-700: #75470c;
+  --color-amber-800: #643c0d;
+  --color-amber-900: #54330e;
+  --color-amber-950: #2f1b06;
+
+  --color-blue-50: var(--learning-light);
+  --color-blue-100: #c8dce5;
+  --color-blue-700: var(--learning);
+  --color-blue-800: #254e61;
+
+  --color-red-50: var(--danger-light);
+  --color-red-100: #eccbc5;
+  --color-red-200: #ddb3ab;
+  --color-red-400: #bf776b;
+  --color-red-500: #af594d;
+  --color-red-700: var(--danger);
+  --color-red-800: #87372d;
+  --color-red-900: #6f3028;
+  --color-red-950: #411812;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-manrope), Arial, Helvetica, sans-serif;
+  font-feature-settings: "ss01", "tnum";
 }
 
 ::selection {
-  background: #ccfbf1;
-  color: #134e4a;
+  background: var(--amber-light);
+  color: var(--pine);
 }
 
 * {
-  scrollbar-color: #a8a29e transparent;
+  scrollbar-color: #9ba7a1 transparent;
   scrollbar-width: thin;
+}
+
+:focus-visible {
+  outline-color: var(--focus);
+}
+
+input,
+textarea,
+select {
+  caret-color: var(--pine);
+}
+
+h1,
+.tiro-display {
+  font-family: var(--font-source-serif), Georgia, serif;
+}
+
+blockquote,
+.tiro-evidence {
+  font-family: var(--font-source-serif), Georgia, serif;
+}
+
+.tiro-surface {
+  background: var(--surface);
+}
+
+.tiro-shadow {
+  box-shadow: var(--shadow);
+}
+
+@layer utilities {
+  .rounded-lg {
+    border-radius: 0.375rem;
+  }
+
+  .rounded-xl,
+  .rounded-2xl {
+    border-radius: 0.5rem;
+  }
+}
+
+@keyframes tiro-rise {
+  from {
+    opacity: 0.01;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tiro-enter {
+    animation: tiro-rise 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 }
 
 button,

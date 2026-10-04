@@ -6,19 +6,27 @@ export function MasteryReport({ report }: { report: TutorMasteryReport }) {
 
   return (
     <div className="min-w-0">
-      <section className="border-b border-stone-200 pb-7" aria-labelledby="summary-heading">
-        <h2 className="text-2xl font-semibold tracking-[-0.03em]" id="summary-heading">
-          {report.totals.passed_first_time} of {report.rules.length} rules passed first time
-        </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">
-          {summarySentence(report)}
-        </p>
+      <section className="grid gap-7 border-b border-stone-200 pb-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center" aria-labelledby="summary-heading">
+        <div>
+          <h2 className="tiro-display text-3xl font-medium tracking-[-0.02em]" id="summary-heading">
+            {report.totals.passed_first_time} of {report.rules.length} rules passed first time
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">
+            {summarySentence(report)}
+          </p>
+        </div>
+        <dl className="grid grid-cols-2 border-y border-stone-200 sm:grid-cols-4 lg:border-y-0">
+          <Metric label="First time" value={report.totals.passed_first_time} />
+          <Metric label="Hint" value={report.totals.needed_hint} />
+          <Metric label="Violated" value={report.totals.violated} />
+          <Metric label="Not seen" value={report.totals.not_encountered} />
+        </dl>
       </section>
 
       <section className="py-8" aria-labelledby="rule-outcomes-heading">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-semibold tracking-[-0.03em]" id="rule-outcomes-heading">
+            <h2 className="text-lg font-bold tracking-[-0.02em]" id="rule-outcomes-heading">
               Rule outcomes
             </h2>
             <p className="mt-2 text-sm text-stone-600">
@@ -59,15 +67,15 @@ export function MasteryReport({ report }: { report: TutorMasteryReport }) {
         )}
       </section>
 
-      <section className="border-t border-stone-200 pt-8" aria-labelledby="practise-next-heading">
-        <h2 className="text-2xl font-semibold tracking-[-0.03em]" id="practise-next-heading">
+      <section className="border-t-2 border-stone-950 pt-8" aria-labelledby="practise-next-heading">
+        <h2 className="tiro-display text-2xl font-medium tracking-[-0.02em]" id="practise-next-heading">
           What to practise next
         </h2>
         {needsPractice.length ? (
           <ol className="mt-5 space-y-4">
             {needsPractice.map((rule, index) => (
               <li className="grid grid-cols-[2rem_minmax(0,1fr)] gap-3" key={rule.rule_id}>
-                <span className="grid size-8 place-items-center rounded-full bg-teal-50 text-sm font-bold text-teal-900">
+                <span className="tiro-display grid size-8 place-items-center text-lg font-medium text-stone-500">
                   {index + 1}
                 </span>
                 <div>
@@ -87,6 +95,15 @@ export function MasteryReport({ report }: { report: TutorMasteryReport }) {
           </p>
         )}
       </section>
+    </div>
+  );
+}
+
+function Metric({ label: name, value }: { label: string; value: number }) {
+  return (
+    <div className="border-l border-stone-200 px-4 py-3 first:border-l-0 lg:first:border-l">
+      <dt className="text-[0.5625rem] font-bold tracking-[0.09em] text-stone-500 uppercase">{name}</dt>
+      <dd className="tiro-display mt-1 text-xl font-medium tabular-nums">{value}</dd>
     </div>
   );
 }

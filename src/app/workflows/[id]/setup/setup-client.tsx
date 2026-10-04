@@ -89,10 +89,10 @@ function SetupView({ workflowId }: { workflowId: string }) {
   );
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8 md:px-10 md:py-12 lg:px-14">
+    <div className="tiro-enter mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 md:px-10 md:py-10 lg:px-12">
       <header className="border-b border-stone-200 pb-9">
         <p className="text-sm font-semibold text-teal-800">Session setup</p>
-        <h1 className="mt-2 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Setup</h1>
+        <h1 className="mt-2 text-4xl font-medium tracking-[-0.025em] sm:text-[2.75rem]">Setup</h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600">
           What Tiro assumes about the task, and what it knows of the tool, before it watches you work.
         </p>

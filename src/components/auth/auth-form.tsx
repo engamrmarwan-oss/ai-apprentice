@@ -148,7 +148,7 @@ export function AuthForm({
       ) : null}
 
       <button
-        className="flex h-12 w-full items-center justify-center rounded-xl bg-teal-950 px-5 text-sm font-semibold text-white outline-none transition-colors hover:bg-teal-900 disabled:cursor-wait disabled:bg-stone-400 focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"
+        className="flex h-11 w-full items-center justify-center rounded-md bg-teal-900 px-5 text-xs font-bold text-white outline-none transition-colors hover:bg-teal-800 disabled:cursor-wait disabled:bg-stone-400 focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2"
         disabled={isSubmitting}
         type="submit"
       >
@@ -267,14 +267,14 @@ function Field({
 
   return (
     <div>
-      <label className="text-sm font-semibold text-stone-800" htmlFor={name}>
+      <label className="text-xs font-bold text-stone-800" htmlFor={name}>
         {label}
       </label>
       <input
         {...inputProps}
         aria-describedby={describedBy || undefined}
         aria-invalid={Boolean(error)}
-        className={`mt-2 h-12 w-full rounded-xl border bg-white px-3.5 text-base text-stone-950 outline-none transition placeholder:text-stone-400 focus:ring-2 sm:text-sm ${
+        className={`mt-2 h-11 w-full rounded-md border bg-white px-3 text-base text-stone-950 outline-none transition placeholder:text-stone-400 focus:ring-2 sm:text-xs ${
           error
             ? "border-red-400 focus:border-red-500 focus:ring-red-100"
             : "border-stone-300 hover:border-stone-400 focus:border-teal-700 focus:ring-teal-100"

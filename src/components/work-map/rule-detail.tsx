@@ -3,7 +3,7 @@ import type { WorkMapRule } from "@/capture/debrief";
 export function RuleDetail({ rule }: { rule: WorkMapRule }) {
   return (
     <aside className="min-w-0 lg:sticky lg:top-8 lg:self-start" aria-labelledby="rule-detail-heading">
-      <div className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
+      <div className="tiro-shadow rounded-lg border border-stone-300 bg-white p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-2">
           <span className={statusClass(rule.status)}>{label(rule.status)}</span>
           <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-600">
@@ -14,7 +14,7 @@ export function RuleDetail({ rule }: { rule: WorkMapRule }) {
           </span>
         </div>
 
-        <h2 className="mt-5 text-2xl font-semibold leading-8 tracking-[-0.03em]" id="rule-detail-heading">
+        <h2 className="tiro-display mt-5 text-2xl font-medium leading-8 tracking-[-0.02em]" id="rule-detail-heading">
           {rule.statement}
         </h2>
 
@@ -41,11 +41,11 @@ export function RuleDetail({ rule }: { rule: WorkMapRule }) {
           </figure>
         ) : null}
 
-        <figure className="mt-6 rounded-xl bg-stone-50 p-4">
+        <figure className="mt-6 border-l border-amber-500 bg-amber-50/60 p-4">
           <figcaption className="text-xs font-semibold tracking-[0.1em] text-stone-500 uppercase">
             Expert evidence
           </figcaption>
-          <blockquote className="mt-2 text-sm leading-6 text-stone-700">
+          <blockquote className="mt-2 text-base leading-6 italic text-stone-700">
             “{rule.quote.text}”
           </blockquote>
         </figure>

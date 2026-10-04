@@ -14,7 +14,7 @@ export function WorkMapTimeline({
     <section aria-labelledby="timeline-heading" className="min-w-0">
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-stone-200 pb-5">
         <div>
-          <h2 className="text-2xl font-semibold tracking-[-0.03em]" id="timeline-heading">
+          <h2 className="text-lg font-bold tracking-[-0.02em]" id="timeline-heading">
             The workflow, step by step
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">
@@ -27,7 +27,7 @@ export function WorkMapTimeline({
       </div>
 
       {map.steps.length ? (
-        <ol className="relative mt-7 space-y-8 before:absolute before:top-5 before:bottom-5 before:left-5 before:w-px before:bg-stone-300">
+        <ol className="relative mt-7 space-y-7 before:absolute before:top-5 before:bottom-5 before:left-5 before:w-px before:bg-stone-300">
           {map.steps.map((step) => (
             <TimelineStep
               key={step.id}
@@ -60,13 +60,13 @@ function TimelineStep({
 }) {
   return (
     <li className="relative grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] gap-4">
-      <span className="relative z-10 grid size-10 place-items-center rounded-full border border-teal-800 bg-stone-50 text-sm font-bold tabular-nums text-teal-900">
+      <span className="tiro-display relative z-10 grid size-10 place-items-center rounded-full border border-teal-800 bg-stone-50 text-base font-medium tabular-nums text-teal-900">
         {step.position}
       </span>
       <article className="min-w-0 pb-2">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 className="text-xl font-semibold tracking-[-0.025em] text-stone-950">
+            <h3 className="text-lg font-bold tracking-[-0.02em] text-stone-950">
               {step.title}
             </h3>
             {step.is_judgment ? (
@@ -97,7 +97,7 @@ function TimelineStep({
               <figcaption className="text-xs font-semibold tracking-[0.1em] text-stone-500 uppercase">
                 Why
               </figcaption>
-              <blockquote className="mt-2 text-sm leading-6 text-stone-700">
+              <blockquote className="mt-2 border-l border-amber-500 bg-amber-50/60 px-4 py-3 text-base leading-6 italic text-stone-700">
                 {step.reason ? `“${step.reason.text}”` : "The expert has not given a reason yet."}
               </blockquote>
             </figure>
@@ -113,7 +113,7 @@ function TimelineStep({
               {rules.map((rule) => (
                 <button
                   aria-pressed={selectedRuleId === rule.id}
-                  className={`rounded-lg border px-3 py-2 text-left text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-teal-700 ${
+                  className={`rounded-md border px-3 py-2 text-left text-xs font-bold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-700 ${
                     selectedRuleId === rule.id
                       ? "border-teal-800 bg-teal-50 text-teal-950"
                       : "border-stone-300 bg-white text-stone-700 hover:border-teal-400 hover:text-teal-950"
@@ -140,7 +140,7 @@ function ScreenMoment({ step }: { step: WorkMapStep }) {
   const screen = moment?.screen;
 
   return (
-    <figure className="min-w-0 overflow-hidden rounded-xl border border-stone-200 bg-stone-100">
+    <figure className="min-w-0 overflow-hidden rounded-lg border border-stone-300 bg-stone-100">
       <div className="flex items-center justify-between gap-3 border-b border-stone-200 bg-white px-3 py-2">
         <figcaption className="truncate text-xs font-semibold text-stone-700">
           {screen?.name ?? "Screen moment"}

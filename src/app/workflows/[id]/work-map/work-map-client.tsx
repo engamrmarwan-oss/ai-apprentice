@@ -106,10 +106,10 @@ function WorkMapScreen({ isExpert, workflowId }: { isExpert: boolean; workflowId
     map.rules.find((rule) => rule.id === selectedRuleId) ?? map.rules[0] ?? null;
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 md:px-10 md:py-12 lg:px-14">
+    <div className="tiro-enter mx-auto w-full max-w-[88rem] px-5 py-8 sm:px-8 md:px-10 md:py-10 lg:px-12">
       <header className="flex flex-col gap-5 border-b border-stone-200 pb-9 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-4xl font-semibold tracking-[-0.04em] text-balance sm:text-5xl">
+          <h1 className="text-4xl font-medium tracking-[-0.025em] text-balance sm:text-[2.75rem]">
             Work Map
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600">

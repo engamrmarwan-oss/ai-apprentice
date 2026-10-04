@@ -43,7 +43,7 @@ export function TutorSessionView({
 
       <Controls onCall={onCall} onEnd={onEnd} onMute={onMute} view={view} />
 
-      <div className="mt-6 grid min-w-0 gap-6 xl:grid-cols-[minmax(20rem,0.82fr)_minmax(0,1.18fr)]">
+      <div className="mt-6 grid min-w-0 gap-5 xl:grid-cols-[minmax(32rem,1.35fr)_minmax(20rem,0.65fr)]">
         <div className="min-w-0 space-y-6">
           <Panel title="Learner’s tool" detail={`${view.frames} frame${view.frames === 1 ? "" : "s"}`}>
             <FramePreview frame={view.lastFrame} />
@@ -52,7 +52,7 @@ export function TutorSessionView({
             <ol className="space-y-3">
               {view.workMap.steps.map((step) => (
                 <li className="grid grid-cols-[1.75rem_minmax(0,1fr)] gap-2 text-sm" key={step.id}>
-                  <span className="grid size-7 place-items-center rounded-full bg-stone-100 text-xs font-bold text-stone-700">
+                  <span className="tiro-display grid size-7 place-items-center text-base font-medium text-stone-500">
                     {step.position}
                   </span>
                   <div>
@@ -101,7 +101,7 @@ export function TutorSessionView({
               <EmptyLine text="The tutor conversation will appear after sharing starts." />
             )}
             {view.partial ? (
-              <p className="mt-3 border-l-2 border-teal-400 pl-3 text-sm leading-6 text-stone-500" aria-live="polite">
+              <p className="mt-3 border-l border-teal-400 pl-3 text-sm leading-6 text-stone-500" aria-live="polite">
                 Hearing: {view.partial}
               </p>
             ) : null}
@@ -122,7 +122,7 @@ export function TutorSessionView({
           </Panel>
           <Panel title="Expert replay">
             {view.replay ? (
-              <div className="rounded-xl bg-teal-50 p-4 text-sm leading-6 text-teal-950">
+              <div className="border-l border-amber-500 bg-amber-50/60 p-4 text-sm leading-6 text-stone-800">
                 <p className="font-semibold">Rule {view.replay.number}: {view.replay.statement}</p>
                 <p className="mt-2">The expert’s screenshot and quote are showing in the companion window.</p>
               </div>
@@ -136,7 +136,7 @@ export function TutorSessionView({
       {view.report ? (
         <section className="mt-10 border-t border-stone-200 pt-9" aria-labelledby="mastery-heading">
           <div className="mb-8">
-            <h2 className="text-3xl font-semibold tracking-[-0.035em]" id="mastery-heading">
+            <h2 className="tiro-display text-3xl font-medium tracking-[-0.02em]" id="mastery-heading">
               Mastery report
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">
@@ -166,15 +166,15 @@ function SetupPanel({
   if (view.phase === "teaching" || view.phase === "ending" || view.phase === "ended") return null;
 
   return (
-    <section className="mt-8 rounded-2xl border-2 border-teal-800 bg-white p-5 sm:p-7" aria-labelledby="tutor-setup-heading">
+    <section className="mt-8 border-y border-stone-200 bg-white/45 p-5 sm:p-7" aria-labelledby="tutor-setup-heading">
       <h2 className="text-2xl font-semibold tracking-[-0.03em]" id="tutor-setup-heading">
         Set up Tiro before sharing
       </h2>
       <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-600">
         Chrome moves to the shared tab as soon as you choose it. Connect voice and open the companion first, while Tiro’s tab is still in front.
       </p>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-stone-200 p-4">
+      <div className="mt-6 grid gap-0 border-y border-stone-200 sm:grid-cols-2">
+        <div className="py-5 sm:pr-6">
           <p className="text-xs font-semibold text-stone-500 uppercase">Step 1</p>
           <h3 className="mt-1 font-semibold">Connect voice</h3>
           <p className="mt-2 text-sm leading-6 text-stone-600">
@@ -195,7 +195,7 @@ function SetupPanel({
           ) : null}
           {companionOpen ? <p className="mt-3 text-xs font-medium text-teal-700">Companion open</p> : null}
         </div>
-        <div className="rounded-xl border border-stone-200 p-4">
+        <div className="border-t border-stone-200 py-5 sm:border-t-0 sm:border-l sm:pl-6">
           <p className="text-xs font-semibold text-stone-500 uppercase">Step 2</p>
           <h3 className="mt-1 font-semibold">Share the tool’s tab</h3>
           <p className="mt-2 text-sm leading-6 text-stone-600">
@@ -228,7 +228,7 @@ function Controls({
 }) {
   const active = view.phase === "teaching";
   return (
-    <section className="mt-8 flex flex-wrap items-center gap-3 rounded-xl border border-stone-200 bg-white p-4" aria-label="Tutor controls">
+    <section className="mt-8 flex flex-wrap items-center gap-3 border-y border-stone-200 bg-white/60 p-4" aria-label="Tutor controls">
       <div className="mr-auto min-w-48">
         <p className="text-xs font-semibold tracking-[0.1em] text-stone-500 uppercase">Floor</p>
         <p className="mt-1 font-semibold text-stone-900">{tutorFloorLine(view)}</p>
@@ -268,7 +268,7 @@ function FramePreview({ frame }: { frame: Blob | null }) {
 
 function Panel({ children, detail, title }: { children: ReactNode; detail?: string; title: string }) {
   return (
-    <section className="min-w-0 rounded-2xl border border-stone-200 bg-white p-5">
+    <section className="min-w-0 rounded-lg border border-stone-300 bg-white p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold tracking-[-0.02em]">{title}</h2>
         {detail ? <span className="text-xs font-medium text-stone-500">{detail}</span> : null}
