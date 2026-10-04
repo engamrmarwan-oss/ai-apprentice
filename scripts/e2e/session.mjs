@@ -83,14 +83,7 @@ const say = (...parts) => console.log(((Date.now() - started) / 1000).toFixed(1)
 const browser = await chromium.launch({
   channel: "chrome",
   headless: true,
-  args: [
-    "--auto-select-tab-capture-source-by-title=Replay target",
-    "--autoplay-policy=no-user-gesture-required",
-    "--disable-backgrounding-occluded-windows",
-    "--disable-renderer-backgrounding",
-    // The replay tab is in the background here; its timers must keep time or the recording plays late.
-    "--disable-background-timer-throttling",
-  ],
+  args: ["--auto-select-tab-capture-source-by-title=Replay target", "--autoplay-policy=no-user-gesture-required"],
 });
 const context = await browser.newContext({ acceptDownloads: true, viewport: { width: 1512, height: 743 }, deviceScaleFactor: 2, permissions: ["microphone"] });
 
@@ -168,7 +161,7 @@ try {
   };
   const speak = async (name) => {
     const length = await page.evaluate((data) => window.__speak(data), clips[name]);
-    say(`expert: ${LINES[name]}`);
+    say(`expert says: ${LINES[name]}`);
     return length;
   };
 
@@ -177,6 +170,8 @@ try {
   say("voice:", (await read()).now.Voice);
   await page.getByRole("button", { name: /3\. Share/ }).click();
   await until((state) => state.now.Session === "capturing", 30_000, "capture to begin");
+  // As in a real session, the tool's tab is in front from here on and Tiro's is hidden.
+  await replay.bringToFront();
   const replayStarted = Date.now();
   void replay.evaluate((ms) => window.startReplay(ms), seconds * 1000);
 
@@ -208,6 +203,10 @@ try {
       linesThisFloor = 0;
     }
     wasOpen = open;
+    for (const line of state.said.filter((line) => /Expert:/.test(line) && !seen.has(line))) {
+      seen.add(line);
+      say("heard:", line.replace(/^.*Expert:\s*/, ""));
+    }
     const tiro = state.said.filter((line) => /Tiro:/.test(line));
     if (tiro.length > agentLines) {
       for (const line of tiro.slice(agentLines)) say("Tiro:", line.replace(/^.*Tiro:\s*/, ""));
