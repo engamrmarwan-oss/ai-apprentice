@@ -168,7 +168,7 @@ function EmptyState({ workflowId }: { workflowId: string }) {
           Mastery report
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-stone-600">
-          Your report is created from the tutor engine’s final view. Finish a tutor session to see every rule outcome and what to practise next.
+          Finish a tutor session to see how you did on each of the expert’s rules, and what to practise next.
         </p>
         <Link
           className="mt-7 inline-flex h-11 items-center justify-center rounded-lg bg-teal-900 px-5 text-sm font-semibold text-white outline-none hover:bg-teal-950 focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"

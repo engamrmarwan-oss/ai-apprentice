@@ -210,7 +210,7 @@ function TutorScreen({ workflowId }: { workflowId: string }) {
               Tiro will use this workflow’s newest confirmed Work Map. You will connect voice and open the companion before sharing the tool tab.
             </p>
             <div className="mt-6">
-              <label className="text-sm font-semibold text-stone-800" htmlFor="tutor-language">
+              <label className="block text-sm font-semibold text-stone-800" htmlFor="tutor-language">
                 Language of the lesson
               </label>
               <select

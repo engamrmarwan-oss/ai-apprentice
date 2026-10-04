@@ -100,7 +100,7 @@ function DebriefScreen({ workflowId }: { workflowId: string }) {
       <CenteredState
         action="Open capture"
         href={`/workflows/${encodeURIComponent(workflowId)}/capture`}
-        message="End an expert capture session first. Its newest session will appear here when it reaches the debrief phase."
+        message="Capture a session and end it first. Its debrief, where Tiro asks about what it saw, opens here."
         title="No session is waiting"
       />
     );

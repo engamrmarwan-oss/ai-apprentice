@@ -329,7 +329,7 @@ function CaptureControls({
   return (
     <section className="mt-8 flex flex-wrap items-center gap-3 rounded-xl border border-stone-200 bg-white p-4" aria-label="Capture controls">
       <div className="mr-auto min-w-48">
-        <p className="text-xs font-semibold tracking-[0.1em] text-stone-500 uppercase">Floor</p>
+        <p className="text-xs font-semibold tracking-[0.1em] text-stone-500 uppercase">Tiro</p>
         <p className="mt-1 font-semibold text-stone-900">{floorLine(view)}</p>
       </div>
       <button

@@ -4,6 +4,19 @@ import Link from "next/link";
 import { AuthenticatedApp } from "@/components/app-shell/authenticated-app";
 import { Icon } from "@/components/ui/icon";
 
+const EXPERT_STEPS = [
+  { path: "/setup", title: "Set up", detail: "Give Tiro your written process, so it knows what to expect before it watches." },
+  { path: "/capture", title: "Capture", detail: "Do the task on a real example and think aloud while Tiro watches." },
+  { path: "/debrief", title: "Debrief", detail: "Answer Tiro’s questions, check what it learned and confirm the Work Map." },
+  { path: "/people", title: "Invite new hires", detail: "Add the people who should learn this workflow." },
+];
+
+const NEW_HIRE_STEPS = [
+  { path: "/work-map", title: "Read the Work Map", detail: "The expert’s steps, and the rules behind them in their own words." },
+  { path: "/tutor", title: "Practise with the tutor", detail: "Work a case while Tiro checks your choices against the expert’s rules." },
+  { path: "/mastery", title: "See your mastery report", detail: "How you did on each rule, and what to practise next." },
+];
+
 export function WorkflowOverviewClient({ workflowId }: { workflowId: string }) {
   return (
     <AuthenticatedApp workflowId={workflowId}>
@@ -20,20 +33,30 @@ export function WorkflowOverviewClient({ workflowId }: { workflowId: string }) {
 
             <section className="py-9" aria-labelledby="next-step-heading">
               <h2 className="text-2xl font-semibold tracking-[-0.03em]" id="next-step-heading">
-                Next step
+                {workflow.role === "expert" ? "How to teach Tiro" : "How to learn this workflow"}
               </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600">
-                {workflow.role === "expert"
-                  ? "Capture a real example so Tiro can begin learning how you make decisions."
-                  : "Open the Work Map to see the expert’s confirmed steps and rules."}
-              </p>
-              <Link
-                className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-teal-900 px-4 text-sm font-semibold text-white outline-none hover:bg-teal-950 focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"
-                href={`/workflows/${encodeURIComponent(workflow.id)}/${workflow.role === "expert" ? "capture" : "work-map"}`}
-              >
-                <Icon className="size-4" name={workflow.role === "expert" ? "record" : "map"} />
-                {workflow.role === "expert" ? "Start capturing" : "Open Work Map"}
-              </Link>
+              <ol className="mt-5 divide-y divide-stone-200 border-y border-stone-200">
+                {(workflow.role === "expert" ? EXPERT_STEPS : NEW_HIRE_STEPS).map((step, index) => (
+                  <li key={step.path}>
+                    <Link
+                      className="group flex items-center gap-4 py-4 outline-none focus-visible:ring-2 focus-visible:ring-teal-700"
+                      href={`/workflows/${encodeURIComponent(workflow.id)}${step.path}`}
+                    >
+                      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-teal-50 text-sm font-bold text-teal-900">
+                        {index + 1}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold text-stone-900">{step.title}</span>
+                        <span className="mt-0.5 block text-sm leading-6 text-stone-600">{step.detail}</span>
+                      </span>
+                      <Icon
+                        className="size-4 shrink-0 text-stone-400 transition-transform group-hover:translate-x-0.5 group-hover:text-teal-800"
+                        name="chevron-right"
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ol>
             </section>
           </div>
         ) : null
