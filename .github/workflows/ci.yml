@@ -40,4 +40,5 @@ jobs:
           curl -sSfL "${base}/gitleaks_${GITLEAKS_VERSION}_checksums.txt" | grep " ${file}\$" | sha256sum --check
           tar -xzf "${file}" -C "${RUNNER_TEMP}" gitleaks
       - name: Scan full history
-        run: '"${RUNNER_TEMP}/gitleaks" git --redact --no-banner .'
+        # Verbose: a finding is listed with its file, line, rule and fingerprint. Redact keeps its value out of the log.
+        run: '"${RUNNER_TEMP}/gitleaks" git --redact --verbose --no-banner .'
