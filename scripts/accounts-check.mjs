@@ -65,17 +65,12 @@ try {
   let r = await stranger("GET", "/api/me");
   check("signed out: /api/me says signed_out", r.status === 401 && code_of(r) === "signed_out", `${r.status} ${code_of(r)}`);
 
-  r = await owner("POST", "/api/auth/sign-up", { ...fresh });
-  check("sign-up without a code is refused", r.status === 403 && code_of(r) === "invite_required", `${r.status} ${code_of(r)}`);
-
-  r = await owner("POST", "/api/auth/sign-up", { ...fresh, invite_code: "TIRO-AAAA-AAAA-AAAA" });
-  check("sign-up with a wrong code is refused", r.status === 403, `${r.status} ${code_of(r)}`);
-
+  // Sign-up is open to anyone. A valid code only skips the confirmation email, so the check signs in at once.
   r = await owner("POST", "/api/auth/sign-up", { ...fresh, password: "short", invite_code: code });
   check("a short password is named as the problem", r.status === 400 && Boolean(r.json.error?.fields?.password), `${r.status} ${code_of(r)}`);
 
   r = await owner("POST", "/api/auth/sign-up", { ...fresh, email: fresh.email.toUpperCase(), invite_code: code.toLowerCase() });
-  check("sign-up with the code works, typed in any case", r.status === 200 && r.json.user?.email === fresh.email, `${r.status} ${code_of(r)}`);
+  check("sign-up with a code signs in at once, the code typed in any case", r.status === 200 && r.json.user?.email === fresh.email, `${r.status} ${code_of(r)}`);
   check("the session is an httpOnly cookie and not in the body", r.httpOnly && !r.tokenInBody);
 
   r = await owner("GET", "/api/me");

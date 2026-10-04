@@ -128,12 +128,17 @@ describe("the account routes", () => {
     expect(signUp).toHaveBeenCalledWith(expect.objectContaining({ email: "ada@example.com" }));
   });
 
-  it("sign-up explains a missing invite and a taken email", async () => {
+  it("sign-up that waits for an email confirmation says so, and sets no cookie", async () => {
     const body = { email: "ada@example.com", password: "long enough", name: "Ada" };
-    vi.mocked(signUp).mockResolvedValue({ ok: false, reason: "invite_required" });
-    const refused = await signUpRoute(request("/api/auth/sign-up", { body }));
-    expect([refused.status, await errorCode(refused)]).toEqual([403, "invite_required"]);
+    vi.mocked(signUp).mockResolvedValue({ ok: true, confirm: { email: "ada@example.com" } });
+    const response = await signUpRoute(request("/api/auth/sign-up", { body }));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ ok: true, confirm: { email: "ada@example.com" } });
+    expect(response.headers.get("set-cookie")).toBeNull();
+  });
 
+  it("sign-up explains a taken email", async () => {
+    const body = { email: "ada@example.com", password: "long enough", name: "Ada" };
     vi.mocked(signUp).mockResolvedValue({ ok: false, reason: "email_taken" });
     const taken = await signUpRoute(request("/api/auth/sign-up", { body }));
     expect([taken.status, await errorCode(taken)]).toEqual([409, "email_taken"]);
@@ -148,6 +153,10 @@ describe("the account routes", () => {
 
     vi.mocked(signIn).mockResolvedValue({ ok: false, reason: "unavailable" });
     expect((await signInRoute(request("/api/auth/sign-in", { body }))).status).toBe(503);
+
+    vi.mocked(signIn).mockResolvedValue({ ok: false, reason: "email_not_confirmed" });
+    const waiting = await signInRoute(request("/api/auth/sign-in", { body }));
+    expect([waiting.status, await errorCode(waiting)]).toEqual([403, "email_not_confirmed"]);
   });
 
   it("sign-out ends the session and clears the cookie", async () => {

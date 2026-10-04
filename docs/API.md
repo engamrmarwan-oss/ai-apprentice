@@ -14,25 +14,35 @@ What the screens can call. Every route lives under `/api`, takes and returns JSO
 
 ## Accounts
 
-People sign in with an email and a password. There is no confirmation email and no password reset yet.
+People sign in with an email and a password. Anyone may sign up. When the server has `EMAIL_CONFIRMATION=required`, a new account confirms its address first, by a link in an email; otherwise it is signed in at once. There is no password reset yet.
 
-An account has no role of its own. **A role belongs to a workflow**: whoever creates a workflow is its `expert`, and the people the expert invites are its `new_hire`s. One person can be an expert on one workflow and a new hire on another.
+An account has no role of its own. **A role belongs to a workflow**: whoever creates a workflow is its `expert`, and the people the expert invites are its `new_hire`s. One person can be an expert on one workflow and a new hire on another. Invitations waiting for an email are taken up as soon as that person is in: at sign-up, or when they confirm their address.
 
 ### `POST /api/auth/sign-up`
 
 ```json
-{ "email": "ada@example.com", "password": "at least 8 characters", "name": "Ada", "invite_code": "optional" }
+{ "email": "ada@example.com", "password": "at least 8 characters", "name": "Ada" }
 ```
 
-Creates the account and signs it in. Sign-up needs either a valid `invite_code` or a pending invitation to a workflow for that email; with an invitation, the code can be left out and the person joins that workflow at once.
+Creates the account. Two answers:
 
-Returns `{ "ok": true, "user": User }`.
+- `{ "ok": true, "user": User }` with the session cookie: the person is signed in. This is the answer when email confirmation is off.
+- `{ "ok": true, "confirm": { "email": "ada@example.com" } }` and no cookie: an email with a confirmation link was sent. Nobody is signed in until it is followed. Show a "check your email" state.
+
+`invite_code` may still be sent. A valid sign-up code (`npm run signup-code`) makes the account at once, confirmed, without an email: for test accounts and the checks. The sign-up form does not need it.
 
 | Code | Status | When |
 |---|---|---|
 | `invalid_input` | 400 | A field is missing or malformed. See `error.fields`. |
-| `invite_required` | 403 | No valid invite code and no invitation for this email. |
 | `email_taken` | 409 | An account with this email exists. |
+
+### `POST /api/auth/resend-confirmation`
+
+`{ "email": "ada@example.com" }`. Sends the confirmation email again. Returns `{ "ok": true, "sent": true }` whether or not an account is waiting for that address, so it gives nothing away.
+
+### `GET /api/auth/confirm`
+
+Where the link in the confirmation email leads (`?token_hash=…&type=email`). Not called by a screen. It confirms the address, signs the person in and redirects to `/`. A link that has expired or was already used redirects to `/sign-in?confirmation=failed`; when the service could not be reached, `/sign-in?confirmation=unavailable`. The sign-in page shows a message for either, with a way to send a new link.
 
 ### `POST /api/auth/sign-in`
 
@@ -45,6 +55,11 @@ Returns `{ "ok": true, "user": User }`.
 | Code | Status | When |
 |---|---|---|
 | `invalid_credentials` | 401 | The email or the password is wrong. The response does not say which. |
+| `email_not_confirmed` | 403 | The password is right but the address is not confirmed yet. Offer to send the link again. |
+
+### Sessions per day
+
+Starting a capture session (`POST /api/workflows/{id}/sessions`) or a tutor session (`POST /api/workflows/{id}/tutor-sessions`) answers `daily_limit` (429) once the account has started `DAILY_SESSION_LIMIT` sessions, 5 by default, in the last 24 hours. Show its message where the start button is.
 
 ### `POST /api/auth/sign-out`
 

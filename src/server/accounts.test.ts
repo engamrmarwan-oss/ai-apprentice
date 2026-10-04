@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fakeDb, type Answer } from "@/test/fake-db";
 import {
   endSession,
@@ -7,6 +7,8 @@ import {
   resolveSession,
   signIn,
   signInSchema,
+  confirmEmail,
+  resendConfirmation,
   signUp,
   signUpSchema,
 } from "./accounts";
@@ -22,6 +24,13 @@ function database(answers: Record<string, Answer> = {}) {
   return db;
 }
 
+/** The password client's auth calls, each answering as given. */
+function passwordAuth(calls: Record<string, () => Promise<unknown>>) {
+  const auth = Object.fromEntries(Object.entries(calls).map(([name, answer]) => [name, vi.fn(answer)]));
+  vi.mocked(newPasswordClient).mockReturnValue({ ok: true, client: { auth } } as unknown as Handle);
+  return auth;
+}
+
 function passwordCheck(answer: Answer) {
   const signInWithPassword = vi.fn(async () => answer);
   vi.mocked(newPasswordClient).mockReturnValue({ ok: true, client: { auth: { signInWithPassword } } } as unknown as Handle);
@@ -34,6 +43,7 @@ const found = (data: unknown): Answer => ({ data, error: null });
 const broken: Answer = { data: null, error: { message: "boom" } };
 
 afterEach(() => {
+  vi.unstubAllEnvs();
   vi.mocked(getSupabase).mockReset();
   vi.mocked(newPasswordClient).mockReset();
 });
@@ -70,39 +80,25 @@ describe("what a person may enter", () => {
   });
 });
 
-describe("signUp", () => {
-  it("refuses when there is neither an invite code nor an invitation", async () => {
-    const db = database({ "workflow_invitations.select": found([]) });
-    expect(await signUp(ada)).toEqual({ ok: false, reason: "invite_required" });
-    expect(db.admin.createUser).not.toHaveBeenCalled();
-  });
-
-  it("refuses a code that was revoked or does not exist", async () => {
-    database({ "workflow_invitations.select": found([]), "signup_codes.select": found({ revoked_at: "2026-10-04T00:00:00Z" }) });
-    expect(await signUp({ ...ada, invite_code: "OLD" })).toEqual({ ok: false, reason: "invite_required" });
-
-    database({ "workflow_invitations.select": found([]), "signup_codes.select": found(null) });
-    expect(await signUp({ ...ada, invite_code: "WRONG" })).toEqual({ ok: false, reason: "invite_required" });
-  });
-
-  it("creates the account with a valid code, looked up by its hash, and signs it in", async () => {
-    const db = database({ "workflow_invitations.select": found([]), "signup_codes.select": found({ revoked_at: null }) });
-    const result = await signUp({ ...ada, invite_code: "GOOD-CODE" });
+describe("signUp, with email confirmation off", () => {
+  it("lets anyone in without a code: the account is made confirmed and signed in", async () => {
+    const db = database();
+    const result = await signUp(ada);
 
     expect(result).toMatchObject({ ok: true, user: profile });
-    expect(db.calls.find((call) => call.table === "signup_codes")?.filters.code_hash).toBe(hashToken("GOOD-CODE"));
     expect(db.admin.createUser).toHaveBeenCalledWith(
       expect.objectContaining({ email: "ada@example.com", password: "long enough", email_confirm: true }),
     );
     expect(db.did("profiles", "insert")[0].rows).toEqual(profile);
+    expect(db.did("signup_codes", "select")).toEqual([]);
 
     // The cookie's token is returned; only its hash is stored.
     const stored = db.did("auth_sessions", "insert")[0].rows as { token_hash: string; user_id: string };
-    expect(result.ok && hashToken(result.token)).toBe(stored.token_hash);
+    expect(result.ok && "token" in result && hashToken(result.token)).toBe(stored.token_hash);
     expect(stored.user_id).toBe("user-1");
   });
 
-  it("lets an invited person in without a code and puts them on the workflow", async () => {
+  it("puts an invited person on the workflow", async () => {
     const db = database({ "workflow_invitations.select": found([{ workflow_id: "wf-1", role: "new_hire" }]) });
     expect((await signUp(ada)).ok).toBe(true);
     expect(db.did("workflow_members", "upsert")[0].rows).toEqual([{ workflow_id: "wf-1", user_id: "user-1", role: "new_hire" }]);
@@ -110,16 +106,13 @@ describe("signUp", () => {
   });
 
   it("says so when the email already has an account", async () => {
-    const db = database({ "workflow_invitations.select": found([{ workflow_id: "wf-1", role: "new_hire" }]) });
+    const db = database();
     db.admin.createUser.mockResolvedValue({ data: { user: null }, error: { message: "exists", code: "email_exists" } });
     expect(await signUp(ada)).toEqual({ ok: false, reason: "email_taken" });
   });
 
   it("removes the account again when its profile cannot be saved", async () => {
-    const db = database({
-      "workflow_invitations.select": found([{ workflow_id: "wf-1", role: "new_hire" }]),
-      "profiles.insert": broken,
-    });
+    const db = database({ "profiles.insert": broken });
     expect(await signUp(ada)).toEqual({ ok: false, reason: "unavailable" });
     expect(db.admin.deleteUser).toHaveBeenCalledWith("user-1");
   });
@@ -130,8 +123,94 @@ describe("signUp", () => {
   });
 });
 
+describe("signUp, with email confirmation required", () => {
+  beforeEach(() => vi.stubEnv("EMAIL_CONFIRMATION", "required"));
+  const waiting = { data: { user: { id: "user-1", identities: [{ id: "i1" }] } }, error: null };
+
+  it("sends a confirmation email and signs nobody in", async () => {
+    const db = database();
+    const auth = passwordAuth({ signUp: async () => waiting });
+    expect(await signUp(ada)).toEqual({ ok: true, confirm: { email: "ada@example.com" } });
+    expect(auth.signUp).toHaveBeenCalledWith({ email: "ada@example.com", password: "long enough", options: { data: { name: "Ada" } } });
+    expect(db.admin.createUser).not.toHaveBeenCalled();
+    expect(db.did("auth_sessions", "insert")).toEqual([]);
+  });
+
+  it("makes the account at once with a valid sign-up code, looked up by its hash", async () => {
+    const db = database({ "signup_codes.select": found({ revoked_at: null }) });
+    const auth = passwordAuth({ signUp: async () => waiting });
+    expect(await signUp({ ...ada, invite_code: "GOOD-CODE" })).toMatchObject({ ok: true, user: profile });
+    expect(db.calls.find((call) => call.table === "signup_codes")?.filters.code_hash).toBe(hashToken("GOOD-CODE"));
+    expect(auth.signUp).not.toHaveBeenCalled();
+  });
+
+  it("treats a withdrawn or unknown code as no code: the email is sent", async () => {
+    database({ "signup_codes.select": found({ revoked_at: "2026-10-04T00:00:00Z" }) });
+    passwordAuth({ signUp: async () => waiting });
+    expect(await signUp({ ...ada, invite_code: "OLD" })).toEqual({ ok: true, confirm: { email: "ada@example.com" } });
+  });
+
+  it("says so when the address already has a confirmed account", async () => {
+    database();
+    passwordAuth({ signUp: async () => ({ data: { user: { id: "user-1", identities: [] } }, error: null }) });
+    expect(await signUp(ada)).toEqual({ ok: false, reason: "email_taken" });
+  });
+
+  it("fails soft when the email cannot be sent", async () => {
+    database();
+    passwordAuth({ signUp: async () => ({ data: { user: null }, error: { message: "rate limit", code: "over_email_send_rate_limit" } }) });
+    expect(await signUp(ada)).toEqual({ ok: false, reason: "unavailable" });
+  });
+});
+
+describe("confirmEmail", () => {
+  it("confirms the address, makes the profile, takes up invitations and signs the person in", async () => {
+    const db = database({ "workflow_invitations.select": found([{ workflow_id: "wf-1", role: "new_hire" }]) });
+    const auth = passwordAuth({
+      verifyOtp: async () => ({ data: { user: { id: "user-1", email: "Ada@Example.com", user_metadata: { name: "Ada" } } }, error: null }),
+    });
+    const result = await confirmEmail("hash-from-link");
+
+    expect(auth.verifyOtp).toHaveBeenCalledWith({ token_hash: "hash-from-link", type: "email" });
+    expect(result).toMatchObject({ ok: true, user: profile });
+    expect(db.did("profiles", "insert")[0].rows).toEqual(profile);
+    expect(db.did("workflow_members", "upsert")[0].rows).toEqual([{ workflow_id: "wf-1", user_id: "user-1", role: "new_hire" }]);
+    expect(db.did("auth_sessions", "insert")).toHaveLength(1);
+  });
+
+  it("refuses a link that has expired or was already used", async () => {
+    const db = database();
+    passwordAuth({ verifyOtp: async () => ({ data: { user: null }, error: { message: "expired", code: "otp_expired" } }) });
+    expect(await confirmEmail("old")).toEqual({ ok: false, reason: "invalid_link" });
+    expect(db.did("auth_sessions", "insert")).toEqual([]);
+  });
+});
+
+describe("resendConfirmation", () => {
+  it("answers alike whether or not an account is waiting", async () => {
+    const auth = passwordAuth({ resend: async () => ({ data: {}, error: { message: "not found" } }) });
+    expect(await resendConfirmation("nobody@example.com")).toEqual({ ok: true });
+    expect(auth.resend).toHaveBeenCalledWith({ type: "signup", email: "nobody@example.com" });
+  });
+
+  it("fails soft when the service cannot be reached", async () => {
+    passwordAuth({
+      resend: async () => {
+        throw new Error("network");
+      },
+    });
+    expect(await resendConfirmation("ada@example.com")).toEqual({ ok: false, reason: "unavailable" });
+  });
+});
+
 describe("signIn", () => {
   const input = { email: "ada@example.com", password: "long enough" };
+
+  it("tells a person whose address is not confirmed yet", async () => {
+    database();
+    passwordCheck({ data: { user: null }, error: { message: "Email not confirmed", code: "email_not_confirmed", status: 400 } });
+    expect(await signIn(input)).toEqual({ ok: false, reason: "email_not_confirmed" });
+  });
 
   it("answers a wrong email and a wrong password alike", async () => {
     database();
