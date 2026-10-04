@@ -3,7 +3,7 @@
 import { vi } from "vitest";
 
 export type Answer = { data: unknown; error: null | { message: string; code?: string; status?: number } };
-export type Call = { table: string; op: "select" | "insert" | "upsert" | "delete"; rows?: unknown; filters: Record<string, unknown> };
+export type Call = { table: string; op: "select" | "insert" | "upsert" | "update" | "delete"; rows?: unknown; filters: Record<string, unknown> };
 
 const NOTHING: Answer = { data: null, error: null };
 
@@ -27,8 +27,10 @@ export function fakeDb(answers: Record<string, Answer> = {}) {
       select: () => builder,
       insert: (rows: unknown) => ((call.op = "insert"), (call.rows = rows), builder),
       upsert: (rows: unknown) => ((call.op = "upsert"), (call.rows = rows), builder),
+      update: (rows: unknown) => ((call.op = "update"), (call.rows = rows), builder),
       delete: () => ((call.op = "delete"), builder),
       eq: (column: string, value: unknown) => ((call.filters[column] = value), builder),
+      is: (column: string, value: unknown) => ((call.filters[column] = value), builder),
       order: () => builder,
       abortSignal: () => builder,
       maybeSingle: answer,

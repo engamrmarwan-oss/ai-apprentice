@@ -131,6 +131,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_keys: {
+        Row: {
+          created_at: string
+          created_by: string
+          hint: string
+          id: string
+          last_used_at: string | null
+          name: string
+          revoked_at: string | null
+          token_hash: string
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          hint: string
+          id?: string
+          last_used_at?: string | null
+          name: string
+          revoked_at?: string | null
+          token_hash: string
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          hint?: string
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          revoked_at?: string | null
+          token_hash?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_keys_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_keys_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auth_sessions: {
         Row: {
           created_at: string
