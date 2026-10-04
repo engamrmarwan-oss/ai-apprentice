@@ -1,0 +1,69 @@
+import { describe, expect, it } from "vitest";
+import type { SensorFrame } from "@/sensor/screen-sensor";
+import { hearsWakeWord, replacePending, spokenText, triggerFor } from "./parts";
+
+const WORDS = ["tiro", "tyro", "tero"];
+
+describe("hearsWakeWord", () => {
+  it("hears the name however it is cased or punctuated", () => {
+    expect(hearsWakeWord("Tiro, one thing you should know", WORDS)).toBe(true);
+    expect(hearsWakeWord("hey TYRO!", WORDS)).toBe(true);
+  });
+
+  it("does not hear it inside another word, or when it was not said", () => {
+    expect(hearsWakeWord("the tyrosine level", WORDS)).toBe(false);
+    expect(hearsWakeWord("this one looks fine to me", WORDS)).toBe(false);
+    expect(hearsWakeWord("", WORDS)).toBe(false);
+  });
+});
+
+describe("spokenText", () => {
+  it("drops the voice model's stage directions and keeps the words", () => {
+    expect(spokenText("[warm] Hi Sam.  What are you about to do?")).toBe("Hi Sam. What are you about to do?");
+    expect(spokenText("\n\nGot it, I'm ready.")).toBe("Got it, I'm ready.");
+    expect(spokenText("[curious]")).toBe("");
+  });
+});
+
+describe("triggerFor", () => {
+  const plan = { decisionAt: 0, summary: "So, after opening it, you held it, correct?", question: { id: "q", text: "Why hold it?", score: 0.8 } };
+
+  it("carries the summary and the follow-up for a turn at a pause", () => {
+    expect(triggerFor("summary", plan)).toBe("ASK:\nSUMMARY: So, after opening it, you held it, correct?\nFOLLOW-UP: Why hold it?");
+  });
+
+  it("says there is no follow-up when nothing is worth asking", () => {
+    expect(triggerFor("summary", { ...plan, question: null })).toContain("FOLLOW-UP: none");
+  });
+
+  it("starts the opening and the called turn with their own words", () => {
+    expect(triggerFor("opening", null)).toMatch(/^START:/);
+    expect(triggerFor("called", null)).toMatch(/^LISTEN:/);
+  });
+});
+
+describe("replacePending", () => {
+  const frame = (t: number, region: SensorFrame["region"]): SensorFrame => ({
+    t,
+    cause: "settled",
+    region,
+    width: 100,
+    height: 100,
+    full: new Blob(),
+    small: new Blob(),
+    changed: null,
+  });
+
+  it("takes the frame when nothing is waiting", () => {
+    const next = frame(1, null);
+    expect(replacePending(null, next)).toBe(next);
+  });
+
+  it("keeps the newest frame and widens its region to cover the one it replaces", () => {
+    const merged = replacePending(frame(1, { x: 0.1, y: 0.1, width: 0.1, height: 0.1 }), frame(2, { x: 0.5, y: 0.5, width: 0.2, height: 0.2 }));
+    expect(merged.t).toBe(2);
+    expect(merged.region).toMatchObject({ x: 0.1, y: 0.1 });
+    expect(merged.region?.width).toBeCloseTo(0.6);
+    expect(merged.region?.height).toBeCloseTo(0.6);
+  });
+});
