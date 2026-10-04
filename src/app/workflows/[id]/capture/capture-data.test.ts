@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseRouteError, parseSessionId } from "./capture-data";
+import { parseRouteError, parseSessionId, startProblem } from "./capture-data";
 
 describe("capture route data", () => {
   it("reads a created session id", () => {
@@ -15,5 +15,21 @@ describe("capture route data", () => {
       }),
     ).toEqual({ code: "not_expert", message: "Only the expert can do that." });
     expect(parseRouteError(null)).toBeNull();
+  });
+});
+
+describe("startProblem", () => {
+  it("shows the daily limit message as a limit", () => {
+    expect(
+      startProblem(429, { code: "daily_limit", message: "You have started 20 sessions today." }, "Generic."),
+    ).toEqual({ limit: true, message: "You have started 20 sessions today." });
+  });
+
+  it("falls back to the route message for other errors", () => {
+    expect(startProblem(503, { code: "unavailable", message: "Try again." }, "Generic.")).toEqual({
+      limit: false,
+      message: "Try again.",
+    });
+    expect(startProblem(500, null, "Generic.")).toEqual({ limit: false, message: "Generic." });
   });
 });

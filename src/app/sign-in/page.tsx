@@ -4,7 +4,8 @@ import { AuthShell } from "@/components/auth/auth-shell";
 
 export const metadata: Metadata = { title: "Sign in · Tiro" };
 
-export default function SignInPage() {
+export default async function SignInPage({ searchParams }: PageProps<"/sign-in">) {
+  const { confirmation } = await searchParams;
   return (
     <AuthShell
       alternateAction="Create an account"
@@ -13,7 +14,7 @@ export default function SignInPage() {
       description="Use the email and password for your Tiro account."
       title="Sign in"
     >
-      <AuthForm kind="sign-in" />
+      <AuthForm confirmation={typeof confirmation === "string" ? confirmation : undefined} kind="sign-in" />
     </AuthShell>
   );
 }

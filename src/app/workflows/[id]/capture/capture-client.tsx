@@ -18,7 +18,7 @@ import {
 } from "@/components/capture/companion";
 import { Icon } from "@/components/ui/icon";
 import { describeEvent } from "@/conductor/describe";
-import { parseRouteError, parseSessionId } from "./capture-data";
+import { parseRouteError, parseSessionId, startProblem } from "./capture-data";
 
 export function CaptureClient({ workflowId }: { workflowId: string }) {
   return (
@@ -48,6 +48,7 @@ function CaptureScreen({ workflowId }: { workflowId: string }) {
   const [isStarting, setIsStarting] = useState(false);
   const [companionOpen, setCompanionOpen] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
   const engineRef = useRef<CaptureEngine | null>(null);
   const companionRef = useRef<CaptureCompanion | null>(null);
 
@@ -61,6 +62,7 @@ function CaptureScreen({ workflowId }: { workflowId: string }) {
 
   async function startSession() {
     setActionError(null);
+    setLimitReached(false);
     setIsStarting(true);
     try {
       const response = await fetch(
@@ -78,9 +80,13 @@ function CaptureScreen({ workflowId }: { workflowId: string }) {
         return;
       }
       if (!response.ok) {
-        setActionError(
-          parseRouteError(payload)?.message ?? "Tiro couldn’t start a session. Try again.",
+        const problem = startProblem(
+          response.status,
+          parseRouteError(payload),
+          "Tiro couldn’t start a session. Try again.",
         );
+        setLimitReached(problem.limit);
+        setActionError(problem.message);
         return;
       }
 
@@ -196,6 +202,7 @@ function CaptureScreen({ workflowId }: { workflowId: string }) {
             >
               {isStarting ? "Starting session…" : "Start a session"}
             </button>
+            {actionError ? <StartProblem limit={limitReached} message={actionError} /> : null}
           </div>
         </section>
       ) : (
@@ -239,12 +246,18 @@ function CaptureScreen({ workflowId }: { workflowId: string }) {
         </>
       )}
 
-      {!sessionId && actionError ? (
-        <p className="mt-4 max-w-2xl text-sm leading-6 text-red-700" role="alert">
-          {actionError}
-        </p>
-      ) : null}
     </div>
+  );
+}
+
+function StartProblem({ limit, message }: { limit: boolean; message: string }) {
+  return (
+    <p
+      className={`mt-4 text-sm leading-6 ${limit ? "rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-950" : "text-red-700"}`}
+      role="alert"
+    >
+      {message}
+    </p>
   );
 }
 

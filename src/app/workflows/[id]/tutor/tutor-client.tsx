@@ -13,6 +13,7 @@ import {
   type TutorCompanion,
 } from "@/components/tutor/companion";
 import { TutorSessionView } from "@/components/tutor/tutor-session-view";
+import { startProblem } from "../capture/capture-data";
 import {
   ENGLISH,
   parseLanguages,
@@ -64,6 +65,7 @@ function TutorScreen({ workflowId }: { workflowId: string }) {
       });
     return () => controller.abort();
   }, []);
+  const [limitReached, setLimitReached] = useState(false);
 
   useEffect(
     () => () => {
@@ -76,6 +78,7 @@ function TutorScreen({ workflowId }: { workflowId: string }) {
   async function startSession() {
     setActionError(null);
     setLanguageError(null);
+    setLimitReached(false);
     setIsStarting(true);
     try {
       const response = await fetch(
@@ -98,12 +101,15 @@ function TutorScreen({ workflowId }: { workflowId: string }) {
           setLanguageError(error.languageField);
           return;
         }
-        setActionError(
-          error?.message ??
-            (error?.code === "no_map"
-              ? "The expert must confirm a Work Map before tutoring can start."
-              : "Tiro couldn’t start a tutor session."),
+        const problem = startProblem(
+          response.status,
+          error,
+          error?.code === "no_map"
+            ? "The expert must confirm a Work Map before tutoring can start."
+            : "Tiro couldn’t start a tutor session.",
         );
+        setLimitReached(problem.limit);
+        setActionError(problem.message);
         return;
       }
 
@@ -248,6 +254,14 @@ function TutorScreen({ workflowId }: { workflowId: string }) {
             <button className="mt-6 h-11 rounded-lg bg-teal-900 px-5 text-sm font-semibold text-white outline-none hover:bg-teal-950 disabled:cursor-wait disabled:bg-teal-100 disabled:text-teal-700 focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2" disabled={isStarting} onClick={() => void startSession()} type="button">
               {isStarting ? "Starting session…" : "Start a tutor session"}
             </button>
+            {actionError ? (
+              <p
+                className={`mt-4 text-sm leading-6 ${limitReached ? "rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-950" : "text-red-700"}`}
+                role="alert"
+              >
+                {actionError}
+              </p>
+            ) : null}
           </div>
         </section>
       ) : (
@@ -263,7 +277,7 @@ function TutorScreen({ workflowId }: { workflowId: string }) {
         />
       )}
 
-      {actionError ? (
+      {view && actionError ? (
         <p className="mt-5 max-w-2xl rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950" role="alert">
           {actionError}
         </p>
