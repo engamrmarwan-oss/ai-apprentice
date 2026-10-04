@@ -40,8 +40,8 @@ export type PlanInput = {
   utterances: Utterance[];
   /** The questions the session already holds. */
   questions: Pick<Question, "text" | "kind" | "status">[];
-  guardrailKinds: readonly QuestionKind[];
-  guardrailAsked: boolean;
+  /** The guardrail kinds the apprentice has not asked about yet in this session. */
+  guardrailOwed: readonly QuestionKind[];
 };
 
 /** How much of the session the planner is shown. Enough for context, small enough to answer quickly. */
@@ -77,6 +77,11 @@ candidates: up to three follow-up questions about what the expert did on this sc
 - answered_by: "transcript" if the expert has already said the answer, "screen" if the screen shows it, "baseline" if a BASELINE statement gives it and nothing contradicts that statement; otherwise "none".
 - baseline_statement: the number of the BASELINE statement the question is about, or null.
 
+What someone new would find questionable is worth a limit, exception or stop_and_ask question, and scores high:
+- the screen shows something out of the ordinary and the expert carried on past it: a warning, an error or a failed status, a value far from the others, something required that is empty.
+- the expert changed how an item is ranked, rated or graded.
+Ask where the line is, when it would not be fine to carry on, or when they would stop and ask someone. Do not say that anything looks wrong.
+
 Rules:
 - Ask about this screen's work and this task. Never ask about the application in general.
 - Do not repeat or reword a question that is in QUESTIONS.
@@ -104,9 +109,9 @@ export function planContent(input: PlanInput): string {
     `SAID:\n${JSON.stringify(said)}`,
     `QUESTIONS:\n${JSON.stringify(input.questions)}`,
   ];
-  if (!input.guardrailAsked && input.guardrailKinds.length > 0) {
+  if (input.guardrailOwed.length > 0) {
     parts.push(
-      `The apprentice has not yet asked a question of these kinds: ${input.guardrailKinds.join(", ")}. If one fits what the expert did here, include it.`,
+      `The apprentice has not yet asked a question of these kinds: ${input.guardrailOwed.join(", ")}. If one fits what the expert did here, include it.`,
     );
   }
   parts.push(`Write the summary and the questions in this language: ${input.language}.`);

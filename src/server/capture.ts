@@ -7,7 +7,7 @@ import type { TiroEvent } from "@/contract/event";
 import type { Question } from "@/contract/question";
 import type { ImageInput } from "./models";
 import { confirmQuestions } from "./planner/confirm";
-import { filterCandidates, guardrailAsked } from "./planner/filter";
+import { filterCandidates, guardrailsOwed } from "./planner/filter";
 import { proposeQuestions, spokenSummary } from "./planner/plan";
 import {
   guardrailKinds,
@@ -148,7 +148,6 @@ export async function planScreen(
   const { events, utterances, questions } = timeline.timeline;
   const nothing = { ok: true as const, plan: null, questions: [] };
 
-  const asked = guardrailAsked(questions, guardrails.kinds);
   const proposed = await proposeQuestions({
     workflow: { tool: workflow.tool.name, task: workflow.task, role: workflow.role },
     language: session.language,
@@ -158,8 +157,7 @@ export async function planScreen(
     screen: screen.ok ? screen.state : null,
     utterances,
     questions,
-    guardrailKinds: guardrails.kinds,
-    guardrailAsked: asked,
+    guardrailOwed: guardrailsOwed(questions, guardrails.kinds),
   });
   if (!proposed.ok) return nothing;
 

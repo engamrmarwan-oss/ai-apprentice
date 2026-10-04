@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { TiroEvent } from "@/contract/event";
 import { confirmQuestions } from "./confirm";
-import { filterCandidates, guardrailAsked, type Candidate, type FilterContext } from "./filter";
+import { filterCandidates, guardrailsOwed, type Candidate, type FilterContext } from "./filter";
 import { planContent, spokenSummary, type PlanInput } from "./plan";
 
 const EVENT_ID = "11111111-1111-4111-8111-111111111111";
@@ -54,7 +54,7 @@ describe("filterCandidates", () => {
     expect(filterCandidates([candidate({}), candidate({})], context())).toHaveLength(1);
   });
 
-  it("boosts guardrail kinds until one has been asked", () => {
+  it("boosts a guardrail kind until a question of that kind has been asked", () => {
     const candidates = [candidate({ text: "Why?", score: 0.6 }), candidate({ text: "Is there a limit?", kind: "limit", score: 0.5 })];
     const before = filterCandidates(candidates, context());
     expect(before.map((question) => [question.kind, question.score])).toEqual([
@@ -62,19 +62,28 @@ describe("filterCandidates", () => {
       ["reason", 0.6],
     ]);
 
-    const asked = context({ existing: [{ text: "When would you stop?", kind: "stop_and_ask", status: "asked" }] });
+    const asked = context({ existing: [{ text: "Where is the line?", kind: "limit", status: "asked" }] });
     expect(filterCandidates(candidates, asked).map((question) => [question.kind, question.score])).toEqual([
       ["reason", 0.6],
       ["limit", 0.5],
     ]);
   });
 
-  it("puts a guardrail question first until one has been asked, even past a stronger question of another kind", () => {
+  it("keeps boosting a kind that has not been asked, whatever other guardrail has", () => {
+    const candidates = [candidate({ text: "Why?", score: 0.6 }), candidate({ text: "Is there a limit?", kind: "limit", score: 0.5 })];
+    const other = context({ existing: [{ text: "When would you stop?", kind: "stop_and_ask", status: "answered" }] });
+    expect(filterCandidates(candidates, other).map((question) => [question.kind, question.score])).toEqual([
+      ["limit", 0.7],
+      ["reason", 0.6],
+    ]);
+  });
+
+  it("puts a question of a kind still owed first, even past a stronger question of another kind", () => {
     const candidates = [candidate({ text: "Why?", score: 0.95 }), candidate({ text: "Is there a limit?", kind: "limit", score: 0.45 })];
     // Boosted to 0.65, which is worth a turn: it goes first although the reason scores higher.
     expect(filterCandidates(candidates, context()).map((question) => question.kind)).toEqual(["limit", "reason"]);
 
-    const asked = context({ existing: [{ text: "When would you stop?", kind: "stop_and_ask", status: "answered" }] });
+    const asked = context({ existing: [{ text: "Where is the line?", kind: "limit", status: "answered" }] });
     expect(filterCandidates(candidates, asked).map((question) => question.kind)).toEqual(["reason", "limit"]);
   });
 
@@ -85,8 +94,8 @@ describe("filterCandidates", () => {
 
   it("does not count a guardrail question that is only waiting as asked", () => {
     const existing = [{ text: "When would you stop?", kind: "stop_and_ask" as const, status: "queued" as const }];
-    expect(guardrailAsked(existing, GUARDRAILS)).toBe(false);
-    expect(guardrailAsked([{ ...existing[0], status: "answered" }], GUARDRAILS)).toBe(true);
+    expect(guardrailsOwed(existing, GUARDRAILS)).toEqual(GUARDRAILS);
+    expect(guardrailsOwed([{ ...existing[0], status: "answered" }], GUARDRAILS)).not.toContain("stop_and_ask");
   });
 
   it("takes which kinds are guardrails from data", () => {
@@ -181,8 +190,7 @@ describe("planContent", () => {
       { id: "u2", session_id: "s", speaker: "agent", start_ms: 40_000, end_ms: 42_000, text: "Why did you open that one first?" },
     ],
     questions: [{ text: "Why did you open that one first?", kind: "reason", status: "asked" }],
-    guardrailKinds: ["limit", "stop_and_ask"],
-    guardrailAsked: false,
+    guardrailOwed: ["limit", "stop_and_ask"],
   };
 
   it("shows the planner the session as data, with nothing about any one tool written in", () => {
@@ -200,9 +208,10 @@ describe("planContent", () => {
     expect(content).toContain('ON THIS SCREEN, since 60 s:\n[{"t":61.5,"what":"Pressed \\"Hold\\" on Invoice 3."}]');
   });
 
-  it("asks for a guardrail question only until one has been asked, naming the kinds from data", () => {
+  it("asks for each guardrail kind until it has been asked, naming the kinds still owed", () => {
     expect(planContent(input)).toContain("has not yet asked a question of these kinds: limit, stop_and_ask");
-    expect(planContent({ ...input, guardrailAsked: true })).not.toContain("has not yet asked");
+    expect(planContent({ ...input, guardrailOwed: ["stop_and_ask"] })).toContain("of these kinds: stop_and_ask.");
+    expect(planContent({ ...input, guardrailOwed: [] })).not.toContain("has not yet asked");
   });
 
   it("says which language to write in", () => {

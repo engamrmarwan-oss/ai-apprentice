@@ -37,10 +37,13 @@ export type FilterContext = {
 const plain = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 const unit = (value: number) => (Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0);
 
-/** True once the session has put a guardrail question to the expert. */
-export function guardrailAsked(existing: FilterContext["existing"], guardrailKinds: readonly QuestionKind[]): boolean {
-  return existing.some(
-    (question) => guardrailKinds.includes(question.kind) && (question.status === "asked" || question.status === "answered"),
+/**
+ * The guardrail kinds the session still owes the expert a question about:
+ * every kind is owed one, and a question that is only waiting does not count.
+ */
+export function guardrailsOwed(existing: FilterContext["existing"], guardrailKinds: readonly QuestionKind[]): QuestionKind[] {
+  return guardrailKinds.filter(
+    (kind) => !existing.some((question) => question.kind === kind && (question.status === "asked" || question.status === "answered")),
   );
 }
 
@@ -51,19 +54,17 @@ export function guardrailAsked(existing: FilterContext["existing"], guardrailKin
  *   answers; a repeat of a question the session already holds; a deviation
  *   that names no baseline statement; an alternative when no tool map shows
  *   the option that was passed over
- * - boosted: guardrail kinds, until one has been asked. Until then a guardrail
- *   question that reaches the threshold also goes first, because at least one
- *   live question must be about a guardrail
+ * - boosted: each guardrail kind, until a question of that kind has been
+ *   asked. Until then a question of that kind that reaches the threshold also
+ *   goes first, because a session must ask about every guardrail kind once
  * - kept: the best few. The first may be asked live, as the follow-up at the
  *   next pause; the rest wait for the debrief.
  */
 export function filterCandidates(candidates: Candidate[], context: FilterContext): NewQuestion[] {
   const seen = new Set(context.existing.map((question) => plain(question.text)));
-  const owed = !guardrailAsked(context.existing, context.guardrailKinds);
-  const boost = owed ? context.guardrailBoost : 0;
-  /** While a guardrail question is owed, one that is worth a turn outranks everything else. */
-  const first = (question: NewQuestion) =>
-    owed && context.guardrailKinds.includes(question.kind) && question.score >= context.threshold ? 1 : 0;
+  const owed = guardrailsOwed(context.existing, context.guardrailKinds);
+  /** A question of a kind still owed, when it is worth a turn, outranks everything else. */
+  const first = (question: NewQuestion) => (owed.includes(question.kind) && question.score >= context.threshold ? 1 : 0);
 
   const kept: NewQuestion[] = [];
   for (const candidate of candidates) {
@@ -85,7 +86,7 @@ export function filterCandidates(candidates: Candidate[], context: FilterContext
       kind: candidate.kind,
       trigger_event_id: context.triggerEventId,
       baseline_statement_id: statement,
-      score: unit(unit(candidate.score) + (context.guardrailKinds.includes(candidate.kind) ? boost : 0)),
+      score: unit(unit(candidate.score) + (owed.includes(candidate.kind) ? context.guardrailBoost : 0)),
       channel: "debrief",
     });
   }
