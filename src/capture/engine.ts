@@ -102,7 +102,7 @@ type FrameAnswer = {
   questions: Question[];
 };
 type PlanAnswer = {
-  plan: { frame_id: string; summary: string; question: Question | null } | null;
+  plan: { frame_id: string; summary: string; question: Question | null; more?: Question[] } | null;
   questions: Question[];
 };
 
@@ -267,14 +267,24 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
   async function settle(record: FloorRecord, closed: OpenFloor) {
     const question = closed.kind === "summary" ? closed.plan?.question : null;
     if (!question) return;
+    const more = closed.plan?.more ?? [];
     if (record.followUpAskedAt === null) {
-      // Tiro never got to it: it waits for the debrief.
-      patchQuestion(question.id, { channel: "debrief" });
+      // Tiro never got to it: it waits for the debrief, with whatever was to come after it.
+      for (const one of [question, ...more]) patchQuestion(one.id, { channel: "debrief" });
       return;
     }
-    const answer = closed.expert.find((one) => one.start >= record.followUpAskedAt!);
-    const answerId = answer ? await answer.stored : null;
+    const answers = closed.expert.filter((one) => one.start >= record.followUpAskedAt!);
+    const answerId = answers[0] ? await answers[0].stored : null;
     patchQuestion(question.id, answerId ? { status: "answered", answer_utterance_id: answerId } : { status: "asked" });
+    // Each question Tiro asked beyond the follow-up is one of these, in order. The last thing said answers the last one asked.
+    const reached = Math.max(0, record.asked - 2);
+    for (const [index, one] of more.entries()) {
+      if (index >= reached) patchQuestion(one.id, { channel: "debrief" });
+      else {
+        const last = index === reached - 1 && answers.length > 1 ? await answers.at(-1)!.stored : null;
+        patchQuestion(one.id, last ? { status: "answered", answer_utterance_id: last } : { status: "asked" });
+      }
+    }
   }
 
   function closeFloor(record: FloorRecord) {
@@ -311,7 +321,7 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
   /** A planned turn's moment has passed. Its question waits for the debrief. */
   function dropPlan(plan: TurnPlan) {
     trace(`not said, its moment passed: ${plan.summary}`);
-    if (plan.question) patchQuestion(plan.question.id, { channel: "debrief" });
+    for (const one of [plan.question, ...(plan.more ?? [])]) if (one) patchQuestion(one.id, { channel: "debrief" });
     update({ planned: null });
   }
 
@@ -555,19 +565,20 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
       if (!plan) return;
       // Not to be said, or planned too late to be said: the question it left waits for the debrief.
       if (!speak || !capturing()) {
-        if (plan.question) patchQuestion(plan.question.id, { channel: "debrief" });
+        for (const one of [plan.question, ...(plan.more ?? [])]) if (one) patchQuestion(one.id, { channel: "debrief" });
         return;
       }
       const turn: TurnPlan = {
         at,
         summary: plan.summary,
         question: plan.question ? { id: plan.question.id, text: plan.question.text, score: plan.question.score } : null,
+        more: (plan.more ?? []).map((one) => ({ id: one.id, text: one.text, score: one.score })),
       };
       planFrame.set(turn, plan.frame_id);
       trace(`planned: ${turn.summary} | ${turn.question?.text ?? "no follow-up"}`);
       const unused = conductor.planReady(turn);
       // Tiro speaks about the screen the expert is on. The question about one they have left waits for the debrief.
-      if (unused?.question) patchQuestion(unused.question.id, { channel: "debrief" });
+      for (const one of unused ? [unused.question, ...(unused.more ?? [])] : []) if (one) patchQuestion(one.id, { channel: "debrief" });
       if (unused === turn) return;
       update({ planned: { summary: turn.summary, question: turn.question?.text ?? null } });
     });

@@ -30,6 +30,8 @@ export type TurnPlan = {
   summary: string;
   /** The follow-up to ask if the answer leaves it open, with the planner's score. */
   question: { id: string; text: string; score: number } | null;
+  /** Further questions for the same turn, asked after the follow-up while the turn's allowance lasts. */
+  more?: { id: string; text: string; score: number }[];
 };
 
 export type FloorKind = "opening" | "summary" | "called";

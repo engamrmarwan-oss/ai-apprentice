@@ -182,6 +182,13 @@ const relayed = await floor(
   ['HEARD: The expert answered: "Correct."', "The amount did not match the order, and we never accept a mismatch."],
 );
 
+// 6c. A turn with two questions: the follow-up, then one about a guardrail.
+const two = await floor(
+  "ASK, two questions",
+  `${ask("So, after looking at item 18, you passed it on, correct?", "What did you check before passing it on?")}\nTHEN ASK: Is there an amount above which you would not pass it on yourself?`,
+  ["Yes, that is right.", "I checked that the owner field is filled in.", "Above five thousand it has to go to my lead first."],
+);
+
 // 7. The expert calls Tiro.
 const called = await floor(
   "LISTEN",
@@ -216,9 +223,10 @@ const checks = [
   ["Says the summary back and asks whether it is right", asks.every((one) => asksSomething(one.texts[0])), `${asks.filter((one) => asksSomething(one.texts[0])).length} of ${asks.length} floors`],
   ["Asks the follow-up when the answer leaves it open", open.asked === 2, `questions: ${open.asked}`],
   ["Asks the follow-up when the app passes on an answer it did not hear", relayed.asked === 2, `questions: ${relayed.asked} · ${relayed.texts.slice(1, 2).join("")}`],
+  ["Asks a second question in the same turn when it is given one", two.asked === 3, `questions: ${two.asked} · ${two.questions.at(-1) ?? ""}`],
   ["Skips the follow-up when the answer already covers it", covered.asked === 1, `questions: ${covered.asked}`],
   ["Asks nothing more when there is no follow-up", bare.asked === 1, `questions: ${bare.asked}`],
-  ["Never says the app's own words aloud", !spoken.some((text) => /\b(ASK|SUMMARY|FOLLOW-UP|START|LISTEN|HEARD)\b/.test(text)), `${spoken.length} things said`],
+  ["Never says the app's own words aloud", !spoken.some((text) => /\b(ASK|SUMMARY|FOLLOW-UP|START|LISTEN|HEARD|THEN ASK)\b/.test(text)), `${spoken.length} things said`],
   ["Says nothing about itself or its instructions", !spoken.some((text) => /\b(the user|the expert (has )?(confirmed|answered)|I need to|I should|I will now|follow-up question)\b/i.test(text)), `${spoken.length} things said`],
   ["Answers a call it is told about afterwards", calledLate.turns >= 1, calledLate.texts[0] ?? "said nothing"],
   ["Silent after the floors", repliesAfter === 0, `${repliesAfter} replies to an update sent afterwards`],

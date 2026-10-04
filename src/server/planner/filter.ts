@@ -32,6 +32,8 @@ export type FilterContext = {
   threshold: number;
   /** How many questions one decision may leave behind. */
   keep: number;
+  /** How many of them may be asked in the turn itself. The rest wait for the debrief. One when not given. */
+  live?: number;
 };
 
 const plain = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
@@ -92,5 +94,5 @@ export function filterCandidates(candidates: Candidate[], context: FilterContext
   }
 
   kept.sort((a, b) => first(b) - first(a) || b.score - a.score);
-  return kept.slice(0, context.keep).map((question, index) => ({ ...question, channel: index === 0 ? "live" : "debrief" }));
+  return kept.slice(0, context.keep).map((question, index) => ({ ...question, channel: index < (context.live ?? 1) ? "live" : "debrief" }));
 }

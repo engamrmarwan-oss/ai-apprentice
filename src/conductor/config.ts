@@ -37,7 +37,8 @@ export const workflowConfigSchema = z.object({
   /** The most turns of Tiro's own in one window. Null: no ceiling. */
   max_questions: z.int().positive().nullable().catch(null),
   questions_window_ms: ms(600_000),
-  follow_ups: count(1),
+  /** How many questions Tiro may ask in one turn after its summary. */
+  follow_ups: count(2),
 
   // --- While the floor is open ---
   /** How long Tiro waits for the expert to start answering before it gives up. */

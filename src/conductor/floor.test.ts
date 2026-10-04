@@ -4,6 +4,8 @@ import { createConductor, type Action, type Conductor, type FloorRecord, type Tu
 
 // The settings these tests reason with, stated here so that a changed default does not move every number below.
 const config = resolveConfig({
+  // The scenarios below are written for a turn with one follow-up.
+  follow_ups: 1,
   screen_still_ms: 2_500,
   speech_silent_ms: 1_500,
   reading_ms_per_word: 250,

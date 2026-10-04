@@ -172,7 +172,7 @@ The session as it stands, with everything recorded so far in time order.
 | `POST /api/sessions/{id}/conversation` | Records which voice conversation the session runs in. |
 | `POST /api/sessions/{id}/frames` | Takes one frame as a form (pictures and its time), stores it, reads it, and returns `{ frame, read, events, screen, new_words, questions }`. |
 | `POST /api/sessions/{id}/frames/{frame_id}/key` | Marks a key frame and passes its picture to the voice conversation. Returns `{ file_id }`, or `null` when the picture could not be passed on. |
-| `POST /api/sessions/{id}/plan` | Body `{ frame_id, since_t_ms }`: the latest frame of the screen the expert is on, and when they came to it. Plans Tiro's summary of the work on that screen. Returns `{ plan, questions }`; `plan` is `{ frame_id, summary, question }` or `null`. The capture engine calls it once per screen visit, after `screen_dwell_ms` on the screen. |
+| `POST /api/sessions/{id}/plan` | Body `{ frame_id, since_t_ms }`: the latest frame of the screen the expert is on, and when they came to it. Plans Tiro's summary of the work on that screen. Returns `{ plan, questions }`; `plan` is `{ frame_id, summary, question }` or `null`. The capture engine calls it once per screen visit, after `screen_dwell_ms` on the screen. `plan.more` holds the questions that may be asked after the follow-up in the same turn. |
 | `POST /api/sessions/{id}/utterances` | Stores one stretch of speech. |
 | `PATCH /api/sessions/{id}/questions/{question_id}` | Records what became of a question: `status`, `channel`, `answer_utterance_id`. |
 | `POST /api/sessions/{id}/end-task` | The expert has finished. The session moves to `debrief`; questions still waiting to be asked live wait for the debrief. |

@@ -135,3 +135,15 @@ describe("an answer the agent did not hear", () => {
     expect(heardTrigger(["Yes,", "that is right."])).toBe('HEARD: The expert answered: "Yes, that is right."');
   });
 });
+
+describe("a turn with more than one question", () => {
+  const plan = { at: 0, summary: "You are checking the order, right?", question: { id: "q1", text: "Why hold it?", score: 0.9 }, more: [{ id: "q2", text: "Where is the limit?", score: 0.8 }] };
+
+  it("hands the agent the follow-up and what to ask after it", () => {
+    expect(triggerFor("summary", plan)).toBe("ASK:\nSUMMARY: You are checking the order, right?\nFOLLOW-UP: Why hold it?\nTHEN ASK: Where is the limit?");
+  });
+
+  it("adds nothing when there is only the follow-up", () => {
+    expect(triggerFor("summary", { ...plan, more: [] })).not.toContain("THEN ASK");
+  });
+});

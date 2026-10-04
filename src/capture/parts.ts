@@ -48,7 +48,8 @@ export function triggerFor(kind: FloorKind, plan: TurnPlan | null, alreadySaid: 
     // When it was only made out afterwards, the agent heard none of it, so it is told what was said.
     return alreadySaid ? `LISTEN: The expert has called you. They said: ${alreadySaid}` : "LISTEN: The expert has called you.";
   }
-  return `ASK:\nSUMMARY: ${plan?.summary ?? ""}\nFOLLOW-UP: ${plan?.question?.text ?? "none"}`;
+  const then = (plan?.more ?? []).map((question) => `\nTHEN ASK: ${question.text}`).join("");
+  return `ASK:\nSUMMARY: ${plan?.summary ?? ""}\nFOLLOW-UP: ${plan?.question?.text ?? "none"}${then}`;
 }
 
 /** The message that hands the agent its questions for the debrief. They are numbered so it asks them in order. */

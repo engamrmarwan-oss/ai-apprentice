@@ -112,6 +112,8 @@ export async function ingestFrame(context: SessionContext, input: FrameInput): P
 
 /** What Tiro will say at the next pause about the screen the expert is on. */
 export type Plan = {
+  /** Questions that may be asked in the same turn after the follow-up, best first. */
+  more: Question[];
   /** The latest frame of the screen: its picture goes to the voice conversation with the turn. */
   frame_id: string;
   /** What the expert is doing on the screen, in one sentence, ending by asking whether it is right. */
@@ -179,14 +181,17 @@ export async function planScreen(
         guardrailBoost: workflow.config.guardrail_boost,
         threshold: workflow.config.score_threshold,
         keep: KEEP_PER_VISIT,
+        live: workflow.config.follow_ups,
       })
     : [];
   const queued = await queueQuestions(session.id, kept);
   const stored = queued.ok ? queued.questions : [];
+  // The turn's questions, best first: the follow-up, then what may be asked after it.
+  const live = stored.filter((question) => question.channel === "live").sort((a, b) => b.score - a.score);
 
   return {
     ok: true,
-    plan: { frame_id: frameId, summary, question: stored.find((question) => question.channel === "live") ?? null },
+    plan: { frame_id: frameId, summary, question: live[0] ?? null, more: live.slice(1) },
     questions: stored,
   };
 }

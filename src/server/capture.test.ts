@@ -161,7 +161,7 @@ describe("planScreen", () => {
     expect(result.plan.question).toMatchObject({ kind: "limit", channel: "live" });
     expect(result.questions.map((question) => [question.kind, question.channel])).toEqual([
       ["limit", "live"],
-      ["reason", "debrief"],
+      ["reason", "live"],
     ]);
     // A press and the status change it caused are one decision: the questions hang on the change.
     expect(result.questions.every((question) => question.trigger_event_id === change.id)).toBe(true);

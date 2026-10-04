@@ -11,7 +11,7 @@ describe("resolveConfig", () => {
       reading_max_ms: 5_000,
       screen_dwell_ms: 15_000,
       decision_window_ms: 20_000,
-      follow_ups: 1,
+      follow_ups: 2,
       questions_window_ms: 600_000,
     });
   });
