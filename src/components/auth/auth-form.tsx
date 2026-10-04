@@ -15,13 +15,21 @@ type FormKind = "sign-in" | "sign-up";
 const emptyErrors: AuthErrors = { code: null, fieldErrors: {}, formError: null };
 const CONNECTION_ERROR = "Tiro couldn’t connect. Check your connection and try again.";
 
+/** What the sign-in page says when the confirmation link brought the person back, by `?confirmation=`. */
+const CONFIRMATION_NOTICES: Record<string, string> = {
+  failed: "That confirmation link has expired or was already used. Sign in, or send yourself a new link.",
+  unavailable:
+    "Tiro couldn’t confirm your address just now. Try the link again in a moment, or send yourself a new one.",
+};
+
 export function AuthForm({
-  confirmationFailed = false,
+  confirmation,
   kind,
 }: {
-  confirmationFailed?: boolean;
+  confirmation?: string;
   kind: FormKind;
 }) {
+  const confirmationNotice = confirmation ? CONFIRMATION_NOTICES[confirmation] : undefined;
   const router = useRouter();
   const [errors, setErrors] = useState<AuthErrors>(emptyErrors);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,9 +93,9 @@ export function AuthForm({
 
   return (
     <form className="space-y-5" noValidate onSubmit={(event) => void submit(event)}>
-      {confirmationFailed && !errors.formError ? (
+      {confirmationNotice && !errors.formError ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950" role="status">
-          <p>That confirmation link has expired or was already used. Sign in, or send yourself a new link.</p>
+          <p>{confirmationNotice}</p>
           <ResendButton email={email} label="Send me a new link" />
         </div>
       ) : null}

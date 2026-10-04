@@ -14,7 +14,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
       description="Use the email and password for your Tiro account."
       title="Sign in"
     >
-      <AuthForm confirmationFailed={confirmation === "failed"} kind="sign-in" />
+      <AuthForm confirmation={typeof confirmation === "string" ? confirmation : undefined} kind="sign-in" />
     </AuthShell>
   );
 }
