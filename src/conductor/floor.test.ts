@@ -9,12 +9,11 @@ const config = resolveConfig({
   reading_ms_per_word: 250,
   reading_max_ms: 20_000,
   decision_window_ms: 30_000,
-  min_gap_ms: 90_000,
 });
 
-const plan = (decisionAt: number, score: number | null = 0.8): TurnPlan => ({
-  decisionAt,
-  summary: "So, after opening it, you held it, correct?",
+const plan = (at: number, score: number | null = 0.8): TurnPlan => ({
+  at,
+  summary: "So you are checking which orders can be released, correct?",
   question: score === null ? null : { id: "q1", text: "Why hold it?", score },
 });
 
@@ -32,19 +31,19 @@ const closedWith = (actions: Action[]): FloorRecord | null => {
 };
 
 describe("when the floor opens", () => {
-  it("stays closed while nothing has been decided", () => {
+  it("stays closed while no screen visit has been planned", () => {
     const conductor = createConductor(config);
     expect(run(conductor, 0, 60_000)).toEqual([]);
   });
 
-  it("opens at the first quiet moment after a decision, with the plan for it", () => {
+  it("opens at the first quiet moment once a plan is ready, with that plan", () => {
     const conductor = createConductor(config);
     conductor.screenMoved(10_000);
     conductor.planReady(plan(10_000));
     const done = run(conductor, 10_000, 20_000);
     // The screen must have been still for 2.5 seconds.
     expect(opened(done)).toEqual([12_500]);
-    expect(done[0].action).toMatchObject({ type: "open", kind: "summary", plan: { decisionAt: 10_000 } });
+    expect(done[0].action).toMatchObject({ type: "open", kind: "summary", plan: { at: 10_000 } });
   });
 
   it("waits while the expert is talking, and for 1.5 seconds of silence after", () => {
@@ -79,21 +78,21 @@ describe("when the floor opens", () => {
     expect(opened(run(conductor, 10_000, 60_000))).toEqual([30_000]);
   });
 
-  it("speaks about the very last decision, not an earlier one", () => {
+  it("speaks from the latest plan, not an earlier one", () => {
     const conductor = createConductor(config);
     conductor.screenMoved(11_000);
     expect(conductor.planReady(plan(10_000))).toBeNull();
     const replaced = conductor.planReady(plan(11_000));
-    expect(replaced?.decisionAt).toBe(10_000);
+    expect(replaced?.at).toBe(10_000);
     const done = run(conductor, 11_000, 20_000);
-    expect(done[0].action).toMatchObject({ type: "open", plan: { decisionAt: 11_000 } });
+    expect(done[0].action).toMatchObject({ type: "open", plan: { at: 11_000 } });
   });
 });
 
-describe("a decision is spoken about while it is fresh, or not at all", () => {
-  it("gives the plan up once the window has passed, even while Tiro owes turns", () => {
+describe("a screen visit is spoken about while it is fresh, or not at all", () => {
+  it("gives the plan up once the window has passed", () => {
     const conductor = createConductor(config);
-    // Decided at 10 s. The expert then works without a pause for two minutes.
+    // Planned at 10 s. The expert then works without a pause for two minutes.
     const late = plan(10_000);
     conductor.planReady(late);
     const done: { at: number; action: Action }[] = [];
@@ -101,7 +100,6 @@ describe("a decision is spoken about while it is fresh, or not at all", () => {
       if (t <= 130_000) conductor.screenMoved(t);
       for (const action of conductor.tick(t)) done.push({ at: t, action });
     }
-    expect(conductor.view(140_000).owed).toBe(true);
     // Not said at the pause two minutes later: handed back, once, when its 30 seconds were up.
     expect(done).toEqual([{ at: 40_250, action: { type: "drop", plan: late } }]);
   });
@@ -121,22 +119,22 @@ describe("a decision is spoken about while it is fresh, or not at all", () => {
     expect(done).toEqual([{ at: 40_250, action: { type: "drop", plan: late } }]);
   });
 
-  it("gives up the plan in hand when a later decision is seen, instead of saying it while the new one is planned", () => {
+  it("gives up the plan in hand when the expert moves to another screen", () => {
     const conductor = createConductor(config);
     conductor.screenMoved(10_000);
     const earlier = plan(10_000);
     conductor.planReady(earlier);
-    expect(conductor.decisionSeen(11_000)).toEqual([{ type: "drop", plan: earlier }]);
-    // Nothing is said until the plan for the later decision arrives.
+    expect(conductor.screenEntered(11_000)).toEqual([{ type: "drop", plan: earlier }]);
+    // Nothing is said until a plan for the new screen arrives.
     expect(run(conductor, 11_000, 16_000)).toEqual([]);
     conductor.planReady(plan(11_000));
-    expect(run(conductor, 16_250, 20_000)[0]).toMatchObject({ at: 16_250, action: { type: "open", plan: { decisionAt: 11_000 } } });
+    expect(run(conductor, 16_250, 20_000)[0]).toMatchObject({ at: 16_250, action: { type: "open", plan: { at: 11_000 } } });
   });
 
-  it("does not take a plan that arrives after a later decision has been seen", () => {
+  it("does not take a plan that arrives after the expert has moved to another screen", () => {
     const conductor = createConductor(config);
-    conductor.decisionSeen(10_000);
-    conductor.decisionSeen(15_000);
+    conductor.screenEntered(10_000);
+    conductor.screenEntered(15_000);
     const stale = plan(10_000);
     expect(conductor.planReady(stale)).toBe(stale);
     expect(run(conductor, 15_000, 25_000)).toEqual([]);
@@ -144,109 +142,54 @@ describe("a decision is spoken about while it is fresh, or not at all", () => {
     expect(opened(run(conductor, 25_250, 30_000))).toEqual([25_250]);
   });
 
-  it("is not disturbed by seeing the decision its plan is for", () => {
+  it("is not disturbed by a move made at the moment its plan is for", () => {
     const conductor = createConductor(config);
-    conductor.decisionSeen(10_000);
+    conductor.screenEntered(10_000);
     conductor.planReady(plan(10_000));
-    expect(conductor.decisionSeen(10_000)).toEqual([]);
+    expect(conductor.screenEntered(10_000)).toEqual([]);
     expect(opened(run(conductor, 10_000, 20_000))).toEqual([10_000]);
   });
 });
 
 /** Opens a summary floor at about `t` and closes it by a yield after the expert has replied. Returns the close time. */
-function takeTurn(conductor: Conductor, t: number): number {
-  conductor.planReady(plan(t));
+function takeTurn(conductor: Conductor, t: number, score: number | null = 0.8): number {
+  conductor.planReady(plan(t, score));
   let at = t;
   while (!conductor.tick(at).some((action) => action.type === "open")) {
     at += 250;
-    if (at > t + 60_000) throw new Error(`no turn opened for the decision at ${t}`);
+    if (at > t + 60_000) throw new Error(`no turn opened for the plan at ${t}`);
   }
-  conductor.agentSaid(at + 1_000, "So you held it, correct?");
+  conductor.agentSaid(at + 1_000, "So you are checking it, correct?");
   conductor.expertReplied(at + 5_000);
   conductor.yielded(at + 5_500);
   return at + 5_500;
 }
 
-/** A conductor that has taken its three turns, one right after the other. `closedAt` is when the third ended. */
-function afterThreeTurns(): { conductor: Conductor; closedAt: number } {
-  const conductor = createConductor(config);
-  let closedAt = 0;
-  for (let turn = 0; turn < 3; turn++) closedAt = takeTurn(conductor, closedAt + 10_000);
-  expect(conductor.view(closedAt).owed).toBe(false);
-  return { conductor, closedAt };
-}
-
 describe("how often Tiro speaks", () => {
-  it("once it has taken its three turns, leaves at least 90 seconds between its own turns", () => {
-    const { conductor, closedAt } = afterThreeTurns();
-    // Decided 70 seconds after the last turn: said when the gap is over, 20 seconds later.
-    conductor.planReady(plan(closedAt + 70_000));
-    expect(opened(run(conductor, closedAt + 70_000, closedAt + 200_000))).toEqual([closedAt + 90_000]);
-  });
-
-  it("takes no turn for a decision that is no longer fresh when the gap is over", () => {
-    const { conductor, closedAt } = afterThreeTurns();
-    conductor.planReady(plan(closedAt + 1_000));
-    expect(opened(run(conductor, closedAt + 1_000, closedAt + 200_000))).toEqual([]);
-  });
-
-  it("while it owes turns, speaks about the next decision without waiting for the gap", () => {
+  it("takes a turn for every screen visit planned, with no gap between them and whatever its question's score", () => {
     const conductor = createConductor(config);
-    const closedAt = takeTurn(conductor, 10_000);
-    expect(conductor.view(closedAt).owed).toBe(true);
-    conductor.planReady(plan(closedAt + 1_000));
-    expect(opened(run(conductor, closedAt + 1_000, closedAt + 30_000))).toEqual([closedAt + 1_000]);
-  });
-
-  it("while it owes turns, speaks even when the question is a weak one", () => {
-    const conductor = createConductor(config);
-    conductor.planReady(plan(10_000, 0.1));
-    expect(opened(run(conductor, 10_000, 20_000))).toEqual([10_000]);
-  });
-
-  it("while it owes turns, speaks even when no follow-up is worth asking", () => {
-    const conductor = createConductor(config);
-    conductor.planReady(plan(10_000, null));
-    expect(opened(run(conductor, 10_000, 20_000))).toEqual([10_000]);
-  });
-
-  it("after three turns in ten minutes, speaks only about a fresh decision with a question above the threshold", () => {
-    const conductor = createConductor(config);
-    let t = 10_000;
-    for (let turn = 0; turn < 3; turn++) t = takeTurn(conductor, t) + 91_000;
-    expect(conductor.view(t).owed).toBe(false);
-
-    // A weak question: no turn.
-    conductor.planReady(plan(t + 100_000, 0.3));
-    expect(opened(run(conductor, t + 100_000, t + 160_000))).toEqual([]);
-
-    // A strong question, but the expert kept working past the 30 seconds.
-    conductor.planReady(plan(t + 170_000, 0.9));
-    const late: number[] = [];
-    for (let now = t + 170_000; now <= t + 240_000; now += 250) {
-      if (now <= t + 205_000) conductor.screenMoved(now);
-      if (conductor.tick(now).some((action) => action.type === "open")) late.push(now);
+    let closedAt = 0;
+    for (const score of [0.9, 0.1, null, 0.3, 0.2]) {
+      const t = closedAt + 1_000;
+      closedAt = takeTurn(conductor, t, score);
+      // Opened at once: no gap after the last turn, no threshold on the question.
+      expect(closedAt).toBe(t + 5_500);
     }
-    expect(late).toEqual([]);
-
-    // A strong question and a pause: a fourth turn. There is no ceiling of five.
-    conductor.planReady(plan(t + 250_000, 0.9));
-    expect(opened(run(conductor, t + 250_000, t + 290_000))).toEqual([t + 250_000]);
-  });
-
-  it("owes turns again once ten minutes have passed", () => {
-    const conductor = createConductor(config);
-    let t = 10_000;
-    for (let turn = 0; turn < 3; turn++) t = takeTurn(conductor, t) + 91_000;
-    expect(conductor.view(t).owed).toBe(false);
-    expect(conductor.view(t + 600_000).owed).toBe(true);
+    expect(conductor.view(closedAt).turnsInWindow).toBe(5);
   });
 
   it("keeps to a ceiling when the workflow sets one", () => {
-    const conductor = createConductor(resolveConfig({ min_questions: 0, max_questions: 1 }));
+    const conductor = createConductor(resolveConfig({ max_questions: 1 }));
     const closedAt = takeTurn(conductor, 10_000);
     conductor.planReady(plan(closedAt + 100_000, 0.9));
     expect(opened(run(conductor, closedAt + 100_000, closedAt + 130_000))).toEqual([]);
+  });
+
+  it("is under its ceiling again once the window has passed", () => {
+    const conductor = createConductor(resolveConfig({ max_questions: 1 }));
+    const closedAt = takeTurn(conductor, 10_000);
+    conductor.planReady(plan(closedAt + 600_000));
+    expect(opened(run(conductor, closedAt + 600_000, closedAt + 610_000))).toEqual([closedAt + 600_000]);
   });
 });
 
@@ -566,7 +509,7 @@ describe("the end of the task", () => {
     conductor.planReady(plan(13_000));
     const { actions, unused } = conductor.end(14_000);
     expect(closedWith(actions)?.reason).toBe("ended");
-    expect(unused?.decisionAt).toBe(13_000);
+    expect(unused?.at).toBe(13_000);
   });
 
   it("opens nothing afterwards", () => {
@@ -582,7 +525,7 @@ describe("the end of the task", () => {
 describe("what the capture screen is told", () => {
   it("says what the floor is waiting for", () => {
     const conductor = createConductor(config);
-    expect(conductor.view(0)).toMatchObject({ state: "closed", waitingFor: null, owed: true });
+    expect(conductor.view(0)).toMatchObject({ state: "closed", waitingFor: null });
     conductor.planReady(plan(10_000));
     conductor.screenMoved(10_000);
     expect(conductor.view(10_500).waitingFor).toBe("screen");

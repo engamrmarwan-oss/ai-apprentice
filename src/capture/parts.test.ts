@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SensorFrame } from "@/sensor/screen-sensor";
-import { debriefTrigger, hearsWakeWord, replacePending, spokenText, teachBackTrigger, triggerFor } from "./parts";
+import { debriefTrigger, hearsWakeWord, replacePending, spokenText, startsVisit, teachBackTrigger, triggerFor } from "./parts";
 
 const WORDS = ["tiro", "tyro", "tero"];
 
@@ -26,10 +26,10 @@ describe("spokenText", () => {
 });
 
 describe("triggerFor", () => {
-  const plan = { decisionAt: 0, summary: "So, after opening it, you held it, correct?", question: { id: "q", text: "Why hold it?", score: 0.8 } };
+  const plan = { at: 0, summary: "So you are checking which orders can be released, correct?", question: { id: "q", text: "Why hold it?", score: 0.8 } };
 
   it("carries the summary and the follow-up for a turn at a pause", () => {
-    expect(triggerFor("summary", plan)).toBe("ASK:\nSUMMARY: So, after opening it, you held it, correct?\nFOLLOW-UP: Why hold it?");
+    expect(triggerFor("summary", plan)).toBe("ASK:\nSUMMARY: So you are checking which orders can be released, correct?\nFOLLOW-UP: Why hold it?");
   });
 
   it("says there is no follow-up when nothing is worth asking", () => {
@@ -94,5 +94,22 @@ describe("the debrief's triggers", () => {
 
   it("says so when there is nothing to teach", () => {
     expect(teachBackTrigger({ steps: [], rules: [] })).toBe("TEACH-BACK:\nSTEPS:\nnone\nRULES:\nnone");
+  });
+});
+
+describe("startsVisit", () => {
+  it("starts the first visit, and one on a screen with another name", () => {
+    expect(startsVisit(null, "requirements", [])).toBe(true);
+    expect(startsVisit("requirements", "process map", [])).toBe(true);
+  });
+
+  it("keeps the visit while the expert works on the same screen", () => {
+    expect(startsVisit("requirements", "requirements", [{ type: "field_change" }, { type: "commit" }])).toBe(false);
+  });
+
+  // The replay of 2026-10-04: the reader named every tab of a requirement "Requirements", and Tiro stayed silent for two and a half minutes.
+  it("starts a visit when the expert moves to another tab or item that the reader gives the same name", () => {
+    expect(startsVisit("requirements", "requirements", [{ type: "navigate" }])).toBe(true);
+    expect(startsVisit("requirements", "requirements", [{ type: "open_item" }])).toBe(true);
   });
 });

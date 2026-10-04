@@ -13,7 +13,7 @@ import { createConductor, type Action, type Conductor, type FloorKind, type Floo
 import type { TiroEvent } from "@/contract/event";
 import type { Question } from "@/contract/question";
 import { startScreenSensor, type ScreenSensor, type SensorFrame } from "@/sensor/screen-sensor";
-import { hearsWakeWord, replacePending, spokenText, triggerFor } from "./parts";
+import { hearsWakeWord, replacePending, spokenText, startsVisit, triggerFor } from "./parts";
 
 /** One stretch of speech, as the capture screen shows it. `id` is set once it is stored. */
 export type Spoken = { key: number; id: string | null; speaker: "expert" | "new_hire" | "agent"; start_ms: number; end_ms: number; text: string };
@@ -47,7 +47,7 @@ export type CaptureView = {
   floors: FloorRecord[];
 };
 
-const CLOSED: FloorView = { state: "closed", kind: null, turnsInWindow: 0, owed: false, waitingFor: null };
+const CLOSED: FloorView = { state: "closed", kind: null, turnsInWindow: 0, waitingFor: null };
 
 export const EMPTY_VIEW: CaptureView = {
   phase: "idle",
@@ -102,8 +102,21 @@ type FrameAnswer = {
   questions: Question[];
 };
 type PlanAnswer = {
-  plan: { frame_id: string; decision_t_ms: number; summary: string; question: Question | null } | null;
+  plan: { frame_id: string; summary: string; question: Question | null } | null;
   questions: Question[];
+};
+
+/** The screen the expert is on: since when, and its latest frame. */
+type Visit = {
+  /** The screen's name as the reader gave it, in lower case. */
+  name: string;
+  since: number;
+  frameId: string;
+  small: Blob;
+  /** Whether a decision was read on it. */
+  decided: boolean;
+  /** Whether its turn has been asked for. Once per visit. */
+  planned: boolean;
 };
 
 /** What the engine remembers about the floor that is open. */
@@ -151,7 +164,11 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
   let waiting: SensorFrame | null = null;
   /** The last frame that was read, scaled down: what the next one is compared with. */
   let before: Blob | null = null;
-  /** How many decisions are having their turn planned. */
+  /** The screen the expert is on, once a frame of it has been read. */
+  let visit: Visit | null = null;
+  /** When the last floor closed: time on a screen counts from then, not from before Tiro last spoke. */
+  let lastFloorClosedAt = 0;
+  /** How many screen visits are having their turn planned. */
   let planning = 0;
   /** For each planned turn, the frame it is about and the picture's id in the voice conversation. */
   const planFrame = new WeakMap<TurnPlan, string>();
@@ -263,6 +280,7 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
   function closeFloor(record: FloorRecord) {
     const closed = floor;
     floor = null;
+    lastFloorClosedAt = record.closedAt;
     update({ floors: [...view.floors, record] });
     voice?.setMicMuted(true);
     trace(`floor closed: ${record.reason}, Tiro spoke ${record.agentTurns} times`);
@@ -482,37 +500,69 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
   // Frames
   // -------------------------------------------------------------------------
 
-  /** Passes a decision's picture on to the voice conversation, and asks for its turn to be planned. */
-  function onDecision(frame: SensorFrame, frameId: string, decisionAt: number) {
-    if (view.voice !== "on") return;
-    run(conductor.decisionSeen(decisionAt));
-    const picture = new FormData();
-    picture.append("small", frame.small, "small.jpg");
-    void call<{ file_id: string | null }>(`${base}/frames/${frameId}/key`, { method: "POST", body: picture }).then((key) => {
-      if (key.ok && key.value.file_id) keyFiles.set(frameId, key.value.file_id);
-    });
+  /**
+   * Asks for the turn about a screen visit to be planned. With `speak`, it is
+   * the turn Tiro takes now the expert has been on the screen long enough, and
+   * the screen's picture goes to the voice conversation with it. Without, the
+   * expert has left a screen where they decided something before Tiro spoke
+   * about it: its questions wait for the debrief.
+   */
+  function planVisit(planned: Visit, at: number, speak: boolean) {
+    planned.planned = true;
+    const frameId = planned.frameId;
+    if (speak) {
+      const picture = new FormData();
+      picture.append("small", planned.small, "small.jpg");
+      void call<{ file_id: string | null }>(`${base}/frames/${frameId}/key`, { method: "POST", body: picture }).then((key) => {
+        if (key.ok && key.value.file_id) keyFiles.set(frameId, key.value.file_id);
+      });
+    }
 
     planning++;
-    void call<PlanAnswer>(`${base}/plan`, json("POST", { frame_id: frameId })).then((planned) => {
+    void call<PlanAnswer>(`${base}/plan`, json("POST", { frame_id: frameId, since_t_ms: planned.since })).then((answer) => {
       planning--;
-      if (!planned.ok) return;
-      const { plan, questions } = planned.value;
+      if (!answer.ok) return;
+      const { plan, questions } = answer.value;
       update({ questions: [...view.questions, ...questions] });
-      // Planned too late to be said: the questions it left wait for the debrief.
-      if (!plan || !capturing()) return;
+      if (!plan) return;
+      // Not to be said, or planned too late to be said: the question it left waits for the debrief.
+      if (!speak || !capturing()) {
+        if (plan.question) patchQuestion(plan.question.id, { channel: "debrief" });
+        return;
+      }
       const turn: TurnPlan = {
-        decisionAt: plan.decision_t_ms,
+        at,
         summary: plan.summary,
         question: plan.question ? { id: plan.question.id, text: plan.question.text, score: plan.question.score } : null,
       };
       planFrame.set(turn, plan.frame_id);
       trace(`planned: ${turn.summary} | ${turn.question?.text ?? "no follow-up"}`);
       const unused = conductor.planReady(turn);
-      // Tiro speaks about the very last decision. The question about an earlier one waits for the debrief.
+      // Tiro speaks about the screen the expert is on. The question about one they have left waits for the debrief.
       if (unused?.question) patchQuestion(unused.question.id, { channel: "debrief" });
       if (unused === turn) return;
       update({ planned: { summary: turn.summary, question: turn.question?.text ?? null } });
     });
+  }
+
+  /** Keeps track of the screen the expert is on, from a frame just read. */
+  function onScreen(frame: SensorFrame, frameId: string, screen: FrameAnswer["screen"], events: TiroEvent[]) {
+    // A frame the reader could not name a screen for keeps the visit's name.
+    const name = screen?.name.trim().toLowerCase() || visit?.name;
+    if (!name) return;
+    const decided = events.some(isDecision);
+    if (visit && !startsVisit(visit.name, name, events)) {
+      visit.frameId = frameId;
+      visit.small = frame.small;
+      visit.decided ||= decided;
+      return;
+    }
+    const left = visit;
+    visit = { name, since: frame.t, frameId, small: frame.small, decided, planned: false };
+    trace(`on screen "${screen?.name ?? name}"${screen?.item ? `, ${screen.item}` : ""}`);
+    if (view.voice !== "on") return;
+    run(conductor.screenEntered(frame.t));
+    if (left && left.decided && !left.planned) planVisit(left, left.since, false);
   }
 
   async function read(frame: SensorFrame) {
@@ -545,8 +595,7 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
       events: [...view.events, ...result.events],
       questions: [...view.questions, ...result.questions],
     });
-    const decision = result.events.find(isDecision);
-    if (decision) onDecision(frame, result.frame.id, decision.t_ms);
+    onScreen(frame, result.frame.id, result.screen, result.events);
   }
 
   /** Reads frames one at a time, each against the one before. While one is being read, only the newest waits. */
@@ -584,6 +633,10 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
     // A pointer or a spinner is not the expert at work.
     if (change === "major") run(conductor.screenMoved(t));
     // Without a voice, or while the expert has muted Tiro, there is nobody to give the floor to.
+    if (view.voice === "on" && !view.muted && !floor && visit && !visit.planned) {
+      // Time on the screen counts from when the expert came to it, or from when Tiro last spoke if that was later.
+      if (t - Math.max(visit.since, lastFloorClosedAt) >= config.screen_dwell_ms) planVisit(visit, t, true);
+    }
     if (view.voice === "on" && (!view.muted || floor)) run(conductor.tick(t));
     update({ elapsedMs: t, floor: conductor.view(t) });
   }

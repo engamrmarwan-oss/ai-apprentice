@@ -139,7 +139,7 @@ The session as it stands, with everything recorded so far in time order.
   "ok": true,
   "session": { "id": "uuid", "workflow_id": "uuid", "kind": "expert", "language": "en", "phase": "capture", "started_at": "...", "ended_at": null },
   "workflow": { "id": "uuid", "task": "Review incoming invoices", "role": "Accounts payable specialist", "tool": { "id": "uuid", "name": "Invoice desk" } },
-  "config": { "screen_still_ms": 1500, "min_questions": 3, "...": "every setting, with defaults filled in" },
+  "config": { "screen_dwell_ms": 15000, "screen_still_ms": 1500, "...": "every setting, with defaults filled in" },
   "events": [Event],
   "utterances": [{ "id": "uuid", "session_id": "uuid", "speaker": "expert", "start_ms": 30000, "end_ms": 33000, "text": "This one is from a new supplier." }],
   "questions": [Question]
@@ -157,7 +157,7 @@ The session as it stands, with everything recorded so far in time order.
 | `POST /api/sessions/{id}/conversation` | Records which voice conversation the session runs in. |
 | `POST /api/sessions/{id}/frames` | Takes one frame as a form (pictures and its time), stores it, reads it, and returns `{ frame, read, events, screen, new_words, questions }`. |
 | `POST /api/sessions/{id}/frames/{frame_id}/key` | Marks a key frame and passes its picture to the voice conversation. Returns `{ file_id }`, or `null` when the picture could not be passed on. |
-| `POST /api/sessions/{id}/plan` | Plans Tiro's turn for the decision on one frame. Returns `{ plan, questions }`; `plan` is `{ frame_id, decision_t_ms, summary, question }` or `null`. |
+| `POST /api/sessions/{id}/plan` | Body `{ frame_id, since_t_ms }`: the latest frame of the screen the expert is on, and when they came to it. Plans Tiro's summary of the work on that screen. Returns `{ plan, questions }`; `plan` is `{ frame_id, summary, question }` or `null`. The capture engine calls it once per screen visit, after `screen_dwell_ms` on the screen. |
 | `POST /api/sessions/{id}/utterances` | Stores one stretch of speech. |
 | `PATCH /api/sessions/{id}/questions/{question_id}` | Records what became of a question: `status`, `channel`, `answer_utterance_id`. |
 | `POST /api/sessions/{id}/end-task` | The expert has finished. The session moves to `debrief`; questions still waiting to be asked live wait for the debrief. |
@@ -193,7 +193,7 @@ What the view holds (`CaptureView`):
 |---|---|
 | `phase` | `idle`, `preparing`, `ready`, `capturing`, `ending`, `ended` |
 | `voice` | `off`, `connecting`, `on`, `lost`. Capture runs without voice; Tiro then only watches |
-| `floor` | `state` (`closed` or `open`), `kind` (`opening`, `summary`, `called`), `turnsInWindow`, `owed` (Tiro is behind on its three turns in ten minutes), `waitingFor` (`screen`, `speech`, `reading`, `gap`, `question` or null: why Tiro is not speaking yet) |
+| `floor` | `state` (`closed` or `open`), `kind` (`opening`, `summary`, `called`), `turnsInWindow`, `waitingFor` (`screen`, `speech`, `reading` or null: why Tiro is not speaking yet) |
 | `agentSpeaking`, `muted` | |
 | `elapsedMs` | Time since sharing began |
 | `screen` | `{ name, item }`: what the screen shows now, as Tiro read it |

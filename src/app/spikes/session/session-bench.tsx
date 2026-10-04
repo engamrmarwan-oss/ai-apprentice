@@ -242,7 +242,7 @@ export function SessionBench() {
                 ["Voice", view.voice],
                 ["Tiro", floorLine(view)],
                 ["Waiting for", view.floor.waitingFor ?? "nothing"],
-                ["Turns in ten minutes", `${view.floor.turnsInWindow}${view.floor.owed ? " (owes more)" : ""}`],
+                ["Turns in ten minutes", String(view.floor.turnsInWindow)],
                 ["Frames", `${view.frames}${view.reading ? " (reading)" : ""}`],
                 ["Screen", view.screen ? `${view.screen.name}${view.screen.item ? ` · ${view.screen.item}` : ""}` : "not read yet"],
               ].map(([label, value]) => (

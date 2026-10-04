@@ -9,10 +9,12 @@ import type { WorkflowConfig } from "./config";
  *
  * - `opening`: once, at the start. Tiro greets the expert and asks what they
  *   are about to do.
- * - `summary`: at a pause just after a decision. Tiro says the decision back,
- *   asks whether it has it right, and may ask one follow-up. A decision is
- *   spoken about while it is fresh or not at all: once its window has passed,
- *   or a later decision has been seen, its question waits for the debrief.
+ * - `summary`: once per screen visit, at the first pause after the expert
+ *   has spent `screen_dwell_ms` on one screen. Tiro sums up what the expert
+ *   is doing there, asks whether it has it right, and may ask one follow-up.
+ *   A visit is spoken about while it is fresh or not at all: once its window
+ *   has passed, or the expert has moved to another screen, its question
+ *   waits for the debrief.
  * - `called`: the expert said Tiro's name or pressed the button. Tiro listens
  *   and may ask one follow-up. These turns are not limited.
  *
@@ -21,10 +23,10 @@ import type { WorkflowConfig } from "./config";
  * Times are milliseconds on the session's clock.
  */
 
-/** What Tiro will say about one decision, as the planner prepared it. */
+/** What Tiro will say about one screen visit, as the planner prepared it. */
 export type TurnPlan = {
-  /** When the decision was made. */
-  decisionAt: number;
+  /** The moment the turn is about: when the expert had been on the screen long enough. */
+  at: number;
   summary: string;
   /** The follow-up to ask if the answer leaves it open, with the planner's score. */
   question: { id: string; text: string; score: number } | null;
@@ -79,10 +81,8 @@ export type FloorView = {
   kind: FloorKind | null;
   /** Turns Tiro started itself inside the current window. */
   turnsInWindow: number;
-  /** True while Tiro is behind on its minimum: it then takes a turn even when no question earns one, and without leaving a gap. */
-  owed: boolean;
   /** Why the floor is not opening now, for the capture screen. Null when it is open or nothing is waiting. */
-  waitingFor: "screen" | "speech" | "reading" | "gap" | "question" | null;
+  waitingFor: "screen" | "speech" | "reading" | null;
 };
 
 type Open = {
@@ -122,13 +122,12 @@ export function createConductor(config: WorkflowConfig) {
   /** Until when the expert is taken to be reading text that just appeared. */
   let readingUntil = -Infinity;
 
-  /** The plan for the very last decision. An older one is replaced, never queued behind. */
+  /** The plan for the screen the expert is on. An older one is replaced, never queued behind. */
   let plan: TurnPlan | null = null;
-  /** When the latest decision known of was made, planned for yet or not. */
-  let latestDecisionAt = -Infinity;
-  /** When Tiro's own turns were opened, for the minimum, the ceiling and the gap. */
+  /** The latest moment known of, planned for yet or not: the expert's last move to another screen, or the last plan. */
+  let latestAt = -Infinity;
+  /** When Tiro's own turns were opened, for the ceiling. */
   const ownTurns: number[] = [];
-  let lastOwnTurnClosedAt = -Infinity;
 
   const inWindow = (t: number) => ownTurns.filter((at) => t - at < config.questions_window_ms).length;
   /** How many times Tiro may ask on one floor. When the expert called it, they speak first and Tiro has only its follow-ups. */
@@ -170,10 +169,7 @@ export function createConductor(config: WorkflowConfig) {
       followUpAnswered: floor.followUpAnswered,
     };
     // A turn Tiro never got to speak in does not count as one of its turns.
-    if (floor.kind === "summary" && floor.agentTurns > 0) {
-      ownTurns.push(floor.openedAt);
-      lastOwnTurnClosedAt = t;
-    }
+    if (floor.kind === "summary" && floor.agentTurns > 0) ownTurns.push(floor.openedAt);
     floor = null;
     return [{ type: "close", record }];
   }
@@ -182,16 +178,9 @@ export function createConductor(config: WorkflowConfig) {
   function blocked(t: number): FloorView["waitingFor"] | "nothing" | null {
     if (!plan) return "nothing";
 
-    // Tiro speaks about a decision just made, or not at all.
-    if (t - plan.decisionAt > config.decision_window_ms) return "nothing";
-    const taken = inWindow(t);
-    if (config.max_questions !== null && taken >= config.max_questions) return "nothing";
-    // Beyond its minimum Tiro speaks only when a question earns the turn, and leaves a gap after its last one.
-    const owed = taken < config.min_questions;
-    if (!owed) {
-      if (!plan.question || plan.question.score < config.score_threshold) return "question";
-      if (t - lastOwnTurnClosedAt < config.min_gap_ms) return "gap";
-    }
+    // Tiro speaks about the screen while the moment is fresh, or not at all.
+    if (t - plan.at > config.decision_window_ms) return "nothing";
+    if (config.max_questions !== null && inWindow(t) >= config.max_questions) return "nothing";
     if (t - screenMovedAt < config.screen_still_ms) return "screen";
     if (t - speechAt < config.speech_silent_ms) return "speech";
     if (t < readingUntil) return "reading";
@@ -268,26 +257,26 @@ export function createConductor(config: WorkflowConfig) {
     },
 
     /**
-     * A decision has been read from the screen; its turn is still being
-     * planned. A plan in hand for an earlier decision is no longer about the
-     * very last one, so it is given up rather than said in the meantime.
+     * The expert moved to another screen at `at`. A plan in hand for the
+     * screen they left is no longer about where they are, so it is given up
+     * rather than said in the meantime.
      */
-    decisionSeen(decisionAt: number): Action[] {
-      latestDecisionAt = Math.max(latestDecisionAt, decisionAt);
-      if (!plan || plan.decisionAt >= latestDecisionAt) return [];
+    screenEntered(at: number): Action[] {
+      latestAt = Math.max(latestAt, at);
+      if (!plan || plan.at >= latestAt) return [];
       const dropped = plan;
       plan = null;
       return [{ type: "drop", plan: dropped }];
     },
 
     /**
-     * The planner has prepared a turn for a decision. Returns the plan that
-     * will not be used: the one it replaces, or `next` itself when a later
-     * decision has been seen since.
+     * The planner has prepared a turn for a screen visit. Returns the plan
+     * that will not be used: the one it replaces, or `next` itself when the
+     * expert has moved to another screen since.
      */
     planReady(next: TurnPlan): TurnPlan | null {
-      if (next.decisionAt < latestDecisionAt) return next;
-      latestDecisionAt = next.decisionAt;
+      if (next.at < latestAt) return next;
+      latestAt = next.at;
       const replaced = plan;
       plan = next;
       return replaced;
@@ -363,7 +352,7 @@ export function createConductor(config: WorkflowConfig) {
       if (ended) return [];
       const actions: Action[] = [];
       // The moment for the planned turn has passed, whatever kept the floor closed.
-      if (plan && t - plan.decisionAt > config.decision_window_ms) {
+      if (plan && t - plan.at > config.decision_window_ms) {
         actions.push({ type: "drop", plan });
         plan = null;
       }
@@ -401,7 +390,6 @@ export function createConductor(config: WorkflowConfig) {
         state: floor ? "open" : "closed",
         kind: floor?.kind ?? null,
         turnsInWindow,
-        owed: !ended && turnsInWindow < config.min_questions,
         waitingFor: reason === "nothing" ? null : reason,
       };
     },
