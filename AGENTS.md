@@ -51,7 +51,7 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 | Path | Content | Owner |
 |---|---|---|
 | `src/app/api/` | Route handlers | Claude Code |
-| `src/server/` | Server-only modules: environment, database client, fail-soft, accounts and sign-in (`accounts.ts`, `require-user.ts`), workflows and their people (`workflows.ts`), sessions and what they record (`sessions.ts`, `capture.ts`, `require-session.ts`), model router (`models.ts`), frame reading (`vision/`), question planner (`planner/`), the debrief's second reading, the Work Map builder and its validator (`workmap/`, `require-map.ts`), the rule engine and its judge (`rules/`), tutor sessions and the mastery report (`tutor.ts`), ElevenLabs session addresses, tokens and picture uploads (`elevenlabs.ts`) | Claude Code |
+| `src/server/` | Server-only modules: environment, database client, fail-soft, accounts and sign-in (`accounts.ts`, `require-user.ts`), workflows and their people (`workflows.ts`), sessions and what they record (`sessions.ts`, `capture.ts`, `require-session.ts`), model router (`models.ts`), frame reading (`vision/`), question planner (`planner/`), the debrief's second reading, the Work Map builder and its validator (`workmap/`, `require-map.ts`), the rule engine, its judge and the rule compiler (`rules/`), the tool map (`toolmap/`), the baseline (`baseline.ts`), tutor sessions and the mastery report (`tutor.ts`), ElevenLabs session addresses, tokens and picture uploads (`elevenlabs.ts`) | Claude Code |
 | `src/spikes/`, `scripts/spikes/` | Spike tooling that is not a page: scoring and replay | Claude Code |
 | `src/contract/` | The contract as Zod schemas; import from here, change only via `CONTRACT.md` | Shared |
 | `src/sensor/` | Screen sensor: frame diff, when to take a frame, the worker that reads the shared tab | Claude Code |
@@ -62,7 +62,7 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 | `src/components/` | What the pages are built from: the app shell, sign-in forms, the capture companion window, icons | Codex |
 | `supabase/migrations/` | Database schema. Apply with `npx supabase db push`, then `npm run types:db` | Claude Code |
 | `agents/` | ElevenLabs agent configurations, prompts and client tools. Push with `npm run agents:push` | Claude Code |
-| `scripts/`, `.github/` | Gate, CI, sign-up codes (`npm run signup-code`), demo accounts (`npm run demo-accounts`), agent push, the interviewer's text checks (`npm run check:agent`, `npm run check:debrief`), a whole expert session and a whole tutor session run with nobody at the keyboard (`npm run check:session`, `npm run check:tutor`) | Claude Code |
+| `scripts/`, `.github/` | Gate, CI, sign-up codes (`npm run signup-code`), demo accounts (`npm run demo-accounts`), agent push, the interviewer's text checks (`npm run check:agent`, `npm run check:debrief`), a whole expert session and a whole tutor session run with nobody at the keyboard (`npm run check:session`, `npm run check:tutor`), the tool map, baseline and rule compiler against a running server (`npm run check:setup`) | Claude Code |
 | `docs/spikes/` | Written spike results | Claude Code |
 
 <!-- BEGIN:nextjs-agent-rules -->

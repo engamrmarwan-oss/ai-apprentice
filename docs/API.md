@@ -262,7 +262,8 @@ For anyone on the workflow. The expert gets the newest Work Map, draft or confir
 - `kind` is a key of the rule kinds table (`limit`, `exception`, `stop_and_ask`, `never`, `judgment`, or one a workflow adds). Show it as given.
 - `action.type` is `block`, `warn`, `ask`, or `escalate` (then with `role`).
 - A rule's `status` is `candidate`, `confirmed` or `corrected`. `provenance` is `observed` (said while working), `live_question` (an answer to Tiro during the task), `debrief` or `baseline_confirmed`. `moment.link` is `direct` (said at that moment) or `related` (the nearest moment to a rule the expert only described).
-- `documented` is true when the baseline already held the rule; otherwise it was newly captured.
+- `documented` is true when the company's written process already held the rule; otherwise it was newly captured. Show the two labels.
+- `check_type` is `judged` (a model judges each case) or `deterministic` (a fixed check over the tool map; the rule then has a `condition`).
 
 ### `GET /api/work-maps/{id}`
 
@@ -325,6 +326,57 @@ What the view holds (`DebriefView`):
 | `spoken` | The conversation so far, as in capture |
 | `workMap` | The Work Map, in the shape above, or null before it is built |
 | `leftOut` | What the validator refused to put in the map: `{ what, text, why }` |
+
+## The tool map and the baseline
+
+Both belong to session setup: what Tiro knows of the tool, and what it assumes about the task, before it watches.
+
+### `GET /api/workflows/{id}/tool-map`
+
+For anyone on the workflow. The tool's screens and what is on each.
+
+```json
+{
+  "ok": true,
+  "tool_map": {
+    "tool": { "id": "…", "name": "Invoice desk" },
+    "screens": [
+      {
+        "id": "…", "name": "Invoice", "origin": "seen_live", "hidden": false,
+        "elements": [
+          { "id": "…", "kind": "status", "label": "Status", "allowed_values": ["Draft", "Held"], "personal": false, "origin": "seen_live" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+`kind` is `field`, `status` or `button`. `allowed_values` are the values the element was seen to take, or `null`. `origin` is `seen_live` for everything so far: the map is built from what Tiro read while the expert worked, so it is empty until a session has run.
+
+### `POST /api/workflows/{id}/tool-map`
+
+Expert only. Brings the tool map up to date with everything Tiro has read in the workflow's sessions. Returns `{ tool_map, added }`. Nothing the expert renamed, hid or marked is touched. It also runs by itself whenever a debrief is prepared.
+
+### `PATCH /api/workflows/{id}/tool-map/screens/{screen_id}`
+
+Expert only. `{ "name": "…" }` renames a screen, `{ "hidden": true }` hides it. A hidden screen is left out of the baseline and of fixed checks. Returns `{ tool_map }`.
+
+### `PATCH /api/workflows/{id}/tool-map/elements/{element_id}`
+
+Expert only. `{ "personal": true }` marks an element as personal data. The mark is stored; nothing is blurred yet. Returns `{ tool_map }`.
+
+### `GET /api/workflows/{id}/baseline`
+
+For anyone on the workflow. `{ "statements": [{ "id", "text", "source", "status" }] }`. `source` is `uploaded_process`, `tool_map`, `model_knowledge` or `previous_work_map`. `status` is `assumed`, `confirmed`, `contradicted` or `not_observed`; a statement is `assumed` until a Work Map bears it out.
+
+### `POST /api/workflows/{id}/baseline`
+
+Expert only. Assembles the baseline and replaces what was assembled before. Body `{ "process_text": "…" }`: the company's written process as plain text, up to 60,000 characters; leave it out when there is none. Read a text or Markdown file in the browser and send its content. The document itself is not kept, only the statements drawn from it. Takes up to half a minute. `baseline_unavailable` (503) when it could not be assembled.
+
+### `POST /api/work-maps/{id}/compile`
+
+Expert only. Runs the rule compiler over a Work Map: a rule that can be checked from the screen alone, using elements of the tool map, becomes a fixed check (`check_type` `deterministic`, with a `condition`); every other rule stays `judged`. Returns `{ fixed, judged, work_map }`. It also runs by itself when a map is confirmed, so a screen only needs it for a "check again" button.
 
 ## Tutor sessions
 
