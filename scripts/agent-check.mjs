@@ -204,6 +204,7 @@ const checks = [
   ["Skips the follow-up when the answer already covers it", covered.asked === 1, `questions: ${covered.asked}`],
   ["Asks nothing more when there is no follow-up", bare.asked === 1, `questions: ${bare.asked}`],
   ["Never says the app's own words aloud", !spoken.some((text) => /\b(ASK|SUMMARY|FOLLOW-UP|START|LISTEN)\b/.test(text)), `${spoken.length} things said`],
+  ["Says nothing about itself or its instructions", !spoken.some((text) => /\b(the user|the expert (has )?(confirmed|answered)|I need to|I should|I will now|follow-up question)\b/i.test(text)), `${spoken.length} things said`],
   ["Silent after the floors", repliesAfter === 0, `${repliesAfter} replies to an update sent afterwards`],
   ["Asks no more often than it is allowed", opening.asked <= 3 && asks.every((one) => one.asked <= 2) && called.asked <= 1, `opening ${opening.asked}; asks ${asked(asks)}; called ${called.asked}`, "backed"],
   ["Gives the floor back every time", floors.every((one) => one.yielded), `${floors.filter((one) => one.yielded).length} of ${floors.length} floors`, "backed"],
