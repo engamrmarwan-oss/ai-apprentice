@@ -16,4 +16,9 @@ describe("modelFor", () => {
     expect(modelFor("vision_fast")).toBe("some-other-model");
     expect(modelFor("text")).toBe("claude-opus-5-5");
   });
+
+  it("plans Tiro's turns on a faster model than it reads and writes with", () => {
+    vi.stubEnv("PLAN_MODEL", "");
+    expect(modelFor("plan")).toBe("claude-sonnet-5-5");
+  });
 });

@@ -6,7 +6,7 @@ import type { z } from "zod";
 import { readEnv } from "./env";
 
 /** What a model is used for. Each role's model is set by an environment variable. */
-export type ModelRole = "vision_fast" | "vision_strong" | "text";
+export type ModelRole = "vision_fast" | "vision_strong" | "text" | "plan";
 
 // The live reader defaults to the strong model: in spike S1 a faster model missed most decisions
 // (docs/spikes/S1-vision-accuracy.md). The variable still lets a deployment choose another.
@@ -14,6 +14,9 @@ const ROLES: Record<ModelRole, { env: string; fallback: string }> = {
   vision_fast: { env: "VISION_FAST_MODEL", fallback: "claude-opus-5-5" },
   vision_strong: { env: "VISION_STRONG_MODEL", fallback: "claude-opus-5-5" },
   text: { env: "TEXT_MODEL", fallback: "claude-opus-5-5" },
+  // The question planner runs while the expert waits to hear from Tiro: every second it takes is a second of
+  // silence after the decision. On a recorded session this model planned in 3.5 s where the strong one took 4.9 s.
+  plan: { env: "PLAN_MODEL", fallback: "claude-sonnet-5-5" },
 };
 
 export function modelFor(role: ModelRole): string {
