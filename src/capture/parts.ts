@@ -37,6 +37,30 @@ export function triggerFor(kind: FloorKind, plan: TurnPlan | null, alreadySaid: 
   return `ASK:\nSUMMARY: ${plan?.summary ?? ""}\nFOLLOW-UP: ${plan?.question?.text ?? "none"}`;
 }
 
+/** The message that hands the agent its questions for the debrief. They are numbered so it asks them in order. */
+export function debriefTrigger(questions: readonly string[]): string {
+  return `DEBRIEF:\nQUESTIONS:\n${questions.map((question, index) => `${index + 1}. ${question}`).join("\n")}`;
+}
+
+/** As much of a Work Map as the agent needs to explain it back. */
+export type MapToTeach = {
+  steps: { position: number; title: string; decision: string | null; reason: string | null }[];
+  rules: { number: number; kind: string; statement: string }[];
+};
+
+/**
+ * The message that asks the agent to explain the Work Map back. Steps and
+ * rules carry the numbers the expert's corrections will refer to.
+ */
+export function teachBackTrigger(map: MapToTeach): string {
+  const steps = map.steps.map((step) => {
+    const reason = step.reason ? ` The expert's reason: "${step.reason}"` : "";
+    return `${step.position}. ${step.title}: ${step.decision ?? ""}${reason}`;
+  });
+  const rules = map.rules.map((rule) => `${rule.number}. (${rule.kind}) ${rule.statement}`);
+  return `TEACH-BACK:\nSTEPS:\n${steps.join("\n") || "none"}\nRULES:\n${rules.join("\n") || "none"}`;
+}
+
 /**
  * A frame waiting to be read while another is being read. Only the newest
  * waits: the reader compares it with the last frame it read, so nothing in
