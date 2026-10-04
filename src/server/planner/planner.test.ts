@@ -23,6 +23,7 @@ const context = (patch: Partial<FilterContext> = {}): FilterContext => ({
   baseline: [],
   hasToolOptions: false,
   guardrailBoost: 0.2,
+  threshold: 0.6,
   keep: 3,
   ...patch,
 });
@@ -66,6 +67,20 @@ describe("filterCandidates", () => {
       ["reason", 0.6],
       ["limit", 0.5],
     ]);
+  });
+
+  it("puts a guardrail question first until one has been asked, even past a stronger question of another kind", () => {
+    const candidates = [candidate({ text: "Why?", score: 0.95 }), candidate({ text: "Is there a limit?", kind: "limit", score: 0.45 })];
+    // Boosted to 0.65, which is worth a turn: it goes first although the reason scores higher.
+    expect(filterCandidates(candidates, context()).map((question) => question.kind)).toEqual(["limit", "reason"]);
+
+    const asked = context({ existing: [{ text: "When would you stop?", kind: "stop_and_ask", status: "answered" }] });
+    expect(filterCandidates(candidates, asked).map((question) => question.kind)).toEqual(["reason", "limit"]);
+  });
+
+  it("does not put a guardrail question first when it is not worth a turn", () => {
+    const candidates = [candidate({ text: "Why?", score: 0.95 }), candidate({ text: "Is there a limit?", kind: "limit", score: 0.2 })];
+    expect(filterCandidates(candidates, context()).map((question) => question.kind)).toEqual(["reason", "limit"]);
   });
 
   it("does not count a guardrail question that is only waiting as asked", () => {

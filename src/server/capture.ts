@@ -172,6 +172,7 @@ export async function planDecision(
     // The tool map arrives with tool recording. Until then nothing shows which options were passed over.
     hasToolOptions: false,
     guardrailBoost: workflow.config.guardrail_boost,
+    threshold: workflow.config.score_threshold,
     keep: KEEP_PER_DECISION,
   });
   const queued = await queueQuestions(session.id, kept);

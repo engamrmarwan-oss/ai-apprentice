@@ -28,6 +28,8 @@ export type FilterContext = {
   /** Whether the tool map lists options for what the expert changed. Without it nothing shows an option was passed over. */
   hasToolOptions: boolean;
   guardrailBoost: number;
+  /** The score from which a question is worth a turn. */
+  threshold: number;
   /** How many questions one decision may leave behind. */
   keep: number;
 };
@@ -49,13 +51,19 @@ export function guardrailAsked(existing: FilterContext["existing"], guardrailKin
  *   answers; a repeat of a question the session already holds; a deviation
  *   that names no baseline statement; an alternative when no tool map shows
  *   the option that was passed over
- * - boosted: guardrail kinds, until one has been asked
+ * - boosted: guardrail kinds, until one has been asked. Until then a guardrail
+ *   question that reaches the threshold also goes first, because at least one
+ *   live question must be about a guardrail
  * - kept: the best few. The first may be asked live, as the follow-up at the
  *   next pause; the rest wait for the debrief.
  */
 export function filterCandidates(candidates: Candidate[], context: FilterContext): NewQuestion[] {
   const seen = new Set(context.existing.map((question) => plain(question.text)));
-  const boost = guardrailAsked(context.existing, context.guardrailKinds) ? 0 : context.guardrailBoost;
+  const owed = !guardrailAsked(context.existing, context.guardrailKinds);
+  const boost = owed ? context.guardrailBoost : 0;
+  /** While a guardrail question is owed, one that is worth a turn outranks everything else. */
+  const first = (question: NewQuestion) =>
+    owed && context.guardrailKinds.includes(question.kind) && question.score >= context.threshold ? 1 : 0;
 
   const kept: NewQuestion[] = [];
   for (const candidate of candidates) {
@@ -82,6 +90,6 @@ export function filterCandidates(candidates: Candidate[], context: FilterContext
     });
   }
 
-  kept.sort((a, b) => b.score - a.score);
+  kept.sort((a, b) => first(b) - first(a) || b.score - a.score);
   return kept.slice(0, context.keep).map((question, index) => ({ ...question, channel: index === 0 ? "live" : "debrief" }));
 }
