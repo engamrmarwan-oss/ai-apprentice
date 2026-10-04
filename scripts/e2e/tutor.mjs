@@ -2,7 +2,7 @@
 // that a wrong prediction is caught before the learner acts and explained in
 // the expert's words.
 //
-//   npm run check:tutor -- <app address> <recording folder> [--keep] [--save=<file>]
+//   npm run check:tutor -- <app address> <recording folder> [--language=de] [--keep] [--save=<file>]
 //
 // A tab shows a recorded session of the tool in place of the tool itself,
 // as in check:session. The Work Map being taught is a hand-written fixture,
@@ -10,6 +10,10 @@
 // stand-in learner first says they would approve at once, which breaks a
 // rule, then corrects themselves. The lines are made with the macOS `say`
 // command, so this runs on a Mac with Chrome.
+//
+// With `--language`, the lesson is held in that language while the Work Map
+// stays in English: the learner speaks it, and Tiro must answer in it and
+// give the expert's words translated, saying so.
 //
 // It signs up an account of its own with the newest sign-up code and removes
 // it, with everything it recorded, at the end. `--keep` leaves it in place.
@@ -27,9 +31,10 @@ import { chromium } from "playwright-core";
 const args = process.argv.slice(2).filter((arg) => !arg.startsWith("--"));
 const keep = process.argv.includes("--keep");
 const saveTo = process.argv.find((arg) => arg.startsWith("--save="))?.slice("--save=".length);
+const language = process.argv.find((arg) => arg.startsWith("--language="))?.slice("--language=".length) ?? "en";
 const [appUrl, recording] = args;
 if (!appUrl || !recording || !existsSync(path.join(recording, "manifest.json"))) {
-  console.error("Usage: npm run check:tutor -- <app address> <recording folder> [--keep] [--save=<file>]");
+  console.error("Usage: npm run check:tutor -- <app address> <recording folder> [--language=de] [--keep] [--save=<file>]");
   process.exit(1);
 }
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -37,10 +42,30 @@ const repo = path.join(here, "../..");
 const manifest = JSON.parse(readFileSync(path.join(recording, "manifest.json"), "utf8"));
 
 // What the stand-in learner says, and the hand-written Work Map. This is the demo workflow's data, not product code.
-const LINES = {
-  wrong: "I would approve the specification right away and start the implementation. The tests can wait until later.",
-  right: "Then I would generate the test scenarios first, and approve it only once they are there.",
+const SPOKEN = {
+  en: {
+    voice: "Samantha",
+    wrong: "I would approve the specification right away and start the implementation. The tests can wait until later.",
+    right: "Then I would generate the test scenarios first, and approve it only once they are there.",
+    // What shows that Tiro spoke the language, gave the expert's reason, and said the words were translated.
+    spoken: /\b(the|and|you|would|before)\b/gi,
+    reason: /cannot be tested|test scenarios first/i,
+    translated: null,
+  },
+  de: {
+    voice: "Anna",
+    wrong: "Ich würde die Spezifikation sofort genehmigen und mit der Umsetzung beginnen. Die Tests können bis später warten.",
+    right: "Dann würde ich zuerst die Testszenarien erzeugen und erst genehmigen, wenn sie vorhanden sind.",
+    spoken: /\b(der|die|das|und|ich|nicht|du|Sie|ist|würde|würdest|bevor|eine|einen)\b/g,
+    reason: /Testszenarien|getestet|testbar/i,
+    translated: /übersetz|sinngemäß|auf Deutsch/i,
+  },
 };
+if (!SPOKEN[language]) {
+  console.error(`This check has the learner's lines in: ${Object.keys(SPOKEN).join(", ")}.`);
+  process.exit(1);
+}
+const { voice, spoken: SOUNDS_LIKE, reason: REASON, translated: TRANSLATED, ...LINES } = SPOKEN[language];
 const MAP = {
   steps: [
     { title: "Generate test scenarios", decision: "Generated the test scenarios before deciding anything.", reason: "I always generate the test scenarios first. If a requirement cannot be tested, it is not ready to be approved." },
@@ -62,7 +87,7 @@ const clips = {};
 for (const [name, text] of Object.entries(LINES)) {
   const aiff = path.join(audio, `${name}.aiff`);
   const wav = path.join(audio, `${name}.wav`);
-  execFileSync("say", ["-v", "Samantha", "-r", "175", "-o", aiff, text]);
+  execFileSync("say", ["-v", voice, "-r", "175", "-o", aiff, text]);
   execFileSync("afconvert", ["-f", "WAVE", "-d", "LEI16@16000", "-c", "1", aiff, wav]);
   clips[name] = readFileSync(wav).toString("base64");
 }
@@ -209,7 +234,7 @@ try {
   await seedMap(made.workflow.id, me.user.id);
   say("a confirmed Work Map is in place:", `${MAP.steps.length} steps, ${MAP.rules.length} rules`);
 
-  await page.goto(`${appUrl}/spikes/tutor`);
+  await page.goto(`${appUrl}/spikes/tutor${language === "en" ? "" : `?language=${language}`}`);
   await page.getByRole("button", { name: "Start a tutor session" }).first().click();
 
   const read = () =>
@@ -339,11 +364,22 @@ const checks = [
   ["Asks what the learner would do when an item is open", tiro.some((line) => /\?/.test(line.text) && (!learner[0] || line.start_ms < learner[0].start_ms)), tiro.find((line) => /\?/.test(line.text))?.text ?? "no question"],
   ["Catches the wrong prediction", Boolean(first) && first.rule.id === broken?.id, first ? `rule ${first.rule.number}: ${first.explanation ?? ""}` : "nothing caught"],
   ["Catches it before the learner acts", Boolean(first) && (!firstAction || first.at < firstAction.t_ms), first ? `caught at ${Math.round(first.at / 1000)} s, first action at ${firstAction ? Math.round(firstAction.t_ms / 1000) : "none"} s` : ""],
-  ["Explains it in the expert's own words", afterCatch.some((line) => /cannot be tested|test scenarios first/i.test(line.text)), afterCatch[0]?.text ?? ""],
+  ["Explains it in the expert's own words", afterCatch.some((line) => REASON.test(line.text)), afterCatch[0]?.text ?? ""],
   ["Shows the expert's screen at that moment", result.sawReplay && trace.some((line) => line.includes(`replay: rule ${broken?.number}`)), ""],
   ["Lets the corrected answer through", view.catches.filter((one) => one.before_acting).length === 1 && learner.length >= 2, `${view.catches.length} catches in all`],
   ["Reports the rule as needing a hint, and to practise next", reported?.outcome === "needed_hint" && view.report?.practise_next[0] === broken?.number, view.report ? view.report.rules.map((rule) => `rule ${rule.number}: ${rule.outcome}`).join(", ") : "no report"],
 ];
+if (TRANSLATED) {
+  // The lesson is not in the expert's language: Tiro must hear and speak the learner's, and say that the expert's words are translated.
+  const all = tiro.map((line) => line.text).join(" ");
+  const inIt = (all.match(SOUNDS_LIKE) ?? []).length;
+  const inEnglish = (all.match(SPOKEN.en.spoken) ?? []).length;
+  checks.push(
+    ["Hears the learner in the lesson's language", learner.length > 0 && learner.every((line) => (line.text.match(SOUNDS_LIKE) ?? []).length > 0), learner[0]?.text ?? "nothing heard"],
+    ["Speaks to the learner in the lesson's language", inIt >= 8 && inEnglish <= 2, `${inIt} of its common words, ${inEnglish} of English`],
+    ["Gives the expert's words translated, and says so", afterCatch.some((line) => TRANSLATED.test(line.text)), afterCatch.find((line) => TRANSLATED.test(line.text))?.text ?? afterCatch[0]?.text ?? ""],
+  );
+}
 console.log("");
 for (const [label, pass, detail] of checks) {
   if (!pass) failures++;
