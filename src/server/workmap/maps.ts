@@ -218,11 +218,14 @@ async function storeDraft(client: TiroClient, context: SessionContext, built: As
 
   const textOf = new Map(said.map((line) => [line.id, line.text]));
   const eventOf = new Map(events.map((event) => [event.id, event]));
-  const ruleRows = built.rules.map((rule) => {
+  const storedAt = Date.now();
+  const ruleRows = built.rules.map((rule, index) => {
     const id = randomUUID();
     const moment = eventOf.get(rule.moment_event_id);
     return {
       id,
+      // Rules are numbered in the order they came to exist. Stored together, they would all share one moment.
+      created_at: new Date(storedAt + index).toISOString(),
       lineage_id: id,
       version: 1,
       work_map_id: map.id,
