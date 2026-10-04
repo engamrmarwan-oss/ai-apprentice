@@ -148,6 +148,10 @@ describe("assemble", () => {
     said,
     questions: [question(1), question(2, { status: "answered" })],
     ruleKinds: ["limit", "exception", "stop_and_ask", "never", "judgment"],
+    baseline: [
+      { id: uuid(401), source: "uploaded_process" },
+      { id: uuid(402), source: "model_knowledge" },
+    ],
     taskEndedAt: 100_000,
     final: false,
     ...patch,
@@ -160,6 +164,7 @@ describe("assemble", () => {
     step: 0,
     action: "block",
     escalate_to: null,
+    baseline_statement: null,
     ...patch,
   });
   const proposal = (patch: Partial<Proposal> = {}): Proposal => ({ steps: [step()], rules: [rule()], answers: [], ...patch });
@@ -233,6 +238,24 @@ describe("assemble", () => {
       ["observed", "direct"],
       ["live_question", "direct"],
       ["debrief", "related"],
+    ]);
+  });
+
+  it("labels a rule documented only when the written process already said it", () => {
+    const built = assemble(
+      proposal({
+        rules: [
+          rule({ baseline_statement: 0 }),
+          rule({ statement: "Finance signs it off first.", quote_utterance: 2, baseline_statement: 1 }),
+          rule({ statement: "Never release on a Friday.", quote_utterance: 3, baseline_statement: 9 }),
+        ],
+      }),
+      input(),
+    );
+    expect(built.rules.map((one) => [one.documented, one.baseline_statement_id])).toEqual([
+      [true, uuid(401)],
+      [false, uuid(402)],
+      [false, null],
     ]);
   });
 

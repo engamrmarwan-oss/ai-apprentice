@@ -7,7 +7,7 @@ import { eventSchema, type TiroEvent } from "@/contract/event";
 import type { Question } from "@/contract/question";
 import type { Condition, JudgeSpec, RuleAction } from "@/contract/rule";
 import { must, mustHave, withDatabase } from "../accounts";
-import { loadTimeline, queueQuestions, type SessionContext } from "../sessions";
+import { loadBaseline, loadTimeline, queueQuestions, type SessionContext } from "../sessions";
 import type { TiroClient } from "../supabase";
 import { assemble, joinStretches, type Assembled, type LeftOut, type Said } from "./assemble";
 import { proposeWorkMap, rewriteItem } from "./build";
@@ -266,13 +266,17 @@ async function storeDraft(client: TiroClient, context: SessionContext, built: As
       action: rule.action as unknown as Json,
       status: "candidate",
       provenance: rule.provenance,
-      documented: false,
+      documented: rule.documented,
     };
   });
   if (ruleRows.length > 0) {
     must(await client.from("rules").insert(ruleRows));
     must(await client.from("rule_links").insert(ruleRows.map((row, index) => ({ rule_id: row.id, step_id: stepRows[built.rules[index].step].id }))));
   }
+
+  // A baseline statement the expert's own rule bears out is no longer only assumed.
+  const borneOut = [...new Set(built.rules.flatMap((rule) => (rule.baseline_statement_id ? [rule.baseline_statement_id] : [])))];
+  if (borneOut.length > 0) must(await client.from("baseline_statements").update({ status: "confirmed" }).in("id", borneOut).eq("workflow_id", workflow.id));
 
   for (const answer of built.answers) {
     must(
@@ -306,8 +310,9 @@ export async function buildWorkMap(
   options: { final: boolean },
 ): Promise<BuildResult | Unavailable | { ok: false; reason: "builder" }> {
   const { session, workflow } = context;
-  const [timeline, extra] = await Promise.all([
+  const [timeline, baseline, extra] = await Promise.all([
     loadTimeline(session.id),
+    loadBaseline(workflow.id),
     withDatabase(async (client, signal) => {
       const [lastFrame, kinds] = await Promise.all([
         client.from("frames").select("t_ms").eq("session_id", session.id).order("t_ms", { ascending: false }).limit(1).abortSignal(signal).maybeSingle(),
@@ -316,7 +321,7 @@ export async function buildWorkMap(
       return { taskEndedAt: must(lastFrame)?.t_ms ?? 0, ruleKinds: (must(kinds) ?? []).map(({ key, label }) => ({ key, label })) };
     }),
   ]);
-  if (!timeline.ok || !extra.ok) return unavailable;
+  if (!timeline.ok || !baseline.ok || !extra.ok) return unavailable;
 
   const { events, utterances, questions } = timeline.timeline;
   const said = joinStretches(utterances.map(({ id, speaker, start_ms, end_ms, text }) => ({ id, speaker, start_ms, end_ms, text })));
@@ -329,6 +334,7 @@ export async function buildWorkMap(
     said,
     questions,
     ruleKinds,
+    baseline: baseline.statements,
     taskEndedAt,
   });
   if (!proposed.ok) return { ok: false, reason: "builder" };
@@ -338,6 +344,7 @@ export async function buildWorkMap(
     said,
     questions,
     ruleKinds: ruleKinds.map((kind) => kind.key),
+    baseline: baseline.statements,
     taskEndedAt,
     final: options.final,
   });

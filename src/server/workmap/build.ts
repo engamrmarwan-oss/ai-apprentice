@@ -15,6 +15,8 @@ export type BuildInput = {
   said: Said[];
   questions: Pick<Question, "text" | "kind" | "status">[];
   ruleKinds: { key: string; label: string }[];
+  /** What was assumed before watching, with where each statement came from. */
+  baseline: { text: string; source: string }[];
   /** When the task ended, on the session's clock. */
   taskEndedAt: number;
 };
@@ -27,6 +29,7 @@ You are given:
 - SAID: everything said aloud, numbered from 0, oldest first: who said it, and whether during the task or in the debrief after it.
 - QUESTIONS: the questions the apprentice put to the expert, numbered from 0.
 - RULE KINDS: the kinds a rule may have.
+- BASELINE: what was assumed about the task before watching, numbered from 0, with where each statement came from. It may be empty.
 
 Return three lists.
 
@@ -44,6 +47,7 @@ rules: what the expert said must hold: a limit, an exception, when to stop and a
 - step: the position, counted from 0, in your own steps list of the step the rule belongs to.
 - action: what should happen when someone is about to break the rule: "block" (it must not be done), "warn" (point it out), "ask" (they must ask someone first), or "escalate" (it goes to a named role).
 - escalate_to: when action is "escalate", the role it goes to, as the expert named it. Otherwise null.
+- baseline_statement: the number of the BASELINE statement that already says this same rule, or null when none does. A statement about something else, or one the expert contradicted, does not count.
 
 answers: for each entry in QUESTIONS that the expert answered, the number of the question and the number of the SAID line where their answer begins. Leave out a question that was not answered.
 
@@ -68,6 +72,7 @@ export function buildContent(input: BuildInput): string {
     `SAID:\n${JSON.stringify(said)}`,
     `QUESTIONS:\n${JSON.stringify(questions)}`,
     `RULE KINDS:\n${JSON.stringify(input.ruleKinds)}`,
+    `BASELINE:\n${JSON.stringify(input.baseline.map((statement, n) => ({ n, text: statement.text, source: statement.source })))}`,
     `Write titles, decisions and statements in this language: ${input.language}.`,
   ].join("\n\n");
 }

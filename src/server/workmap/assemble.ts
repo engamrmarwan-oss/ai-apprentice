@@ -23,6 +23,7 @@ export const proposalSchema = z.object({
       step: z.number(),
       action: z.enum(["block", "warn", "ask", "escalate"]),
       escalate_to: z.string().nullable(),
+      baseline_statement: z.number().nullable(),
     }),
   ),
   answers: z.array(z.object({ question: z.number(), utterance: z.number() })),
@@ -75,6 +76,10 @@ export type DraftRule = {
   moment_link: "direct" | "related";
   action: RuleAction;
   provenance: "observed" | "live_question" | "debrief";
+  /** True when the company's written process already said it. Otherwise the rule is newly captured. */
+  documented: boolean;
+  /** The baseline statement that already held the rule, whatever its source. */
+  baseline_statement_id: string | null;
   /** The position of its step in `steps`, from 0. */
   step: number;
 };
@@ -97,6 +102,8 @@ export type AssembleInput = {
   questions: Pick<Question, "id" | "status">[];
   /** The rule kinds this workflow may use. Kinds are data. */
   ruleKinds: readonly string[];
+  /** The baseline as the model was shown it. */
+  baseline: { id: string; source: string }[];
   /** When the task ended, on the session's clock. What was said after it was said in the debrief. */
   taskEndedAt: number;
   /** True for the last build before the teach-back: a step still without a reason is then left out instead of asked about. */
@@ -192,6 +199,7 @@ export function assemble(proposal: Proposal, input: AssembleInput): Assembled {
     const index = said.indexOf(quote);
     const before = index > 0 ? said[index - 1] : null;
     const role = clean(rule.escalate_to ?? "");
+    const assumed = rule.baseline_statement !== null && whole(rule.baseline_statement) ? input.baseline[rule.baseline_statement] : undefined;
     rules.push({
       kind: rule.kind,
       statement,
@@ -207,6 +215,9 @@ export function assemble(proposal: Proposal, input: AssembleInput): Assembled {
           : before?.speaker === "agent" && quote.start_ms - before.end_ms <= ANSWER_MS
             ? "live_question"
             : "observed",
+      // Only the company's own written process makes a rule a documented one. What a model assumed does not.
+      documented: assumed?.source === "uploaded_process",
+      baseline_statement_id: assumed?.id ?? null,
       step: at,
     });
   }
