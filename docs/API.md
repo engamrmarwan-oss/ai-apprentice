@@ -321,6 +321,86 @@ What the view holds (`DebriefView`):
 | `workMap` | The Work Map, in the shape above, or null before it is built |
 | `leftOut` | What the validator refused to put in the map: `{ what, text, why }` |
 
+## Tutor sessions
+
+A tutor session teaches the workflow's newest confirmed Work Map to the person signed in, while they work a case in the tool. Anyone on the workflow can start one.
+
+### `POST /api/workflows/{id}/tutor-sessions`
+
+Starts a tutor session. Returns `{ session, work_map }`: the session (its `kind` is `tutor`, its `phase` is `teach`) and the Work Map it teaches, in the shape above. `no_map` (409) when the expert has not confirmed a Work Map yet.
+
+### `GET /api/sessions/{id}/report`
+
+The mastery report of a tutor session, during it or after it has ended.
+
+```json
+{
+  "ok": true,
+  "report": {
+    "session_id": "…",
+    "work_map": { "id": "…", "version": 1 },
+    "rules": [
+      { "number": 1, "rule_id": "…", "kind": "never", "statement": "…", "outcome": "needed_hint" }
+    ],
+    "totals": { "passed_first_time": 0, "needed_hint": 1, "violated": 0, "not_encountered": 1 },
+    "practise_next": [1, 2]
+  }
+}
+```
+
+`outcome` is `passed_first_time`, `needed_hint` (the learner said they would break the rule and was caught before acting), `violated` (they broke it on screen) or `not_encountered`. Each rule gets the worst that happened to it. `practise_next` are rule numbers, most pressing first: violated, then needed a hint, then never met.
+
+### Routes the tutor engine calls
+
+| Route | What it does |
+|---|---|
+| `POST /api/sessions/{id}/voice` | As in capture. For a tutor session it hands out the tutor's address and the Work Map as the tutor's prompt values. |
+| `POST /api/sessions/{id}/conversation`, `/frames`, `/utterances` | As in capture. The frames answer also carries `fields`: the fields of the item on screen, as `{ name, value }`. In a tutor session what the person says is stored with `speaker` `new_hire`. |
+| `POST /api/sessions/{id}/check` | Checks the learner against the rules. `{ "kind": "prediction", "said": "…" }` checks what they say they would do; `{ "kind": "action", "frame_id": "…" }` checks what they did on that frame. Returns `{ verdicts, caught }`. `caught` lists the rules they broke: `{ rule, explanation, action }`, where `rule` is the rule in the Work Map shape, with the expert's quote and screen moment. |
+| `POST /api/sessions/{id}/end` | Ends the tutor session. The report stays readable. |
+
+## The tutor engine
+
+`src/capture/tutor.ts` runs one tutor session in the browser: the screen sensor, the voice, the transcriber, the checks and the tutor's turns. It has no React in it. The tutor bench at `/spikes/tutor` is a bare page built on it; read `src/app/spikes/tutor/tutor-bench.tsx` for a working example.
+
+```ts
+import { createTutorEngine, emptyTutorView, type TutorView } from "@/capture/tutor";
+
+// session and work_map come from POST /api/workflows/{id}/tutor-sessions
+const engine = createTutorEngine(session.id, work_map, (view) => setView(view));
+```
+
+The order is the same as in capture, and for the same reason: the browser moves to the shared tab as soon as it is chosen.
+
+1. `engine.prepare()` from a click, while Tiro's tab is in front. It opens the voice; this is when the browser asks for the microphone. `phase` goes `idle` → `preparing` → `ready`.
+2. Open the companion window now, if there is one.
+3. `engine.share()` from a second click. `phase` becomes `teaching` and Tiro greets the learner.
+
+What then happens by itself: when the learner opens an item, Tiro says what the expert does with such an item and asks what they would do. Their answer is checked against the rules before Tiro replies. A broken rule is a catch: Tiro says the rule and the expert's reason, and `replay` is set so the screen can show the expert's moment. What the learner does on screen is checked too.
+
+| Call | What it does |
+|---|---|
+| `engine.callTiro()` | The learner wants to ask something. The same as saying Tiro's name. |
+| `engine.setMuted(true)` | Nothing the microphone hears is kept and Tiro takes no turn, until unmuted. |
+| `engine.end()` | Ends the session and loads its mastery report into the view. `phase` goes `ending` → `ended`. Also happens when the learner stops sharing. |
+| `engine.release()` | Lets go of the screen and the microphone without ending. Call it when the screen unmounts. |
+| `engine.view()` | The current view. |
+
+What the view holds (`TutorView`):
+
+| Field | Meaning |
+|---|---|
+| `phase` | `idle`, `preparing`, `ready`, `teaching`, `ending`, `ended` |
+| `problem` | The last thing that went wrong, in plain words, or null |
+| `voice` | `off`, `connecting`, `on`, `lost` |
+| `floor` | `state` (`closed` or `open`) and `kind`: `start`, `item` (Tiro has asked what the learner would do), `catch`, `called` |
+| `agentSpeaking`, `muted`, `checking` | `checking` is true while an answer or an action is being checked against the rules |
+| `elapsedMs`, `frames`, `lastFrame`, `reading`, `screen`, `events`, `spoken`, `partial` | As in capture. A line of `spoken` has `speaker` `new_hire` or `agent` |
+| `workMap` | The Work Map being taught |
+| `catches` | Every rule the learner broke so far: `{ at, rule, explanation, before_acting, what }`. `before_acting` is true when it was caught in what they said, false when in what they did |
+| `replay` | The expert's moment to show now: a rule, with `quote.text` and `moment.picture`. Null when nothing is to be shown. It is set on a catch and cleared after half a minute. Show it where the learner can see it without leaving the tool: the companion window |
+| `report` | The mastery report, in the shape above, once the session has ended |
+
 ## Other routes
 
 - `GET /api/health`: `{ "ok": true, "database": { "table", "rows" } }` or 503. Needs no sign-in.
