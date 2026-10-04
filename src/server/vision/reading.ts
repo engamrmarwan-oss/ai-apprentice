@@ -34,6 +34,8 @@ export const readingSchema = z.object({
   item: z.string().nullable(),
   fields: z.array(z.object({ name: z.string(), value: z.string() })),
   events: z.array(readEventSchema),
+  /** Roughly how many words appeared that the previous screenshot did not show: the person needs time to read them. */
+  new_words: z.number(),
 });
 
 export type ReadEvent = z.infer<typeof readEventSchema>;
@@ -54,7 +56,7 @@ export type FrameImages = {
 };
 
 const EVENT_GUIDE = `Event types, and the keys each one uses (set every other key to null):
-- navigate: the person moved to another screen. to = the new screen's name, from = the previous one.
+- navigate: the person moved to another screen, or to another tab or section of the same record. to = the name of the new screen or tab, from = the previous one.
 - open_item: the person opened one record. item = its name or number as shown.
 - field_change: a field got a different value. item, field, from, to.
 - status_change: a status, state or decision field got a different value. item, field, from, to.
@@ -75,6 +77,7 @@ Return:
 - item: the one record the person is working on, as the application labels it, or null if there is none.
 - fields: the fields that matter for that record and their current values, exactly as shown. At most 25. Keep each name the same from one screenshot to the next.
 - events: what the person did between PREVIOUS and now. Leave it empty when nothing meaningful changed: scrolling, hovering, a tooltip, a moving cursor, a loading indicator.
+- new_words: roughly how many words of text the current screenshot shows that the previous one did not. 0 when nothing new appeared, and 0 for the first screenshot.
 
 ${EVENT_GUIDE}
 
@@ -82,6 +85,8 @@ Rules:
 - Report only what you can see. Never guess a name or a value. If you cannot read it, leave the event out.
 - When the previous screenshot is given, an event is something that differs between the two screenshots. What looks the same in both did not happen.
 - Do not report again an event listed in PREVIOUS unless the person did it again.
+- A control that has just turned busy (its label changed to a working form, or a spinner appeared on it) was pressed by the person. Report that press as a commit, with the control's own label as the action, even when something else changed in the same screenshot.
+- What the application then does by itself is not an event: a result arriving, a list refreshing, the busy control finishing. Show it in fields.
 - Copy names and values exactly as they appear on screen.
 - confidence is between 0 and 1: how sure you are that the event happened as you describe it.
 - The first screenshot has no events.`;
