@@ -26,10 +26,11 @@ import { chromium } from "playwright-core";
 
 const args = process.argv.slice(2).filter((arg) => !arg.startsWith("--"));
 const keep = process.argv.includes("--keep");
+const withDebrief = process.argv.includes("--debrief");
 const saveTo = process.argv.find((arg) => arg.startsWith("--save="))?.slice("--save=".length);
 const [appUrl, recording, secondsArg = "150"] = args;
 if (!appUrl || !recording || !existsSync(path.join(recording, "manifest.json"))) {
-  console.error("Usage: npm run check:session -- <app address> <recording folder> [seconds] [--keep]");
+  console.error("Usage: npm run check:session -- <app address> <recording folder> [seconds] [--debrief] [--keep] [--save=<file>]");
   process.exit(1);
 }
 const seconds = Number(secondsArg);
@@ -48,6 +49,8 @@ const LINES = {
   why3: "Once the specification and the tests are both in place, it is safe to approve and start the work.",
   limit: "If more than two acceptance criteria are missing, I stop and ask the product owner before doing anything else.",
   call: "Tiro, one thing you should know. Anything that touches security always needs a second reviewer before I approve it.",
+  reason: "Because that is the next thing we do once the specification is complete and the tests are there.",
+  confirm: "Yes, that is all correct.",
 };
 
 const audio = mkdtempSync(path.join(tmpdir(), "tiro-lines-"));
@@ -125,6 +128,8 @@ await context.addInitScript(() => {
 
 let failures = 0;
 let result = null;
+/** What the debrief left behind, when the run goes on into it. */
+let debrief = null;
 try {
   const replay = await context.newPage();
   await replay.goto(replayUrl);
@@ -243,6 +248,72 @@ try {
   const [download] = await Promise.all([page.waitForEvent("download", { timeout: 20_000 }), page.getByRole("button", { name: "Download the result" }).click()]);
   result = JSON.parse(readFileSync(await download.path(), "utf8"));
   if (saveTo) writeFileSync(saveTo, JSON.stringify(result, null, 2));
+
+  if (withDebrief) {
+    // The debrief: Tiro asks what it was left with, the Work Map is built, Tiro explains it back, the expert confirms.
+    await page.bringToFront();
+    await page.goto(`${appUrl}/spikes/debrief`);
+    await page.getByRole("button", { name: "Start the debrief" }).first().click({ timeout: 30_000 });
+    const readDebrief = () =>
+      page.evaluate(() => {
+        const heading = [...document.querySelectorAll("h2")].find((h) => h.textContent === "Said");
+        return {
+          phase: document.querySelector('[data-testid="phase"]')?.textContent ?? "",
+          status: document.querySelector('[data-testid="map-status"]')?.textContent ?? null,
+          said: heading ? [...heading.parentElement.querySelectorAll("li")].map((li) => li.textContent) : [],
+          speaking: document.body.innerText.includes("Tiro is speaking"),
+          reading: document.body.innerText.match(/second reading: (\d+) verified, (\d+) doubted/)?.slice(1, 3).map(Number) ?? [0, 0],
+          problem: document.querySelector(".bg-amber-50")?.textContent ?? null,
+        };
+      });
+    const reasons = ["why1", "why2", "limit", "why3", "reason"];
+    let heardTiro = 0;
+    let asked = 0;
+    let confirmations = 0;
+    let quiet = 0;
+    let lastPhase = "";
+    let state = await readDebrief();
+    const debriefDeadline = Date.now() + 8 * 60_000;
+    while (Date.now() < debriefDeadline && state.phase !== "confirmed") {
+      state = await readDebrief();
+      if (state.phase !== lastPhase) {
+        say("debrief:", state.phase, state.problem ? `· ${state.problem}` : "");
+        lastPhase = state.phase;
+      }
+      for (const line of state.said.filter((line) => /^Expert:/.test(line) && !seen.has(`d:${line}`))) {
+        seen.add(`d:${line}`);
+        say("heard:", line.replace(/^Expert:\s*/, ""));
+      }
+      const tiro = state.said.filter((line) => /^Tiro:/.test(line));
+      if (tiro.length > heardTiro) {
+        for (const line of tiro.slice(heardTiro)) say("Tiro:", line.replace(/^Tiro:\s*/, ""));
+        heardTiro = tiro.length;
+        quiet = Math.max(quiet, Date.now() + 1_500);
+      }
+      const last = tiro.at(-1) ?? "";
+      const answered = seen.has(`a:${tiro.length}`);
+      if (/\?/.test(last) && !state.speaking && Date.now() > quiet && !answered) {
+        seen.add(`a:${tiro.length}`);
+        let name;
+        if (state.phase === "teach_back") {
+          name = "confirm";
+          confirmations++;
+        } else {
+          asked++;
+          name = /read that right|did i (read|see)|is that right|correct\?/i.test(last) ? "yes" : reasons[(asked - 1) % reasons.length];
+        }
+        await page.waitForTimeout(600);
+        quiet = Date.now() + (await speak(name)) * 1000 + 1_000;
+      }
+      if (confirmations > 4) break;
+      await page.waitForTimeout(400);
+    }
+    state = await readDebrief();
+    const session = await (await page.request.get(`${appUrl}/api/sessions/${result.sessionId}`)).json();
+    const map = await (await page.request.get(`${appUrl}/api/workflows/${session.workflow.id}/work-map`)).json();
+    debrief = { phase: state.phase, verified: state.reading[0], doubted: state.reading[1], asked, said: state.said, map: map.work_map ?? null, session: session.session };
+    if (saveTo) writeFileSync(saveTo, JSON.stringify({ ...result, debrief }, null, 2));
+  }
 } finally {
   await browser.close();
   server.close();
@@ -258,6 +329,8 @@ try {
           if (files?.length) await admin.storage.from("frames").remove(files.map((file) => `${session.id}/${file.name}`));
         }
         const { data: workflow } = await admin.from("workflows").select("tool_id").eq("id", workflow_id).maybeSingle();
+        // A map points at what the session recorded, so it goes first.
+        await admin.from("work_maps").delete().eq("workflow_id", workflow_id);
         await admin.from("workflows").delete().eq("id", workflow_id);
         if (workflow?.tool_id) await admin.from("tools").delete().eq("id", workflow.tool_id);
       }
@@ -294,6 +367,27 @@ const checks = [
   ["Leaves the rest of its questions for the debrief", stored.questions.every((question) => question.status !== "queued" || question.channel === "debrief"), `${stored.questions.filter((question) => question.status === "queued").length} waiting`],
   ["Marks nothing verified before the debrief", stored.events.every((event) => event.verified === false), ""],
 ];
+if (debrief) {
+  const map = debrief.map;
+  checks.push(
+    ["Reads the decisions a second time at the debrief", debrief.verified > 0, `${debrief.verified} verified, ${debrief.doubted} doubted`],
+    ["Asks its questions in the debrief", debrief.asked >= 2, `${debrief.asked} answered`],
+    ["Builds a Work Map with steps and rules", Boolean(map) && map.steps.length > 0 && map.rules.length > 0, map ? `${map.steps.length} steps, ${map.rules.length} rules` : "no map"],
+    [
+      "Gives every step a screen moment and the expert's reason, and every rule a quote",
+      Boolean(map) && map.steps.every((step) => step.moment?.picture && step.reason?.text) && map.rules.every((rule) => rule.quote.text && rule.moment.picture),
+      "",
+    ],
+    ["Has the map confirmed by voice, which ends the session", debrief.phase === "confirmed" && map?.status === "confirmed" && debrief.session?.phase === "ended", `${debrief.phase}, map ${map?.status ?? "none"}, session ${debrief.session?.phase}`],
+  );
+  if (map) {
+    console.log("\nWork Map");
+    for (const step of map.steps) {
+      console.log(` ${step.position}. ${step.title}: ${step.decision}\n      reason: "${step.reason?.text ?? ""}"`);
+      for (const rule of map.rules.filter((one) => one.steps.includes(step.position))) console.log(`      rule ${rule.number} (${rule.kind}, ${rule.provenance}): ${rule.statement}\n         quote: "${rule.quote.text}"`);
+    }
+  }
+}
 console.log("");
 for (const [label, pass, detail] of checks) {
   if (!pass) failures++;
