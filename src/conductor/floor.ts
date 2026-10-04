@@ -9,8 +9,10 @@ import type { WorkflowConfig } from "./config";
  *
  * - `opening`: once, at the start. Tiro greets the expert and asks what they
  *   are about to do.
- * - `summary`: at a pause after a decision. Tiro says the decision back,
- *   asks whether it has it right, and may ask one follow-up.
+ * - `summary`: at a pause just after a decision. Tiro says the decision back,
+ *   asks whether it has it right, and may ask one follow-up. A decision is
+ *   spoken about while it is fresh or not at all: once its window has passed,
+ *   or a later decision has been seen, its question waits for the debrief.
  * - `called`: the expert said Tiro's name or pressed the button. Tiro listens
  *   and may ask one follow-up. These turns are not limited.
  *
@@ -68,14 +70,16 @@ export type Action =
   /** Mute the agent. Its voice is silenced as soon as it stops talking. */
   | { type: "close"; record: FloorRecord }
   /** The expert is working again while Tiro has the floor: tell the agent to hold. */
-  | { type: "hold_agent" };
+  | { type: "hold_agent" }
+  /** A planned turn will not be taken: its moment has passed. Its question waits for the debrief. */
+  | { type: "drop"; plan: TurnPlan };
 
 export type FloorView = {
   state: "closed" | "open";
   kind: FloorKind | null;
   /** Turns Tiro started itself inside the current window. */
   turnsInWindow: number;
-  /** True while Tiro is behind on its minimum and will speak at the next quiet moment. */
+  /** True while Tiro is behind on its minimum: it then takes a turn even when no question earns one. */
   owed: boolean;
   /** Why the floor is not opening now, for the capture screen. Null when it is open or nothing is waiting. */
   waitingFor: "screen" | "speech" | "reading" | "gap" | "question" | null;
@@ -120,6 +124,8 @@ export function createConductor(config: WorkflowConfig) {
 
   /** The plan for the very last decision. An older one is replaced, never queued behind. */
   let plan: TurnPlan | null = null;
+  /** When the latest decision known of was made, planned for yet or not. */
+  let latestDecisionAt = -Infinity;
   /** When Tiro's own turns were opened, for the minimum, the ceiling and the gap. */
   const ownTurns: number[] = [];
   let lastOwnTurnClosedAt = -Infinity;
@@ -176,14 +182,13 @@ export function createConductor(config: WorkflowConfig) {
   function blocked(t: number): FloorView["waitingFor"] | "nothing" | null {
     if (!plan) return "nothing";
 
+    // Tiro speaks about a decision just made, or not at all.
+    if (t - plan.decisionAt > config.decision_window_ms) return "nothing";
     const taken = inWindow(t);
     if (config.max_questions !== null && taken >= config.max_questions) return "nothing";
+    // Beyond its minimum Tiro speaks only when a question earns the turn.
     const owed = taken < config.min_questions;
-    if (!owed) {
-      // Beyond its minimum Tiro speaks only about a decision just made, and only when a question earns the turn.
-      if (t - plan.decisionAt > config.decision_window_ms) return "nothing";
-      if (!plan.question || plan.question.score < config.score_threshold) return "question";
-    }
+    if (!owed && (!plan.question || plan.question.score < config.score_threshold)) return "question";
     if (t - lastOwnTurnClosedAt < config.min_gap_ms) return "gap";
     if (t - screenMovedAt < config.screen_still_ms) return "screen";
     if (t - speechAt < config.speech_silent_ms) return "speech";
@@ -255,8 +260,27 @@ export function createConductor(config: WorkflowConfig) {
       readingUntil = Math.max(readingUntil, frameAt + allowance);
     },
 
-    /** The planner has prepared a turn for the latest decision. Returns the plan it replaces, if that was never used. */
+    /**
+     * A decision has been read from the screen; its turn is still being
+     * planned. A plan in hand for an earlier decision is no longer about the
+     * very last one, so it is given up rather than said in the meantime.
+     */
+    decisionSeen(decisionAt: number): Action[] {
+      latestDecisionAt = Math.max(latestDecisionAt, decisionAt);
+      if (!plan || plan.decisionAt >= latestDecisionAt) return [];
+      const dropped = plan;
+      plan = null;
+      return [{ type: "drop", plan: dropped }];
+    },
+
+    /**
+     * The planner has prepared a turn for a decision. Returns the plan that
+     * will not be used: the one it replaces, or `next` itself when a later
+     * decision has been seen since.
+     */
     planReady(next: TurnPlan): TurnPlan | null {
+      if (next.decisionAt < latestDecisionAt) return next;
+      latestDecisionAt = next.decisionAt;
       const replaced = plan;
       plan = next;
       return replaced;
@@ -330,14 +354,20 @@ export function createConductor(config: WorkflowConfig) {
     /** Time passes. Call it on every sample from the sensor. */
     tick(t: number): Action[] {
       if (ended) return [];
+      const actions: Action[] = [];
+      // The moment for the planned turn has passed, whatever kept the floor closed.
+      if (plan && t - plan.decisionAt > config.decision_window_ms) {
+        actions.push({ type: "drop", plan });
+        plan = null;
+      }
       if (floor) {
         const reason = overdue(t);
-        if (reason) return close(t, reason);
+        if (reason) return [...actions, ...close(t, reason)];
         // A pause in the movement is not the expert leaving.
         if (floor.activitySince !== null && t - screenMovedAt >= config.screen_still_ms) floor.activitySince = null;
-        return [];
+        return actions;
       }
-      if (blocked(t) !== null) return [];
+      if (blocked(t) !== null) return actions;
       const next = plan;
       plan = null;
       return [open("summary", t, next)];

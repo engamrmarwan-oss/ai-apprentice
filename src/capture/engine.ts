@@ -290,10 +290,18 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
     void settle(record, closed);
   }
 
+  /** A planned turn's moment has passed. Its question waits for the debrief. */
+  function dropPlan(plan: TurnPlan) {
+    trace(`not said, its moment passed: ${plan.summary}`);
+    if (plan.question) patchQuestion(plan.question.id, { channel: "debrief" });
+    update({ planned: null });
+  }
+
   function run(actions: Action[]) {
     for (const action of actions) {
       if (action.type === "open") openFloor(action.kind, action.plan);
       else if (action.type === "close") closeFloor(action.record);
+      else if (action.type === "drop") dropPlan(action.plan);
       else voice?.sendUserActivity();
     }
   }
@@ -475,8 +483,9 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
   // -------------------------------------------------------------------------
 
   /** Passes a decision's picture on to the voice conversation, and asks for its turn to be planned. */
-  function onDecision(frame: SensorFrame, frameId: string) {
+  function onDecision(frame: SensorFrame, frameId: string, decisionAt: number) {
     if (view.voice !== "on") return;
+    run(conductor.decisionSeen(decisionAt));
     const picture = new FormData();
     picture.append("small", frame.small, "small.jpg");
     void call<{ file_id: string | null }>(`${base}/frames/${frameId}/key`, { method: "POST", body: picture }).then((key) => {
@@ -498,9 +507,10 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
       };
       planFrame.set(turn, plan.frame_id);
       trace(`planned: ${turn.summary} | ${turn.question?.text ?? "no follow-up"}`);
-      const replaced = conductor.planReady(turn);
-      // Tiro speaks about the very last decision. The question about the one before waits for the debrief.
-      if (replaced?.question) patchQuestion(replaced.question.id, { channel: "debrief" });
+      const unused = conductor.planReady(turn);
+      // Tiro speaks about the very last decision. The question about an earlier one waits for the debrief.
+      if (unused?.question) patchQuestion(unused.question.id, { channel: "debrief" });
+      if (unused === turn) return;
       update({ planned: { summary: turn.summary, question: turn.question?.text ?? null } });
     });
   }
@@ -535,7 +545,8 @@ export function createCaptureEngine(sessionId: string, onView: (view: CaptureVie
       events: [...view.events, ...result.events],
       questions: [...view.questions, ...result.questions],
     });
-    if (result.events.some(isDecision)) onDecision(frame, result.frame.id);
+    const decision = result.events.find(isDecision);
+    if (decision) onDecision(frame, result.frame.id, decision.t_ms);
   }
 
   /** Reads frames one at a time, each against the one before. While one is being read, only the newest waits. */
