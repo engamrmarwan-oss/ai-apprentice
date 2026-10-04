@@ -167,20 +167,35 @@ function takeTurn(conductor: Conductor, t: number): number {
   return at + 5_500;
 }
 
+/** A conductor that has taken its three turns, one right after the other. `closedAt` is when the third ended. */
+function afterThreeTurns(): { conductor: Conductor; closedAt: number } {
+  const conductor = createConductor(config);
+  let closedAt = 0;
+  for (let turn = 0; turn < 3; turn++) closedAt = takeTurn(conductor, closedAt + 10_000);
+  expect(conductor.view(closedAt).owed).toBe(false);
+  return { conductor, closedAt };
+}
+
 describe("how often Tiro speaks", () => {
-  it("leaves at least 90 seconds between its own turns", () => {
-    const conductor = createConductor(config);
-    const closedAt = takeTurn(conductor, 10_000);
+  it("once it has taken its three turns, leaves at least 90 seconds between its own turns", () => {
+    const { conductor, closedAt } = afterThreeTurns();
     // Decided 70 seconds after the last turn: said when the gap is over, 20 seconds later.
     conductor.planReady(plan(closedAt + 70_000));
     expect(opened(run(conductor, closedAt + 70_000, closedAt + 200_000))).toEqual([closedAt + 90_000]);
   });
 
   it("takes no turn for a decision that is no longer fresh when the gap is over", () => {
-    const conductor = createConductor(config);
-    const closedAt = takeTurn(conductor, 10_000);
+    const { conductor, closedAt } = afterThreeTurns();
     conductor.planReady(plan(closedAt + 1_000));
     expect(opened(run(conductor, closedAt + 1_000, closedAt + 200_000))).toEqual([]);
+  });
+
+  it("while it owes turns, speaks about the next decision without waiting for the gap", () => {
+    const conductor = createConductor(config);
+    const closedAt = takeTurn(conductor, 10_000);
+    expect(conductor.view(closedAt).owed).toBe(true);
+    conductor.planReady(plan(closedAt + 1_000));
+    expect(opened(run(conductor, closedAt + 1_000, closedAt + 30_000))).toEqual([closedAt + 1_000]);
   });
 
   it("while it owes turns, speaks even when the question is a weak one", () => {

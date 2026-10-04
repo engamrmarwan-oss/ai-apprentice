@@ -79,7 +79,7 @@ export type FloorView = {
   kind: FloorKind | null;
   /** Turns Tiro started itself inside the current window. */
   turnsInWindow: number;
-  /** True while Tiro is behind on its minimum: it then takes a turn even when no question earns one. */
+  /** True while Tiro is behind on its minimum: it then takes a turn even when no question earns one, and without leaving a gap. */
   owed: boolean;
   /** Why the floor is not opening now, for the capture screen. Null when it is open or nothing is waiting. */
   waitingFor: "screen" | "speech" | "reading" | "gap" | "question" | null;
@@ -186,10 +186,12 @@ export function createConductor(config: WorkflowConfig) {
     if (t - plan.decisionAt > config.decision_window_ms) return "nothing";
     const taken = inWindow(t);
     if (config.max_questions !== null && taken >= config.max_questions) return "nothing";
-    // Beyond its minimum Tiro speaks only when a question earns the turn.
+    // Beyond its minimum Tiro speaks only when a question earns the turn, and leaves a gap after its last one.
     const owed = taken < config.min_questions;
-    if (!owed && (!plan.question || plan.question.score < config.score_threshold)) return "question";
-    if (t - lastOwnTurnClosedAt < config.min_gap_ms) return "gap";
+    if (!owed) {
+      if (!plan.question || plan.question.score < config.score_threshold) return "question";
+      if (t - lastOwnTurnClosedAt < config.min_gap_ms) return "gap";
+    }
     if (t - screenMovedAt < config.screen_still_ms) return "screen";
     if (t - speechAt < config.speech_silent_ms) return "speech";
     if (t < readingUntil) return "reading";
