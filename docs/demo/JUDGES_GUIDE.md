@@ -6,7 +6,7 @@ Tiro watches an expert work in a web tool, asks why at the right moments, builds
 
 - Use Chrome or Edge on a computer, and allow the microphone when asked.
 - Tiro: https://tiro-ai.vercel.app
-- The tool being watched is Crystal: `<Crystal address>`. Open it in its own tab and sign in with the Crystal demo login you were given.
+- The tool being watched is Crystal: https://crystal-specops.vercel.app/. Open it in its own tab and sign in with the Crystal demo login you were given.
 - You were given two Tiro sign-ins: the demo expert and the demo new hire.
 
 ## See what Tiro learned (1 minute)
