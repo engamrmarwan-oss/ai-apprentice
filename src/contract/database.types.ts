@@ -1252,6 +1252,7 @@ export type Database = {
           config: Json
           created_at: string
           id: string
+          is_demo: boolean
           role: string | null
           task: string
           tool_id: string
@@ -1260,6 +1261,7 @@ export type Database = {
           config?: Json
           created_at?: string
           id?: string
+          is_demo?: boolean
           role?: string | null
           task: string
           tool_id: string
@@ -1268,6 +1270,7 @@ export type Database = {
           config?: Json
           created_at?: string
           id?: string
+          is_demo?: boolean
           role?: string | null
           task?: string
           tool_id?: string

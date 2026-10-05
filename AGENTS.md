@@ -62,7 +62,7 @@ Node 24 is pinned in `.nvmrc` and used by Vercel and CI.
 | `src/components/` | What the pages are built from: the app shell, sign-in forms, the capture companion window, icons | Codex |
 | `supabase/migrations/` | Database schema. Apply with `npx supabase db push`, then `npm run types:db` | Claude Code |
 | `agents/` | ElevenLabs agent configurations, prompts, client tools, and the entry that gives the tutor Tiro's MCP server. Push with `npm run agents:push` | Claude Code |
-| `scripts/`, `.github/` | Gate, CI, sign-up codes (`npm run signup-code`), demo accounts (`npm run demo-accounts`), agent push, the interviewer's text checks (`npm run check:agent`, `npm run check:debrief`), a whole expert session and a whole tutor session run with nobody at the keyboard (`npm run check:session`, `npm run check:tutor`), the tool map, baseline and rule compiler against a running server (`npm run check:setup`), Tiro's MCP server as an agent outside Tiro uses it (`npm run check:mcp`) | Claude Code |
+| `scripts/`, `.github/` | Gate, CI, sign-up codes (`npm run signup-code`), demo accounts (`npm run demo-accounts`), demo workflows every account is put on (`npm run demo-workflow`), agent push, the interviewer's text checks (`npm run check:agent`, `npm run check:debrief`), a whole expert session and a whole tutor session run with nobody at the keyboard (`npm run check:session`, `npm run check:tutor`), the tool map, baseline and rule compiler against a running server (`npm run check:setup`), Tiro's MCP server as an agent outside Tiro uses it (`npm run check:mcp`) | Claude Code |
 | `docs/spikes/` | Written spike results | Claude Code |
 
 <!-- BEGIN:nextjs-agent-rules -->

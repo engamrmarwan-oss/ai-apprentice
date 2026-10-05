@@ -124,8 +124,26 @@ async function ensureProfile(client: TiroClient, account: Account, emailAddress:
   return profile;
 }
 
-/** Puts the person on every workflow that invited their email, and clears those invitations. */
+/**
+ * Puts the person on every demo workflow as a new hire, so that a new account
+ * has a confirmed Work Map to look at and a lesson to take. A role they
+ * already hold there is left as it is.
+ */
+async function joinDemoWorkflows(client: TiroClient, user: User, signal?: AbortSignal): Promise<void> {
+  const query = client.from("workflows").select("id").eq("is_demo", true);
+  const demos = must(await (signal ? query.abortSignal(signal) : query)) ?? [];
+  if (demos.length === 0) return;
+  must(
+    await client.from("workflow_members").upsert(
+      demos.map((demo) => ({ workflow_id: demo.id, user_id: user.id, role: "new_hire" })),
+      { onConflict: "workflow_id,user_id", ignoreDuplicates: true },
+    ),
+  );
+}
+
+/** Puts the person on every workflow that invited their email, and clears those invitations. Demo workflows come with it. */
 async function takeUpInvitations(client: TiroClient, user: User, signal?: AbortSignal): Promise<void> {
+  await joinDemoWorkflows(client, user, signal);
   const query = client.from("workflow_invitations").select("workflow_id, role").eq("email", user.email);
   const invitations = must(await (signal ? query.abortSignal(signal) : query)) ?? [];
   if (invitations.length === 0) return;

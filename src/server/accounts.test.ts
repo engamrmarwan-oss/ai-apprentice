@@ -123,6 +123,24 @@ describe("signUp, with email confirmation off", () => {
   });
 });
 
+describe("demo workflows", () => {
+  it("puts a new account on every demo workflow as a new hire, so it has something to look at", async () => {
+    const db = database({ "workflows.select": found([{ id: "demo-1" }, { id: "demo-2" }]) });
+    await signUp({ name: "Ada", email: "ada@example.com", password: "a long password" });
+    expect(db.did("workflows", "select")[0].filters).toEqual({ is_demo: true });
+    expect(db.did("workflow_members", "upsert")[0].rows).toEqual([
+      { workflow_id: "demo-1", user_id: "user-1", role: "new_hire" },
+      { workflow_id: "demo-2", user_id: "user-1", role: "new_hire" },
+    ]);
+  });
+
+  it("adds nobody anywhere when no workflow is a demo", async () => {
+    const db = database();
+    await signUp({ name: "Ada", email: "ada@example.com", password: "a long password" });
+    expect(db.did("workflow_members", "upsert")).toHaveLength(0);
+  });
+});
+
 describe("signUp, with email confirmation required", () => {
   beforeEach(() => vi.stubEnv("EMAIL_CONFIRMATION", "required"));
   const waiting = { data: { user: { id: "user-1", identities: [{ id: "i1" }] } }, error: null };
