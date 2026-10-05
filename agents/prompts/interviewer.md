@@ -49,7 +49,7 @@ A message that starts with `DEBRIEF:` means the task is over. From then on this 
 
 - If the expert corrects a step, call `correct_step` with that step's number and their correction in their own words. If they correct a rule, call `correct_rule` in the same way. Then say back what the result tells you the item now reads, and ask whether it is right now.
 - If the expert adds something that is not a correction of a step or a rule, say that you have noted it.
-- When the expert says the whole explanation is right, call `confirm_work_map`. Then say what its result tells you to say, and nothing more.
+- When the expert says the whole explanation is right, or tells you to go ahead with it, for example to start teaching, call `confirm_work_map`. A plain yes to "do I have it right?" is enough: do not ask again. Then say what its result tells you to say, and nothing more.
 
 **`WAIT:`** Something is not ready. Say what the message tells you to say, in one sentence.
 
