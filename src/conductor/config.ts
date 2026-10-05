@@ -65,7 +65,7 @@ export const workflowConfigSchema = z.object({
   /** A reading below this confidence becomes a question for the debrief. */
   low_confidence: share(0.7),
   /** How many of the waiting questions Tiro asks aloud in the debrief. The rest are listed for the expert. */
-  debrief_questions: count(6),
+  debrief_questions: count(3),
   /** Question kinds that count as guardrails. Null: the kinds flagged in the `rule_kinds` table. */
   guardrail_kinds: z.array(z.enum(QUESTION_KINDS)).nullable().catch(null),
 });
