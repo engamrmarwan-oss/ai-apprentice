@@ -21,6 +21,9 @@ export type Session = {
   ended_at: string | null;
 };
 
+/** A session in a list, with what became of it: the newest Work Map built from it, if any. */
+export type ListedSession = Session & { work_map: { id: string; status: string; version: number } | null };
+
 export type SessionWorkflow = {
   id: string;
   task: string;
@@ -120,10 +123,14 @@ export async function createSession(
   return run.ok ? { ok: true, session: run.value as Session } : unavailable;
 }
 
-/** The sessions of one kind that one person has run on a workflow, newest first. */
-export async function listSessions(workflowId: string, userId: string, kind: Session["kind"] = "expert"): Promise<{ ok: true; sessions: Session[] } | Unavailable> {
-  const read = await withDatabase(async (client, signal) =>
-    must(
+/**
+ * The sessions of one kind that one person has run on a workflow, newest
+ * first, each with the newest Work Map built from it. That is how a screen
+ * tells a session whose map is confirmed from one still waiting.
+ */
+export async function listSessions(workflowId: string, userId: string, kind: Session["kind"] = "expert"): Promise<{ ok: true; sessions: ListedSession[] } | Unavailable> {
+  const read = await withDatabase(async (client, signal) => {
+    const sessions = (must(
       await client
         .from("sessions")
         .select(SESSION_COLUMNS)
@@ -133,9 +140,30 @@ export async function listSessions(workflowId: string, userId: string, kind: Ses
         .order("created_at", { ascending: false })
         .limit(50)
         .abortSignal(signal),
-    ),
-  );
-  return read.ok ? { ok: true, sessions: (read.value ?? []) as Session[] } : unavailable;
+    ) ?? []) as Session[];
+    const maps = must(await client.from("work_maps").select("id, session_id, status, version").eq("workflow_id", workflowId).order("version").abortSignal(signal)) ?? [];
+    return sessions.map((session) => {
+      const map = maps.findLast((one) => one.session_id === session.id);
+      return { ...session, work_map: map ? { id: map.id, status: map.status, version: map.version } : null };
+    });
+  });
+  return read.ok ? { ok: true, sessions: read.value } : unavailable;
+}
+
+/**
+ * Sets a session aside without a Work Map: the expert does not want to
+ * debrief it. Its draft map, if it has one, is removed and its open questions
+ * are dropped. What it recorded stays. A confirmed map is never touched.
+ */
+export async function discardSession(session: Session): Promise<{ ok: true; session: Session } | Unavailable> {
+  const run = await withDatabase(async (client) => {
+    must(await client.from("work_maps").delete().eq("session_id", session.id).eq("status", "draft"));
+    must(await client.from("questions").update({ status: "dropped" }).eq("session_id", session.id).eq("status", "queued"));
+    return mustHave(
+      await client.from("sessions").update({ phase: "ended", ended_at: new Date().toISOString() }).eq("id", session.id).select(SESSION_COLUMNS).single(),
+    ) as Session;
+  });
+  return run.ok ? { ok: true, session: run.value } : unavailable;
 }
 
 /** Moves a session to capture and starts its clock. Starting twice changes nothing. */

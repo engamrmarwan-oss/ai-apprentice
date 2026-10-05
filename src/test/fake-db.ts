@@ -31,6 +31,7 @@ export function fakeDb(answers: Record<string, Answer> = {}) {
       delete: () => ((call.op = "delete"), builder),
       eq: (column: string, value: unknown) => ((call.filters[column] = value), builder),
       is: (column: string, value: unknown) => ((call.filters[column] = value), builder),
+      in: (column: string, value: unknown) => ((call.filters[column] = value), builder),
       gte: (column: string, value: unknown) => ((call.filters[`${column}>=`] = value), builder),
       order: () => builder,
       limit: () => builder,

@@ -229,11 +229,15 @@ When the expert ends the task, the session is in its `debrief` phase. The debrie
 
 ### `GET /api/workflows/{id}/sessions`
 
-Expert only. The expert's own sessions on the workflow, newest first: `{ "sessions": [{ "id", "phase", "language", "started_at", "ended_at", ... }] }`. The session to debrief is the newest one whose `phase` is `debrief`.
+Expert only. The expert's own sessions on the workflow, newest first: `{ "sessions": [{ "id", "phase", "language", "started_at", "ended_at", "work_map", ... }] }`. `work_map` is the newest Work Map built from that session, `{ id, status, version }`, or null. A session whose `phase` is `debrief` is waiting to be debriefed; one that is `ended` either has a confirmed map or was set aside.
+
+### `POST /api/sessions/{id}/discard`
+
+Expert only: sets one of their sessions aside without a Work Map, when they do not want to debrief it. Its draft map and its open questions go; what it recorded stays. Returns `{ session }`, now `ended`. Not for a session that already ended.
 
 ### `GET /api/workflows/{id}/work-map`
 
-For anyone on the workflow. The expert gets the newest Work Map, draft or confirmed. A new hire gets the newest confirmed one. `work_map` is `null` when there is none yet.
+For anyone on the workflow. The expert gets the newest Work Map, draft or confirmed. A new hire gets the newest confirmed one, and so does the expert with `?confirmed=1`: that is the map a lesson teaches. `work_map` is `null` when there is none yet.
 
 ```json
 {
